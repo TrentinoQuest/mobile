@@ -1,0 +1,7 @@
+{
+  "name": "trentino-quest-mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
