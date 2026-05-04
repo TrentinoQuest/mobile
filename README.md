@@ -1,5 +1,7 @@
 # Trentino Quest — Mobile App
 
+[![CI](https://github.com/TrentinoQuest/mobile/actions/workflows/ci.yml/badge.svg)](https://github.com/TrentinoQuest/mobile/actions/workflows/ci.yml)
+
 App mobile di **Trentino Quest**, app gamificata per l'esplorazione del Trentino.
 
 Progetto del corso di **Ingegneria del Software** (a.a. 2025-2026), Università degli Studi di Trento, Prof. Sandro Fiore.
