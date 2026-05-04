@@ -5,7 +5,7 @@ import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonInput, IonButton, IonText,
 } from '@ionic/angular/standalone';
-import { AuthService } from 'src/app/services/auth';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
