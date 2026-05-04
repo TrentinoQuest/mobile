@@ -8,11 +8,7 @@
   <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
     <ion-list>
       <ion-item>
-        <ion-input
-          label="Email"
-          labelPlacement="floating"
-          type="email"
-          formControlName="email">
+        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email">
         </ion-input>
       </ion-item>
 
@@ -21,22 +17,19 @@
           label="Password"
           labelPlacement="floating"
           type="password"
-          formControlName="password">
+          formControlName="password"
+        >
         </ion-input>
       </ion-item>
     </ion-list>
 
     @if (errorMessage) {
-      <ion-text color="danger">
-        <p class="ion-text-center">{{ errorMessage }}</p>
-      </ion-text>
+    <ion-text color="danger">
+      <p class="ion-text-center">{{ errorMessage }}</p>
+    </ion-text>
     }
 
-    <ion-button
-      expand="block"
-      type="submit"
-      class="ion-margin-top"
-      [disabled]="loginForm.invalid">
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="loginForm.invalid">
       {{ submitting ? 'Signing in…' : 'Sign in' }}
     </ion-button>
 

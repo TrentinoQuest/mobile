@@ -1,9 +1,16 @@
 import { Component, inject } from '@angular/core';
-import { ReactiveFormsModule , FormBuilder , Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
-  IonList, IonItem, IonInput, IonButton, IonText,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonList,
+  IonItem,
+  IonInput,
+  IonButton,
+  IonText,
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -15,8 +22,15 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [
     RouterLink,
     ReactiveFormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
-    IonList, IonItem, IonInput, IonButton, IonText
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonList,
+    IonItem,
+    IonInput,
+    IonButton,
+    IonText,
   ],
 })
 export class LoginPage {
@@ -27,12 +41,10 @@ export class LoginPage {
   private formBuilder = inject(FormBuilder);
   private router = inject(Router);
 
-  loginForm = this.formBuilder.nonNullable.group(
-    {
-      email: ['' , Validators.required , Validators.minLength(1)],
-      password: ['' , Validators.required , Validators.minLength(1)]
-    }
-  )
+  loginForm = this.formBuilder.nonNullable.group({
+    email: ['', Validators.required, Validators.minLength(1)],
+    password: ['', Validators.required, Validators.minLength(1)],
+  });
 
   submitting = false;
   errorMessage = '';
@@ -44,18 +56,17 @@ export class LoginPage {
     this.errorMessage = '';
 
     const { email, password } = this.loginForm.getRawValue();
-    const ok = await this.authService.login(email , password);
+    const ok = await this.authService.login(email, password);
 
     this.submitting = true;
 
-    if (ok){
+    if (ok) {
       console.log('Login attempt:', this.email);
-      this.router.navigateByUrl('/home')
-    } else{
+      this.router.navigateByUrl('/home');
+    } else {
       this.submitting = false;
-      this.errorMessage = 'Login fallito come te'
-      console.log("Login Error!");
+      this.errorMessage = 'Login fallito come te';
+      console.log('Login Error!');
     }
-
   }
 }
