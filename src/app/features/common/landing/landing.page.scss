@@ -1,17 +1,8 @@
 // =============================================================================
-// Landing page styles
-// =============================================================================
-// Layout single-viewport mobile-first: hero compatto + 2 card + login prompt,
-// senza scroll su viewport >=560px di altezza utile.
-//
-// Convenzioni:
-// - Tutti i colori passano dalle CSS variables Ionic, mai hardcoded.
-// - Naming BEM-like: block__element--modifier.
-// - Le variabili --landing-* sono locali alla pagina.
+// Landing page styles (dark theme)
 // =============================================================================
 
 :host {
-  // ----- Design tokens locali alla landing -----
   --landing-section-padding-x: 1.25rem;
   --landing-content-max-width: 480px;
 
@@ -22,8 +13,6 @@
   --landing-tagline-size: 1rem;
   --landing-card-title-size: 1.35rem;
   --landing-card-subtitle-size: 0.9rem;
-
-  --landing-text-muted: var(--ion-color-medium-shade);
 }
 
 // =============================================================================
@@ -31,11 +20,9 @@
 // =============================================================================
 
 .landing-content {
-  --background: #ffffff;
+  // Eredita --ion-background-color (#121212) dal tema globale.
+  // NON sovrascrivere qui.
 
-  // Layout flex verticale: hero in alto, card al centro che si espandono,
-  // login prompt in basso. Permette alle card di prendere lo spazio
-  // disponibile su schermi piu alti senza creare scroll.
   &::part(scroll) {
     display: flex;
     flex-direction: column;
@@ -43,7 +30,6 @@
   }
 }
 
-// Sezioni con larghezza massima centrata (utile su tablet)
 .paths,
 .login-prompt {
   max-width: var(--landing-content-max-width);
@@ -62,6 +48,10 @@
   padding: 2rem var(--landing-section-padding-x) 1.5rem;
   text-align: center;
   flex-shrink: 0;
+
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
 
   &__title {
     margin: 0 0 0.25rem;
@@ -96,12 +86,13 @@
 .path-card {
   margin: 0;
   border-radius: var(--landing-card-radius);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  // Shadow piu morbida e meno pronunciata su tema scuro
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
 
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   }
 
   &__content {
@@ -140,6 +131,7 @@
   }
 
   // ---------- Variante: Giocatore ----------
+  // Card gialla. CTA scura per massimo contrasto sul giallo.
   &--player {
     --background: var(--ion-color-primary);
     --color: var(--ion-color-primary-contrast);
@@ -152,14 +144,15 @@
   }
 
   // ---------- Variante: Attivita Locale ----------
+  // Card verde. CTA chiara per contrasto sul verde.
   &--business {
-    --background: var(--ion-color-secondary);
+    --background: var(--ion-color-secondary-shade);
     --color: var(--ion-color-secondary-contrast);
 
     .path-card__icon,
     .path-card__title,
     .path-card__subtitle {
-      color: var(--ion-color-secondary-contrast);
+      color: var(--ion-color-primary-contrast);
     }
   }
 }
@@ -176,14 +169,28 @@
   &__text {
     margin: 0;
     font-size: 0.95rem;
-    color: var(--landing-text-muted);
+    color: var(--ion-color-medium);  // grigio chiaro su tema scuro
   }
 
   &__link {
-    color: var(--ion-color-primary-shade);
+    color: var(--ion-color-primary-tint);  // giallo piu chiaro per contrasto
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 0.15em;
     margin-left: 0.25rem;
   }
+}
+
+.path-card__cta--player {
+  --background: #1a1a1a;
+  --background-hover: #2a2a2a;
+  --background-activated: #2a2a2a;
+  --color: #ffffff;
+}
+
+.path-card__cta--business {
+  --background: #1a1a1a; //#f4f5f8;
+  --background-hover: #2a2a2a;
+  --background-activated: #2a2a2a;
+  --color: #ffffff;
 }

@@ -21,18 +21,28 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/common/landing/landing.page').then((m) => m.LandingPage),
+      import('./features/common/landing/landing.page').then(
+        (m) => m.LandingPage,
+      ),
   },
 
   // Auth — rotte trasversali a tutti i ruoli
-  /*
-  {
+  /*{
     path: 'auth/login',
     loadComponent: () =>
-      import('./features/common/auth/login/login.page').then((m) => m.LoginPage),
+      import('./features/common/auth/login/login.page').then(
+        (m) => m.LoginPage,
+      ),
+  },*/
+
+  // Pagina di emergenza — backend non raggiungibile
+  {
+    path: 'offline',
+    loadComponent: () =>
+      import('./features/common/offline/offline.page').then(
+        (m) => m.OfflinePage,
+      ),
   },
-  
-  */
 
   // Giocatore
   {
@@ -41,6 +51,13 @@ export const routes: Routes = [
       import('./features/giocatore/register-player/register-player.page').then(
         (m) => m.RegisterPlayerPage,
       ),
+  },
+
+  {
+    path: 'giocatore/home',
+    loadComponent: () => 
+      import('./features/giocatore/home/home.page').then( 
+        (m) => m.HomePage)
   },
 
   // Attivita Locale
@@ -57,4 +74,5 @@ export const routes: Routes = [
     path: '**',
     redirectTo: '',
   },
+  
 ];

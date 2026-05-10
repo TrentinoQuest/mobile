@@ -1,0 +1,73 @@
+// =============================================================================
+// Offline page styles
+// =============================================================================
+
+:host {
+  --offline-padding-x: 1.5rem;
+  --offline-icon-size: 5rem;
+  --offline-title-size: 1.75rem;
+  --offline-message-size: 1rem;
+}
+
+.offline-content {
+  --background: #ffffff;
+
+  &::part(scroll) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+  }
+}
+
+.offline-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem var(--offline-padding-x);
+  max-width: 400px;
+  width: 100%;
+}
+
+.offline-icon {
+  font-size: var(--offline-icon-size);
+  color: var(--ion-color-medium);
+  margin-bottom: 1.25rem;
+}
+
+.offline-title {
+  margin: 0 0 0.75rem;
+  font-size: var(--offline-title-size);
+  font-weight: 800;
+  color: var(--ion-color-dark);
+  letter-spacing: -0.02em;
+}
+
+.offline-message {
+  margin: 0 0 2rem;
+  font-size: var(--offline-message-size);
+  line-height: 1.5;
+  color: var(--ion-color-medium-shade);
+}
+
+.offline-retry {
+  margin: 0 0 1.5rem;
+  min-width: 180px;
+  --border-radius: 0.75rem;
+  font-weight: 600;
+
+  ion-spinner {
+    margin-right: 0.5rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.offline-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  line-height: 1.4;
+  font-style: italic;
+}
