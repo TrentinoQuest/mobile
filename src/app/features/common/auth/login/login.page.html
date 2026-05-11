@@ -1,0 +1,119 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Accedi</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="login-content">
+
+  <div class="login-wrapper">
+
+    <header class="login-intro">
+      <h1 class="login-intro__title">Bentornato</h1>
+      <p class="login-intro__subtitle">
+        Accedi per continuare la tua esplorazione.
+      </p>
+    </header>
+
+    <form
+      class="login-form"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate>
+
+      <!-- Email -->
+      <ion-item
+        class="login-form__item"
+        [class.login-form__item--invalid]="email.touched && email.invalid"
+        lines="full">
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="nome@esempio.it"
+          [attr.aria-invalid]="email.touched && email.invalid ? 'true' : null"
+          aria-describedby="email-error">
+        </ion-input>
+      </ion-item>
+      <ion-note id="email-error" color="danger" class="login-form__error">
+        @if (email.touched && email.errors?.['required']) {
+          L'email è obbligatoria.
+        } @else if (email.touched && email.errors?.['email']) {
+          Inserisci un'email valida.
+        }
+      </ion-note>
+
+      <!-- Password -->
+      <ion-item
+        class="login-form__item"
+        [class.login-form__item--invalid]="password.touched && password.invalid"
+        lines="full">
+        <ion-label position="stacked">Password</ion-label>
+        <ion-input
+          [type]="passwordVisible() ? 'text' : 'password'"
+          autocomplete="current-password"
+          formControlName="password"
+          placeholder="La tua password"
+          [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
+          aria-describedby="password-error">
+        </ion-input>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          type="button"
+          class="login-form__visibility-toggle"
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'">
+          <ion-icon
+            slot="icon-only"
+            [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'">
+          </ion-icon>
+        </ion-button>
+      </ion-item>
+      <ion-note id="password-error" color="danger" class="login-form__error">
+        @if (password.touched && password.errors?.['required']) {
+          La password è obbligatoria.
+        }
+      </ion-note>
+
+      <!-- Link recupero password -->
+      <p class="login-form__forgot">
+        <a routerLink="/auth/recover" class="login-form__forgot-link">
+          Hai dimenticato la password?
+        </a>
+      </p>
+
+      <!-- Submit -->
+      <ion-button
+        type="submit"
+        color="primary"
+        fill="solid"
+        expand="block"
+        size="default"
+        class="login-form__submit"
+        [disabled]="submitting()">
+        @if (submitting()) {
+          <ion-spinner name="crescent" slot="start"></ion-spinner>
+          Accesso in corso...
+        } @else {
+          Accedi
+        }
+      </ion-button>
+
+    </form>
+
+    <!-- Link a registrazione -->
+    <p class="login-register-prompt">
+      Non hai un account?
+      <a routerLink="/" class="login-register-prompt__link">Iscriviti</a>
+    </p>
+
+  </div>
+
+</ion-content>

@@ -1,0 +1,23 @@
+.welcome-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.welcome-title {
+  margin: 0 0 0.75rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ion-text-color);
+}
+
+.welcome-message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ion-color-medium);
+}

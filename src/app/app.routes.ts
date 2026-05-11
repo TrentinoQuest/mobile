@@ -1,21 +1,5 @@
 import { Routes } from '@angular/router';
 
-/**
- * Mappa di navigazione di Trentino Quest Mobile.
- *
- * Convenzioni:
- * - Tutte le pagine sono lazy-loaded via loadComponent per mantenere
- *   il bundle iniziale snello.
- * - Le rotte sono raggruppate per dominio funzionale, coerentemente
- *   con la separazione dei componenti del Deliverable D2:
- *     - /auth/*       -> rotte trasversali a tutti i ruoli (login, ...)
- *     - /giocatore/*  -> rotte specifiche del ruolo Giocatore
- *     - /attivita/*   -> rotte specifiche del ruolo Attivita Locale
- *
- * TODO: in una fase successiva, la rotta '' (landing) dovra essere
- * protetta da un guard che redirige gli utenti gia autenticati alla
- * home del loro ruolo (mappa per Giocatore, dashboard per Attivita).
- */
 export const routes: Routes = [
   // Landing page (default)
   {
@@ -27,13 +11,20 @@ export const routes: Routes = [
   },
 
   // Auth — rotte trasversali a tutti i ruoli
-  /*{
+  {
     path: 'auth/login',
     loadComponent: () =>
       import('./features/common/auth/login/login.page').then(
         (m) => m.LoginPage,
       ),
-  },*/
+  },
+  {
+    path: 'auth/recover',
+    loadComponent: () =>
+      import('./features/common/auth/recover-password/recover-password.page').then(
+        (m) => m.RecoverPasswordPage,
+      ),
+  },
 
   // Pagina di emergenza — backend non raggiungibile
   {
@@ -52,12 +43,12 @@ export const routes: Routes = [
         (m) => m.RegisterPlayerPage,
       ),
   },
-
   {
     path: 'giocatore/home',
-    loadComponent: () => 
-      import('./features/giocatore/home/home.page').then( 
-        (m) => m.HomePage)
+    loadComponent: () =>
+      import('./features/giocatore/home/home.page').then(
+        (m) => m.HomePage,
+      ),
   },
 
   // Attivita Locale
@@ -68,11 +59,17 @@ export const routes: Routes = [
         (m) => m.RegisterBusinessPage,
       ),
   },
+  {
+    path: 'attivita/home',
+    loadComponent: () =>
+      import('./features/attivita/home/home.page').then(
+        (m) => m.AttivitaHomePage,
+      ),
+  },
 
-  // Wildcard: qualsiasi URL non riconosciuto torna alla landing
+  // Wildcard
   {
     path: '**',
     redirectTo: '',
   },
-  
 ];
