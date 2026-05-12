@@ -5,14 +5,7 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import {
-  BehaviorSubject,
-  catchError,
-  filter,
-  switchMap,
-  take,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
 import { AuthService } from '../services/auth/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -94,10 +87,7 @@ function isExcludedEndpoint(url: string): boolean {
   return REFRESH_EXCLUDED_ENDPOINTS.some((endpoint) => url.endsWith(endpoint));
 }
 
-function cloneWithToken(
-  req: HttpRequest<unknown>,
-  token: string,
-): HttpRequest<unknown> {
+function cloneWithToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
   return req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,

@@ -1,8 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import {
-  provideAppInitializer,
-  inject as angularInject,
-} from '@angular/core';
+import { provideAppInitializer, inject as angularInject } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   RouteReuseStrategy,
@@ -49,15 +46,9 @@ async function initializeApp(): Promise<void> {
     if (!environment.production) {
       const userLoaded = authService.currentUser() !== null;
       // eslint-disable-next-line no-console
-      console.log(
-        '[AppInit] Stato utente:',
-        userLoaded ? 'autenticato' : 'non autenticato',
-      );
+      console.log('[AppInit] Stato utente:', userLoaded ? 'autenticato' : 'non autenticato');
       // eslint-disable-next-line no-console
-      console.log(
-        '[AppInit] Backend:',
-        isBackendOnline ? 'online' : 'offline',
-      );
+      console.log('[AppInit] Backend:', isBackendOnline ? 'online' : 'offline');
     }
 
     if (!isBackendOnline) {
@@ -77,13 +68,7 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(
-      withInterceptors([
-        authInterceptor,
-        errorInterceptor,
-        refreshInterceptor,
-      ]),
-    ),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAppInitializer(initializeApp),
   ],
 });

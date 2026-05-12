@@ -169,24 +169,18 @@ export class LoginPage {
 
       case UserRole.ADMIN:
         this.authService.logout();
-        await this.showInfoToast(
-          'Account amministratore. Usa il backoffice web.',
-        );
+        await this.showInfoToast('Account amministratore. Usa il backoffice web.');
         break;
 
       case UserRole.MAINTENANCE:
         this.authService.logout();
-        await this.showInfoToast(
-          'Account operatore. Usa l\'app dedicata.',
-        );
+        await this.showInfoToast("Account operatore. Usa l'app dedicata.");
         break;
 
       default:
         // Ruolo sconosciuto, fallback prudente
         this.authService.logout();
-        await this.showErrorToast(
-          'Tipo di account non supportato.',
-        );
+        await this.showErrorToast('Tipo di account non supportato.');
     }
   }
 

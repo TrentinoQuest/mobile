@@ -111,14 +111,7 @@ export class RegisterPlayerPage {
   readonly form: FormGroup = this.fb.group(
     {
       email: ['', [Validators.required, Validators.email]],
-      username: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(30),
-        ],
-      ],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
     },
@@ -253,10 +246,7 @@ export class RegisterPlayerPage {
    * toccato. Usato per mostrare l'errore solo dopo che l'utente ha provato.
    */
   get passwordsMismatch(): boolean {
-    return (
-      this.form.errors?.['passwordsMismatch'] === true &&
-      this.confirmPassword.touched
-    );
+    return this.form.errors?.['passwordsMismatch'] === true && this.confirmPassword.touched;
   }
 }
 
@@ -268,9 +258,7 @@ export class RegisterPlayerPage {
  * Validatore di gruppo: aggiunge un errore `passwordsMismatch` al FormGroup
  * se i campi `password` e `confirmPassword` non coincidono.
  */
-function passwordsMatchValidator(
-  group: AbstractControl,
-): ValidationErrors | null {
+function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirmPassword = group.get('confirmPassword')?.value;
 

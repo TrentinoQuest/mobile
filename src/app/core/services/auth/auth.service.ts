@@ -86,9 +86,7 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
 
   /** Ruolo dell'utente corrente, o null se non autenticato. */
-  readonly userRole = computed<UserRole | null>(
-    () => this._currentUser()?.role ?? null,
-  );
+  readonly userRole = computed<UserRole | null>(() => this._currentUser()?.role ?? null);
 
   // ===========================================================================
   // 5. API PUBBLICA HTTP
@@ -131,14 +129,12 @@ export class AuthService {
     // 2. Notifica il backend in background, senza aspettare ne gestire errori
     if (refreshToken) {
       const body: LogoutRequest = { refreshToken };
-      this.http
-        .post<void>(`${environment.apiUrl}/auth/logout`, body)
-        .subscribe({
-          error: () => {
-            // Logout backend fallito: ignoriamo, il refresh token scadra
-            // naturalmente lato server.
-          },
-        });
+      this.http.post<void>(`${environment.apiUrl}/auth/logout`, body).subscribe({
+        error: () => {
+          // Logout backend fallito: ignoriamo, il refresh token scadra
+          // naturalmente lato server.
+        },
+      });
     }
   }
 
@@ -148,10 +144,7 @@ export class AuthService {
    * registrate.
    */
   recoverPassword(req: PasswordRecoveryRequest): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/auth/password-recovery`,
-      req,
-    );
+    return this.http.post<void>(`${environment.apiUrl}/auth/password-recovery`, req);
   }
 
   /**
@@ -315,9 +308,7 @@ export class AuthService {
    * Gestisce il successo di refresh: aggiorna entrambi i token (rotation),
    * lascia l'utente invariato.
    */
-  private async handleRefreshSuccess(
-    response: RefreshTokenResponse,
-  ): Promise<void> {
+  private async handleRefreshSuccess(response: RefreshTokenResponse): Promise<void> {
     this.accessTokenCache = response.accessToken;
     this.refreshTokenCache = response.refreshToken;
 

@@ -1,12 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {
-  IonButton,
-  IonCard,
-  IonCardContent,
-  IonContent,
-  IonIcon,
-} from '@ionic/angular/standalone';
+import { IonButton, IonCard, IonCardContent, IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { compassOutline, storefrontOutline } from 'ionicons/icons';
 
@@ -38,17 +32,10 @@ import { compassOutline, storefrontOutline } from 'ionicons/icons';
   templateUrl: './landing.page.html',
   styleUrls: ['./landing.page.scss'],
   standalone: true,
-  imports: [
-    RouterLink,
-    IonContent,
-    IonCard,
-    IonCardContent,
-    IonButton,
-    IonIcon,
-  ],
+  imports: [RouterLink, IonContent, IonCard, IonCardContent, IonButton, IonIcon],
 })
 export class LandingPage {
   constructor() {
-    addIcons({compassOutline,storefrontOutline});
+    addIcons({ compassOutline, storefrontOutline });
   }
 }

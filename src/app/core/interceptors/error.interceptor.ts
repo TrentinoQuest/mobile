@@ -1,7 +1,4 @@
-import {
-  HttpErrorResponse,
-  HttpInterceptorFn,
-} from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
@@ -35,8 +32,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       const isHealthCheck = req.url === environment.healthCheckUrl;
       const isAlreadyOffline = router.url === '/offline';
 
-      const shouldRedirect =
-        isNetworkError && isOurBackend && !isHealthCheck && !isAlreadyOffline;
+      const shouldRedirect = isNetworkError && isOurBackend && !isHealthCheck && !isAlreadyOffline;
 
       if (shouldRedirect) {
         // Navigazione fire-and-forget: non aspettiamo il completamento.

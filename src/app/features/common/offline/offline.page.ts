@@ -1,12 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { from, interval, Subject, switchMap, takeUntil } from 'rxjs';
-import {
-  IonButton,
-  IonContent,
-  IonIcon,
-  IonSpinner,
-} from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { cloudOfflineOutline } from 'ionicons/icons';
