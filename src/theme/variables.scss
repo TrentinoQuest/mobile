@@ -1,2 +1,140 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// =============================================================================
+// Trentino Quest — Theme Variables
+// =============================================================================
+// Variabili globali del tema. Le CSS custom properties qui definite vengono
+// lette internamente da Ionic per risolvere color="primary", color="secondary"
+// ecc. nei componenti.
+//
+// L'app usa SEMPRE tema scuro (dark mode), gestito interamente da questo file.
+// Gli import dark.* di Ionic in global.scss sono disabilitati di proposito.
+// =============================================================================
+
+:root {
+  /* -------------------------------------------------------------------------
+   * Brand colors — Trentino Quest (variante dark)
+   *
+   * Giallo ocra desaturato per non abbagliare su sfondo scuro.
+   * Verde bosco schiarito per essere leggibile su sfondo scuro.
+   * I contrast colors restano nero/bianco come nel tema chiaro.
+   * ------------------------------------------------------------------------- */
+
+  /** primary — Giallo ocra dark (Brand & Giocatore) **/
+  --ion-color-primary: #B8860B;
+  --ion-color-primary-rgb: 184, 134, 11;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #A2770A;
+  --ion-color-primary-tint: #BF9223;
+
+  /** secondary — Verde bosco dark (Attivita Locale) **/
+  --ion-color-secondary: #5A8A3A;
+  --ion-color-secondary-rgb: 90, 138, 58;
+  --ion-color-secondary-contrast: #FFFFFF;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #4F7933;
+  --ion-color-secondary-tint: #6B964E;
+
+  /* -------------------------------------------------------------------------
+   * Status colors — Default Ionic, gia bilanciati per dark mode
+   * ------------------------------------------------------------------------- */
+
+  --ion-color-tertiary: #6a64ff;
+  --ion-color-tertiary-rgb: 106, 100, 255;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #5d58e0;
+  --ion-color-tertiary-tint: #7974ff;
+
+  --ion-color-success: #2fdf75;
+  --ion-color-success-rgb: 47, 223, 117;
+  --ion-color-success-contrast: #000000;
+  --ion-color-success-contrast-rgb: 0, 0, 0;
+  --ion-color-success-shade: #29c467;
+  --ion-color-success-tint: #44e283;
+
+  --ion-color-warning: #ffd534;
+  --ion-color-warning-rgb: 255, 213, 52;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #e0bb2e;
+  --ion-color-warning-tint: #ffd948;
+
+  --ion-color-danger: #ff4961;
+  --ion-color-danger-rgb: 255, 73, 97;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #e04055;
+  --ion-color-danger-tint: #ff5b71;
+
+  /** dark in dark mode = quasi-bianco (per testi enfatizzati) **/
+  --ion-color-dark: #f4f5f8;
+  --ion-color-dark-rgb: 244, 245, 248;
+  --ion-color-dark-contrast: #000000;
+  --ion-color-dark-contrast-rgb: 0, 0, 0;
+  --ion-color-dark-shade: #d7d8da;
+  --ion-color-dark-tint: #f5f6f9;
+
+  --ion-color-medium: #989aa2;
+  --ion-color-medium-rgb: 152, 154, 162;
+  --ion-color-medium-contrast: #000000;
+  --ion-color-medium-contrast-rgb: 0, 0, 0;
+  --ion-color-medium-shade: #86888f;
+  --ion-color-medium-tint: #a2a4ab;
+
+  /** light in dark mode = quasi-nero (sfondi sottili) **/
+  --ion-color-light: #222428;
+  --ion-color-light-rgb: 34, 36, 40;
+  --ion-color-light-contrast: #ffffff;
+  --ion-color-light-contrast-rgb: 255, 255, 255;
+  --ion-color-light-shade: #1e2023;
+  --ion-color-light-tint: #383a3e;
+
+  /* -------------------------------------------------------------------------
+   * Override globali — Tema scuro applicato a tutta l'app
+   * ------------------------------------------------------------------------- */
+
+  /** Sfondo principale (ion-content). #121212 invece di nero puro:
+      Material Design recommendation, meno duro all'occhio su OLED. **/
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+
+  /** Colore testo principale. #e0e0e0 invece di bianco puro:
+      meno abbagliante, riduce affaticamento visivo. **/
+  --ion-text-color: #e0e0e0;
+  --ion-text-color-rgb: 224, 224, 224;
+
+  /** Sfondi secondari per ion-item, ion-card, ecc.
+      #1e1e1e e' un livello di "elevazione" sopra il background. **/
+  --ion-item-background: #1e1e1e;
+  --ion-card-background: #1e1e1e;
+
+  /** Toolbar (header) — gestita via color="primary" **/
+  --ion-toolbar-background: #1e1e1e;
+  --ion-toolbar-border-color: #2a2a2a;
+
+  /** Border color (separatori sotto gli ion-item, ecc.) **/
+  --ion-border-color: #2a2a2a;
+
+  /** Step colors — scala invertita rispetto al tema chiaro.
+      In dark mode i toni piu' scuri sono "vicini al sfondo" (50)
+      e i piu' chiari "vicini al testo" (950). **/
+  --ion-color-step-50: #1e1e1e;
+  --ion-color-step-100: #2a2a2a;
+  --ion-color-step-150: #353535;
+  --ion-color-step-200: #404040;
+  --ion-color-step-250: #4b4b4b;
+  --ion-color-step-300: #565656;
+  --ion-color-step-350: #616161;
+  --ion-color-step-400: #6c6c6c;
+  --ion-color-step-450: #777777;
+  --ion-color-step-500: #828282;
+  --ion-color-step-550: #8d8d8d;
+  --ion-color-step-600: #989898;
+  --ion-color-step-650: #a3a3a3;
+  --ion-color-step-700: #aeaeae;
+  --ion-color-step-750: #b9b9b9;
+  --ion-color-step-800: #c4c4c4;
+  --ion-color-step-850: #cfcfcf;
+  --ion-color-step-900: #dadada;
+  --ion-color-step-950: #e5e5e5;
+}

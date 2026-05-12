@@ -1,0 +1,196 @@
+// =============================================================================
+// Landing page styles (dark theme)
+// =============================================================================
+
+:host {
+  --landing-section-padding-x: 1.25rem;
+  --landing-content-max-width: 480px;
+
+  --landing-card-radius: 1.25rem;
+  --landing-card-padding: 1.25rem;
+
+  --landing-title-size: 2rem;
+  --landing-tagline-size: 1rem;
+  --landing-card-title-size: 1.35rem;
+  --landing-card-subtitle-size: 0.9rem;
+}
+
+// =============================================================================
+// Container
+// =============================================================================
+
+.landing-content {
+  // Eredita --ion-background-color (#121212) dal tema globale.
+  // NON sovrascrivere qui.
+
+  &::part(scroll) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+}
+
+.paths,
+.login-prompt {
+  max-width: var(--landing-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+// =============================================================================
+// Sezione 1 — Hero
+// =============================================================================
+
+.hero {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  padding: 2rem var(--landing-section-padding-x) 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: var(--landing-title-size);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  &__tagline {
+    margin: 0;
+    font-size: var(--landing-tagline-size);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+  }
+}
+
+// =============================================================================
+// Sezione 2 — Card percorsi
+// =============================================================================
+
+.paths {
+  padding: 1.5rem var(--landing-section-padding-x);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.path-card {
+  margin: 0;
+  border-radius: var(--landing-card-radius);
+  // Shadow piu morbida e meno pronunciata su tema scuro
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  &__content {
+    padding: var(--landing-card-padding);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+  }
+
+  &__icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--landing-card-title-size);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    margin: 0 0 0.5rem;
+    font-size: var(--landing-card-subtitle-size);
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+
+  &__cta {
+    width: 100%;
+    margin: 0;
+    --border-radius: 0.75rem;
+    font-weight: 600;
+  }
+
+  // ---------- Variante: Giocatore ----------
+  // Card gialla. CTA scura per massimo contrasto sul giallo.
+  &--player {
+    --background: var(--ion-color-primary);
+    --color: var(--ion-color-primary-contrast);
+
+    .path-card__icon,
+    .path-card__title,
+    .path-card__subtitle {
+      color: var(--ion-color-primary-contrast);
+    }
+  }
+
+  // ---------- Variante: Attivita Locale ----------
+  // Card verde. CTA chiara per contrasto sul verde.
+  &--business {
+    --background: var(--ion-color-secondary-shade);
+    --color: var(--ion-color-secondary-contrast);
+
+    .path-card__icon,
+    .path-card__title,
+    .path-card__subtitle {
+      color: var(--ion-color-primary-contrast);
+    }
+  }
+}
+
+// =============================================================================
+// Sezione 3 — Login prompt
+// =============================================================================
+
+.login-prompt {
+  padding: 0.75rem var(--landing-section-padding-x) 1.5rem;
+  text-align: center;
+  flex-shrink: 0;
+
+  &__text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ion-color-medium);  // grigio chiaro su tema scuro
+  }
+
+  &__link {
+    color: var(--ion-color-primary-tint);  // giallo piu chiaro per contrasto
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    margin-left: 0.25rem;
+  }
+}
+
+.path-card__cta--player {
+  --background: #1a1a1a;
+  --background-hover: #2a2a2a;
+  --background-activated: #2a2a2a;
+  --color: #ffffff;
+}
+
+.path-card__cta--business {
+  --background: #1a1a1a; //#f4f5f8;
+  --background-hover: #2a2a2a;
+  --background-activated: #2a2a2a;
+  --color: #ffffff;
+}

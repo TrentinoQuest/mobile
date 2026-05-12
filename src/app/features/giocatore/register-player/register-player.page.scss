@@ -1,53 +1,54 @@
 // =============================================================================
-// Login page styles (dark theme)
+// Register Player page styles (dark theme)
 // =============================================================================
 
 :host {
-  --login-padding-x: 1.25rem;
-  --login-content-max-width: 480px;
+  --register-padding-x: 1.25rem;
+  --register-content-max-width: 480px;
 
-  --login-title-size: 1.65rem;
-  --login-subtitle-size: 0.95rem;
+  --register-title-size: 1.65rem;
+  --register-subtitle-size: 0.95rem;
 
-  --login-error-min-height: 1.25rem;
+  --register-form-gap: 0.25rem;
+  --register-error-min-height: 1.25rem;
 }
 
 // =============================================================================
 // Container
 // =============================================================================
 
-.login-content {
+.register-content {
   // Eredita --ion-background-color (#121212) dal tema globale.
 }
 
-.login-wrapper {
-  max-width: var(--login-content-max-width);
+.register-wrapper {
+  max-width: var(--register-content-max-width);
   margin: 0 auto;
-  padding: 1.5rem var(--login-padding-x) 2rem;
+  padding: 1.5rem var(--register-padding-x) 2rem;
 }
 
 // =============================================================================
 // Intro
 // =============================================================================
 
-.login-intro {
+.register-intro {
   margin-bottom: 1.75rem;
   text-align: left;
 
   &__title {
     margin: 0 0 0.4rem;
-    font-size: var(--login-title-size);
+    font-size: var(--register-title-size);
     font-weight: 800;
-    color: var(--ion-text-color);
+    color: var(--ion-text-color);  // bianco-attenuato su scuro
     letter-spacing: -0.02em;
     line-height: 1.2;
   }
 
   &__subtitle {
     margin: 0;
-    font-size: var(--login-subtitle-size);
+    font-size: var(--register-subtitle-size);
     line-height: 1.5;
-    color: var(--ion-color-medium);
+    color: var(--ion-color-medium);  // grigio chiaro su scuro
   }
 }
 
@@ -55,7 +56,7 @@
 // Form
 // =============================================================================
 
-.login-form {
+.register-form {
   display: flex;
   flex-direction: column;
 
@@ -78,7 +79,7 @@
   // Note di errore: altezza minima fissa per evitare layout shift
   &__error {
     display: block;
-    min-height: var(--login-error-min-height);
+    min-height: var(--register-error-min-height);
     padding: 0.25rem 0.5rem 0.5rem;
     font-size: 0.8rem;
     line-height: 1.3;
@@ -97,23 +98,9 @@
     }
   }
 
-  // Link "Hai dimenticato la password?"
-  &__forgot {
-    margin: 0.25rem 0 1rem;
-    text-align: right;
-    font-size: 0.85rem;
-  }
-
-  &__forgot-link {
-    color: var(--ion-color-primary-tint);
-    font-weight: 500;
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
   // Bottone submit
   &__submit {
-    margin: 0;
+    margin: 1rem 0 0;
     --border-radius: 0.75rem;
     font-weight: 600;
     height: 2.75rem;
@@ -127,10 +114,10 @@
 }
 
 // =============================================================================
-// Register prompt
+// Login prompt
 // =============================================================================
 
-.login-register-prompt {
+.register-login-prompt {
   margin: 1.5rem 0 0;
   text-align: center;
   font-size: 0.95rem;
