@@ -1,0 +1,47 @@
+/* ============================================================================
+ * AmiciPage (stub)
+ * ============================================================================
+ * Stesso pattern strutturale di album.page.scss. Quando svilupperemo
+ * la versione vera, riscriviamo tutto.
+ * ========================================================================== */
+
+.amici-stub {
+  --background: var(--tq-bg);
+}
+
+.amici-stub__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: calc(100% - 64px - env(safe-area-inset-bottom, 0));
+  padding: 24px;
+  gap: 12px;
+}
+
+.amici-stub__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--tq-ocra);
+  margin: 0 0 8px;
+}
+
+.amici-stub__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+}
+
+.amici-stub__note {
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  color: var(--tq-text-muted);
+  margin: 8px 0 0;
+}

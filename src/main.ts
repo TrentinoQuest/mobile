@@ -15,9 +15,19 @@ import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
 
 import { AuthService } from './app/core/services/auth/auth.service';
+import { ThemeService } from './app/core/services/theme/theme.service';
 import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { refreshInterceptor } from './app/core/interceptors/refresh.interceptor';
+
+/**
+ * Primo initializer: applica il tema salvato prima che qualsiasi
+ * componente venga renderizzato, eliminando il flash of unstyled content.
+ */
+async function initializeTheme(): Promise<void> {
+  const themeService = angularInject(ThemeService);
+  await themeService.initialize();
+}
 
 /**
  * Funzione di inizializzazione dell'app.
@@ -69,6 +79,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
+    provideAppInitializer(initializeTheme),
     provideAppInitializer(initializeApp),
   ],
 });

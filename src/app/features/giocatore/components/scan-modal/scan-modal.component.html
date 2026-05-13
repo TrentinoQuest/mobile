@@ -1,0 +1,25 @@
+<!--
+  Modal placeholder per la scansione QR.
+  Volutamente minimalista: centrato, un titolo, una nota esplicativa,
+  un bottone per chiudere. La modal di scan vera avra' una struttura
+  completamente diversa (preview camera, mirino, hint testuali).
+-->
+<ion-content [fullscreen]="true" class="scan-placeholder">
+  <div class="scan-placeholder__inner">
+    <h2 class="scan-placeholder__title">Scansione QR</h2>
+
+    <p class="scan-placeholder__hint">
+      Qui montera' la camera con il decoder QR.<br />
+      Per ora e' un placeholder per testare il flusso di apertura.
+    </p>
+
+    <ion-button
+      expand="block"
+      color="primary"
+      (click)="dismiss()"
+      class="scan-placeholder__btn"
+    >
+      Chiudi
+    </ion-button>
+  </div>
+</ion-content>

@@ -1,0 +1,13 @@
+:host {
+  display: block;
+
+  ion-segment {
+    --background: var(--tq-panel-2);
+  }
+
+  ion-segment-button {
+    --color: var(--tq-text-muted);
+    --color-checked: var(--tq-text-primary);
+    --indicator-color: var(--tq-ocra);
+  }
+}

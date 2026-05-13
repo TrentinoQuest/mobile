@@ -34,4 +34,16 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* dark.system.css disabilitato: il tema e' gestito via data-theme da ThemeService */
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+
+/* ===========================================================
+ * Leaflet base styles.
+ * Obbligatorio per rendering corretto di tile, marker e controlli mappa.
+ * Lo carichiamo globalmente perch the CSS interno di Leaflet usa
+ * selettori .leaflet-* non scoped; isolarli nel singolo componente
+ * darebbe problemi di rendering quando creiamo marker dinamici.
+ * ===========================================================
+ */
+@import 'leaflet/dist/leaflet.css';

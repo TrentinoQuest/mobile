@@ -1,0 +1,53 @@
+/* ============================================================================
+ * ScanModalPlaceholderComponent
+ * ============================================================================
+ * Stile minimale per la modal placeholder.
+ * Quando svilupperemo lo scan vero, questo file viene cancellato insieme
+ * al resto del componente.
+ * ========================================================================== */
+
+.scan-placeholder {
+  /* Override del background di ion-content per usare il nostro token. */
+  --background: var(--tq-bg);
+}
+
+.scan-placeholder__inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0 32px;
+  gap: 24px;
+  text-align: center;
+}
+
+.scan-placeholder__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+}
+
+.scan-placeholder__hint {
+  font-family: var(--tq-font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--tq-text-secondary);
+  margin: 0;
+}
+
+.scan-placeholder__btn {
+  /* Override dei token Ionic per coerenza con la palette warm. */
+  --background: var(--tq-ocra);
+  --background-activated: var(--tq-ocra-shade);
+  --color: #000;
+  --border-radius: var(--tq-radius-md);
+
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
+}

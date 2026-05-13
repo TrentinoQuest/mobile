@@ -1,0 +1,37 @@
+/* ============================================================================
+ * GiocatoreLayoutComponent
+ * ============================================================================
+ * Shell minimale: contenitore fullscreen che ospita outlet + tab bar.
+ * Non disegna nulla di proprio (niente background, niente padding):
+ * delega completamente alle pagine figlie l'estetica del contenuto.
+ * ========================================================================== */
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.player-shell {
+  /* Position relative per ancorare la tab bar fixed al viewport. */
+  position: relative;
+  height: 100%;
+  width: 100%;
+  /* Background di sicurezza nel caso una pagina figlia non ne abbia uno
+     proprio. Le pagine vere (home/album/...) lo sovrascriveranno. */
+  background: var(--tq-bg);
+
+  &__outlet {
+    /* L'outlet occupa tutto lo spazio: la tab bar e' in fixed e si sovrappone.
+       Non applichiamo padding-bottom qui — vedi commento nel TS. */
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+
+  &__tab-bar {
+    /* La tab bar si posiziona internamente in fixed.
+       Qui esponiamo solo lo z-index gerarchico tramite il token globale. */
+    z-index: var(--tq-z-tab-bar);
+  }
+}
