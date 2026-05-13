@@ -2,13 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IonIcon, ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import {
-  mapOutline,
-  imagesOutline,
-  peopleOutline,
-  personOutline,
-  qrCode,
-} from 'ionicons/icons';
+import { mapOutline, imagesOutline, peopleOutline, personOutline, qrCode } from 'ionicons/icons';
 import { ScanModalComponent } from '../scan-modal/scan-modal.component';
 
 /**

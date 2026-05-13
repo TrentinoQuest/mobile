@@ -9,8 +9,8 @@ describe('TabBarComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ TabBarComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [TabBarComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TabBarComponent);

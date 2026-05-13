@@ -9,8 +9,8 @@ describe('ScanModalComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ScanModalComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [ScanModalComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ScanModalComponent);

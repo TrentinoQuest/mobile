@@ -54,5 +54,3 @@ export const authGuard: CanActivateFn = (route): true | UrlTree => {
 
   return true;
 };
-
-

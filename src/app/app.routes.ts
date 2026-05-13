@@ -47,8 +47,7 @@ export const routes: Routes = [
   // ============================================================
   {
     path: 'auth/login',
-    loadComponent: () =>
-      import('./features/common/auth/login/login.page').then((m) => m.LoginPage),
+    loadComponent: () => import('./features/common/auth/login/login.page').then((m) => m.LoginPage),
     canActivate: [guestGuard],
   },
   {
@@ -80,9 +79,7 @@ export const routes: Routes = [
   {
     path: 'giocatore',
     loadComponent: () =>
-      import('./features/giocatore/layout/layout.component').then(
-        (m) => m.LayoutComponent,
-      ),
+      import('./features/giocatore/layout/layout.component').then((m) => m.LayoutComponent),
     canActivate: [authGuard],
     data: { allowedRoles: [UserRole.PLAYER] },
     children: [
@@ -95,8 +92,7 @@ export const routes: Routes = [
       // Tab 1 — Mappa (home)
       {
         path: 'home',
-        loadComponent: () =>
-          import('./features/giocatore/home/home.page').then((m) => m.HomePage),
+        loadComponent: () => import('./features/giocatore/home/home.page').then((m) => m.HomePage),
       },
       // Tab 2 — Album / Collezione
       {

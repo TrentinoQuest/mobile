@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons } from '@ionic/angular/standalone';
 import { LogoutButtonComponent } from 'src/app/shared/components/logout-button/logout-button.component';
 
-
 /**
  * Home del Giocatore.
  *
@@ -15,6 +14,6 @@ import { LogoutButtonComponent } from 'src/app/shared/components/logout-button/l
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar , IonButtons ,LogoutButtonComponent],
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, LogoutButtonComponent],
 })
 export class HomePage {}

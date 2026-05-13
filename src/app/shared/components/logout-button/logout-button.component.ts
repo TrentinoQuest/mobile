@@ -29,7 +29,7 @@ export class LogoutButtonComponent {
   private readonly router = inject(Router);
 
   constructor() {
-    addIcons({logOutOutline});
+    addIcons({ logOutOutline });
   }
 
   async onLogout(): Promise<void> {
