@@ -1,3 +1,67 @@
-<p>
-  tab-bar works!
-</p>
+<!--
+  Tab bar custom del giocatore.
+  Struttura: 5 slot in flex row, con il FAB centrale che si "stacca"
+  verticalmente (margin-top negativo) per dare l'effetto elevato.
+
+  Le tab usano routerLink + routerLinkActive per la gestione dichiarativa
+  dello stato attivo (Angular aggiunge la classe --active automaticamente).
+-->
+<nav class="tab-bar" aria-label="Navigazione giocatore">
+  <!-- TAB 1 — Mappa (home) -->
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/home"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Mappa"
+  >
+    <ion-icon name="map-outline" class="tab-bar__icon"></ion-icon>
+    <span class="tab-bar__label">Mappa</span>
+  </a>
+
+  <!-- TAB 2 — Album -->
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/album"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Album"
+  >
+    <ion-icon name="images-outline" class="tab-bar__icon"></ion-icon>
+    <span class="tab-bar__label">Album</span>
+  </a>
+
+  <!--
+    SLOT CENTRALE — QR Scan
+    Non e' una tab di navigazione: e' un trigger che apre la modal.
+    Visivamente e' un FAB elevato in ocra solido.
+  -->
+  <button
+    type="button"
+    class="tab-bar__fab"
+    (click)="openScanModal()"
+    aria-label="Scansiona QR"
+  >
+    <ion-icon name="qr-code" class="tab-bar__fab-icon"></ion-icon>
+  </button>
+
+  <!-- TAB 3 — Amici -->
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/amici"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Amici"
+  >
+    <ion-icon name="people-outline" class="tab-bar__icon"></ion-icon>
+    <span class="tab-bar__label">Amici</span>
+  </a>
+
+  <!-- TAB 4 — Profilo -->
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/profilo"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Profilo"
+  >
+    <ion-icon name="person-outline" class="tab-bar__icon"></ion-icon>
+    <span class="tab-bar__label">Profilo</span>
+  </a>
+</nav>
