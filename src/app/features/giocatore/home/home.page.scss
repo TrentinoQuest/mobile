@@ -1,6 +1,100 @@
-.test-fonts {
-     font-family: var(--tq-font-serif);
-     font-style: italic;
-     font-size: 48px;
-     /* deve apparire un serif elegante, non Georgia di sistema */
-   }
+/* ============================================================================
+ * HomePage — Sotto-step 2A
+ * ============================================================================
+ * Mappa full-bleed: copre tutto lo schermo, anche sotto la tab bar
+ * (la tab bar in glass blur trasparisce delicatamente).
+ *
+ * In 2D arriveranno gli overlay UI (header, collection chip, ecc.) che
+ * si posizioneranno in absolute sopra il container mappa.
+ * ========================================================================== */
+
+.home {
+  /* ion-content background: trasparente per non interferire con la mappa. */
+  --background: var(--tq-bg);
+  /* Niente padding: la mappa deve essere edge-to-edge. */
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.home__map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--tq-bg);
+
+  /* z-index esplicito per stare sotto la tab bar (--tq-z-tab-bar = 30). */
+  z-index: var(--tq-z-map);  /* = 0 dai token */
+}
+
+/* ============================================================================
+ * Override stili Leaflet interni
+ * ============================================================================
+ * Le classi .leaflet-* sono globali (vedi global.scss che importa
+ * leaflet.css). Le sovrascriviamo qui scoped a .home per evitare
+ * collisioni con altre mappe future (es. in Quest Detail).
+ * ========================================================================== */
+
+.home {
+  /* ----------------------------------------------------------------
+   * Container mappa: forza il background warm-dark anche durante il
+   * caricamento dei tile (di default Leaflet usa un grigio neutro).
+   * ---------------------------------------------------------------- */
+  ::ng-deep .leaflet-container {
+    background: var(--tq-bg) !important;
+    /* Disabilita l'outline blu sul focus (web a11y default) per coerenza
+       col look mobile. La navigazione tastiera resta funzionante. */
+    outline: none;
+    font-family: var(--tq-font-sans);
+  }
+
+  /* ----------------------------------------------------------------
+   * Attribution control: lo spostiamo in basso a sinistra e lo stiliziamo
+   * discreto. Lo lasciamo visibile perche' CartoDB lo richiede per uso
+   * pubblico, ma deve essere fuori dalla zona tab bar.
+   * ---------------------------------------------------------------- */
+  ::ng-deep .leaflet-control-attribution {
+    /* Posizione: di default e' bottom-right. Sposto in bottom-left con
+       margin-bottom che evita la tab bar (64px) + safe area. */
+    background: rgba(var(--tq-bg-rgb), 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--tq-text-muted);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: var(--tq-radius-sm) var(--tq-radius-sm) 0 0;
+    margin-bottom: calc(64px + env(safe-area-inset-bottom, 0)) !important;
+
+    a {
+      color: var(--tq-text-secondary);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--tq-ocra);
+      }
+    }
+  }
+
+  /* ----------------------------------------------------------------
+   * Tile loading: rimuove l'effetto "lampeggio bianco" tra un tile
+   * e il successivo durante zoom/pan veloce.
+   * ---------------------------------------------------------------- */
+  /*
+  ::ng-deep .leaflet-tile-container {
+    // Smooth transitions tra tile. 
+    will-change: transform;
+  }
+  */
+}
+
+
+:host {
+  ::ng-deep .leaflet-pane,
+  ::ng-deep .leaflet-top,
+  ::ng-deep .leaflet-bottom,
+  ::ng-deep .leaflet-control {
+    z-index: auto !important;
+  }
+}
