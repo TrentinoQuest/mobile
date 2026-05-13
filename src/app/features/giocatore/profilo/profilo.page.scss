@@ -1,0 +1,66 @@
+/* ============================================================================
+ * ProfiloPage (stub)
+ * ============================================================================
+ * Stesso pattern strutturale degli altri stub, con due sezioni funzionali
+ * (theme selector e logout) per consentire test end-to-end durante lo sviluppo.
+ * ========================================================================== */
+
+.profilo-stub {
+  --background: var(--tq-bg);
+}
+
+.profilo-stub__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: calc(100% - 64px - env(safe-area-inset-bottom, 0));
+  padding: 32px 24px calc(24px + 64px + env(safe-area-inset-bottom, 0));
+  gap: 16px;
+}
+
+.profilo-stub__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--tq-ocra);
+  margin: 0;
+}
+
+.profilo-stub__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+}
+
+.profilo-stub__note {
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  color: var(--tq-text-muted);
+  margin: 0 0 16px;
+}
+
+.profilo-stub__section {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profilo-stub__section-title {
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tq-text-secondary);
+  text-align: left;
+  margin: 0 0 4px;
+}

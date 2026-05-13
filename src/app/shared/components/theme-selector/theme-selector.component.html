@@ -1,0 +1,16 @@
+<ion-segment
+  [value]="themeService.mode()"
+  (ionChange)="onModeChange($event)"
+>
+  <ion-segment-button value="light">
+    <ion-label>Chiaro</ion-label>
+  </ion-segment-button>
+
+  <ion-segment-button value="dark">
+    <ion-label>Scuro</ion-label>
+  </ion-segment-button>
+
+  <ion-segment-button value="system">
+    <ion-label>Sistema</ion-label>
+  </ion-segment-button>
+</ion-segment>
