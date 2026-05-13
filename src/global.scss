@@ -47,3 +47,46 @@
  * ===========================================================
  */
 @import 'leaflet/dist/leaflet.css';
+
+
+/* ============================================================================
+ * Keyframes globali
+ * ============================================================================
+ * I keyframes dichiarati dentro componenti con ViewEncapsulation possono
+ * ricevere hash da Angular che li rende irraggiungibili dalla property
+ * "animation: ...". Per le animazioni usate in marker Leaflet (iniettati
+ * fuori dall'albero Angular) li teniamo globali qui.
+ * ========================================================================== */
+
+/* Wrapper esterno aggiunto da Leaflet (className di L.divIcon): rimuove
+   il background bianco di default che Leaflet applicherebbe. */
+.user-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Animazione del ring che pulsa attorno al marker utente. */
+@keyframes user-marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Forziamo l'animation sul pulse anche se la regola scopata nel
+   home.page.scss non venisse applicata per encapsulation. */
+.user-marker__pulse {
+  /* Auto-sufficiente: definisce tutto quello che serve all'animazione visibile. */
+  background: rgba(200, 147, 15, 0.6) !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
+}
