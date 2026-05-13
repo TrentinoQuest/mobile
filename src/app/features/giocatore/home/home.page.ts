@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  ViewChild,
-  AfterViewInit,
-  OnDestroy,
-} from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { IonContent } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 
@@ -82,8 +76,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   ];
 
   /** URL template tile CartoDB Dark Matter. {s} = subdomain, {z}/{x}/{y} = tile coords. */
-  private readonly TILE_URL =
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+  private readonly TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
 
   /** Attribution obbligatoria per uso pubblico di OSM + CARTO. */
   private readonly TILE_ATTRIBUTION =
