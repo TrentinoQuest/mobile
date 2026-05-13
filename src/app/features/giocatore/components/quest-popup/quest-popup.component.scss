@@ -1,0 +1,73 @@
+/* ============================================================================
+ * QuestPopupComponent
+ * ============================================================================
+ * Stili interni del popup quest/zone.
+ *
+ * NOTA importante: il componente e' montato dentro Leaflet via
+ * createComponent + appendChild, quindi vive nel DOM ma NON come figlio
+ * normale dell'albero Angular. ViewEncapsulation funziona comunque
+ * perche' Angular emette gli stili scoped via attributo sull'host.
+ *
+ * Il "frame" esterno del popup (cornice, bordi, freccia che punta al
+ * marker) e' stilizzato in global.scss perche' .leaflet-popup-* sono
+ * iniettati da Leaflet fuori da questo componente.
+ * ========================================================================== */
+
+:host {
+  /* Il componente e' un blocco minimo dentro il popup wrapper. */
+  display: block;
+}
+
+.quest-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Larghezza target per leggibilita' mobile. */
+  min-width: 200px;
+  max-width: 260px;
+}
+
+.quest-popup__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  margin: 0;
+  /* Colore default ocra (zone, available). */
+  color: var(--tq-ocra);
+
+  /* Modificatori per stato. Le classi vengono applicate via [class] nel template. */
+  &.quest-popup__kicker--discovered {
+    color: var(--tq-forest);
+  }
+  &.quest-popup__kicker--locked {
+    color: var(--tq-text-muted);
+  }
+}
+
+.quest-popup__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+}
+
+.quest-popup__desc {
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--tq-text-secondary);
+  margin: 0;
+}
+
+.quest-popup__meta {
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--tq-ocra);
+  margin: 4px 0 0;
+}

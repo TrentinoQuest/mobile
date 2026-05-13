@@ -20,6 +20,9 @@ import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { refreshInterceptor } from './app/core/interceptors/refresh.interceptor';
 
+import { QuestRepository } from './app/core/services/quest/repository/quest.repository';
+import { MockQuestRepository } from './app/core/services/quest/repository/quest.repository.mock';
+
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
  * componente venga renderizzato, eliminando il flash of unstyled content.
@@ -81,5 +84,13 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAppInitializer(initializeTheme),
     provideAppInitializer(initializeApp),
+
+    // ============================================================
+    // Quest data layer
+    // ============================================================
+    // Binding del contratto QuestRepository alla sua implementazione concreta.
+    // Per passare al backend reale: cambia MockQuestRepository in HttpQuestRepository.
+    // QuestService riceve automaticamente l'implementazione corrente via DI.
+    { provide: QuestRepository, useClass: MockQuestRepository },
   ],
 });
