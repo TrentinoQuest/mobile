@@ -1,20 +1,19 @@
 /* ============================================================================
  * QuestPopupComponent
  * ============================================================================
- * Stili interni del popup quest/zone.
+ * Stili interni del popup quest.
  *
- * NOTA importante: il componente e' montato dentro Leaflet via
- * createComponent + appendChild, quindi vive nel DOM ma NON come figlio
- * normale dell'albero Angular. ViewEncapsulation funziona comunque
- * perche' Angular emette gli stili scoped via attributo sull'host.
+ * NOTA: il componente e' montato dentro Leaflet via createComponent +
+ * appendChild, quindi vive nel DOM ma NON come figlio normale dell'albero
+ * Angular. ViewEncapsulation funziona comunque perche' Angular emette
+ * gli stili scoped via attributo sull'host element.
  *
- * Il "frame" esterno del popup (cornice, bordi, freccia che punta al
- * marker) e' stilizzato in global.scss perche' .leaflet-popup-* sono
- * iniettati da Leaflet fuori da questo componente.
+ * Il "frame" esterno del popup (cornice, freccia che punta al marker) e'
+ * stilizzato in global.scss perche' .leaflet-popup-* sono iniettati da
+ * Leaflet fuori da questo componente.
  * ========================================================================== */
 
 :host {
-  /* Il componente e' un blocco minimo dentro il popup wrapper. */
   display: block;
 }
 
@@ -22,7 +21,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  /* Larghezza target per leggibilita' mobile. */
   min-width: 200px;
   max-width: 260px;
 }
@@ -33,10 +31,9 @@
   font-weight: 500;
   letter-spacing: 0.18em;
   margin: 0;
-  /* Colore default ocra (zone, available). */
+  /* Default ocra (available). */
   color: var(--tq-ocra);
 
-  /* Modificatori per stato. Le classi vengono applicate via [class] nel template. */
   &.quest-popup__kicker--discovered {
     color: var(--tq-forest);
   }
@@ -55,12 +52,23 @@
   margin: 0;
 }
 
+.quest-popup__type {
+  font-family: var(--tq-font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tq-text-muted);
+  margin: 0;
+  /* Caps small per distinguere il "metadato" dal "contenuto". */
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .quest-popup__desc {
   font-family: var(--tq-font-sans);
   font-size: 13px;
   line-height: 1.5;
   color: var(--tq-text-secondary);
-  margin: 0;
+  margin: 4px 0 0;
 }
 
 .quest-popup__meta {

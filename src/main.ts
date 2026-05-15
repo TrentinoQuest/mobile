@@ -22,6 +22,7 @@ import { refreshInterceptor } from './app/core/interceptors/refresh.interceptor'
 
 import { QuestRepository } from './app/core/services/quest/repository/quest.repository';
 import { MockQuestRepository } from './app/core/services/quest/repository/quest.repository.mock';
+import { HttpQuestRepository } from './app/core/services/quest/repository/quest.repository.http';
 
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
@@ -91,6 +92,12 @@ bootstrapApplication(AppComponent, {
     // Binding del contratto QuestRepository alla sua implementazione concreta.
     // Per passare al backend reale: cambia MockQuestRepository in HttpQuestRepository.
     // QuestService riceve automaticamente l'implementazione corrente via DI.
-    { provide: QuestRepository, useClass: MockQuestRepository },
+    {
+      provide: QuestRepository,
+      useClass:
+        environment.questRepository === 'http'
+          ? HttpQuestRepository
+          : MockQuestRepository,
+    },
   ],
 });

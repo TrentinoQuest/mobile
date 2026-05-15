@@ -1,26 +1,24 @@
 <!--
-  Popup quest/zone montato dentro Leaflet via createComponent().
+  Popup quest montato dentro Leaflet via createComponent().
 
-  Discrimina tra Quest (marker) e Zone (cerchio) via il signal mode.
-  Usa la new control flow syntax di Angular 17+ (@if invece di *ngIf).
+  Mostra:
+  - kicker stato giocatore (discovered/available/locked) in colore
+  - titolo della quest
+  - tipo (primary/secondary)
+  - descrizione
+  - punti base assegnati al completamento
 -->
 <div class="quest-popup">
-  @if (mode() === 'quest' && quest(); as q) {
+  @if (quest(); as q) {
     <p class="quest-popup__kicker" [class]="statusModifier()">
       {{ statusLabel() }}
     </p>
     <h3 class="quest-popup__title">{{ q.name }}</h3>
+    <p class="quest-popup__type">{{ typeLabel() }}</p>
     <p class="quest-popup__desc">{{ q.description }}</p>
-    <p class="quest-popup__meta">{{ q.points }} pt</p>
-  } @else if (mode() === 'zone' && zone(); as z) {
-    <p class="quest-popup__kicker">— ZONA —</p>
-    <h3 class="quest-popup__title">{{ z.name }}</h3>
-    <p class="quest-popup__desc">{{ z.description }}</p>
+    <p class="quest-popup__meta">{{ q.basePoints }} pt</p>
   } @else {
-    <!--
-      Stato vuoto: visibile solo se il componente viene montato senza
-      input. In produzione non dovrebbe mai accadere.
-    -->
+    <!-- Stato vuoto: in produzione non dovrebbe mai accadere. -->
     <p class="quest-popup__desc">Nessun dato disponibile.</p>
   }
 </div>

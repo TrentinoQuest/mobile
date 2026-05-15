@@ -51,16 +51,19 @@
     font-family: var(--tq-font-sans);
   }
 
-  /* ----------------------------------------------------------------
-   * Force tutti gli elementi Leaflet a restare sotto la tab bar.
-   * Leaflet usa z-index interni fino a ~700 per controlli e popup.
-   * ---------------------------------------------------------------- */
-  ::ng-deep .leaflet-pane,
-  ::ng-deep .leaflet-top,
-  ::ng-deep .leaflet-bottom,
-  ::ng-deep .leaflet-control {
-    z-index: auto !important;
-  }
+
+/* ----------------------------------------------------------------
+ * Z-index dei controlli Leaflet "ammorbiditi" per non superare
+ * la tab bar. NON tocchiamo gli z-index dei pane interni della
+ * mappa (tile/marker/popup): sono regolati da Leaflet stesso
+ * e ogni override rompe l'ordine di rendering.
+ * ---------------------------------------------------------------- */
+::ng-deep .leaflet-top,
+::ng-deep .leaflet-bottom,
+::ng-deep .leaflet-control {
+  z-index: 1 !important;
+}
+
 
   /* ----------------------------------------------------------------
    * Attribution control: posizionata in basso a sinistra, discreta,
@@ -202,11 +205,10 @@
     font-family: var(--tq-font-sans);
   }
 
-  ::ng-deep .leaflet-pane,
   ::ng-deep .leaflet-top,
   ::ng-deep .leaflet-bottom,
   ::ng-deep .leaflet-control {
-    z-index: auto !important;
+    z-index: 1 !important;
   }
 
   ::ng-deep .leaflet-control-attribution {

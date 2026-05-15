@@ -15,35 +15,34 @@ import { IonContent } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { QuestService } from '../../../core/services/quest/quest.service';
 import { getQuestIcon } from '../../../core/services/quest/quest-icons';
-import { Quest, Zone } from '../../../core/services/quest/quest.types';
+import {
+  AnyQuest,
+  PrimaryQuest,
+  QuestType,
+  SecondaryQuest,
+} from '../../../core/services/quest/quest.types';
 import { QuestPopupComponent } from '../components/quest-popup/quest-popup.component';
 
 /**
  * Home Giocatore — vista principale mappa-centrica.
  *
- * Strategia di costruzione:
- * - 2A: mappa Leaflet full-bleed con tile dark warm.
- * - 2B: marker posizione utente con pulse animato (mock GPS).
- * - 2B-bis: integrazione Capacitor Geolocation per GPS reale (chat dedicata).
- * - 2C (corrente): consumo dati via QuestService (repository pattern),
- *   zone come cerchi, marker quest con popup Angular dinamico.
- * - 2D: header overlay con collection chip + progress bar.
- * - 2E: controlli mappa flottanti (zoom, centra-su-di-me).
- * - 2F: card "Vicino a te" + bottom sheet.
+ * Architettura dati (allineata a OpenAPI v0.2.0):
+ * Il componente consuma QuestService che espone signal reattivi
+ * (quests, completions, loading, error). Gli effect ridisegnano i
+ * marker quando i signal cambiano.
  *
- * Architettura dati:
- * Il componente NON conosce la fonte dei dati. Inietta QuestService che
- * espone signal reattivi (zones, quests, loading, error). L'effect()
- * sotto re-renderizza i marker ogni volta che i signal cambiano.
+ * Rendering quest:
+ * - PrimaryQuest -> L.circle attorno a searchArea (raggio = searchRadiusMeters),
+ *   visualizzata come zona soffusa di ricerca per il QR nascosto
+ * - SecondaryQuest -> L.marker puntuale sulla position (check-in entro
+ *   checkInRadiusMeters)
  *
- * Migrazione al backend: zero modifiche a questo file. Basta cambiare
- * il provider in main.ts da MockQuestRepository a HttpQuestRepository.
+ * Migrazione al backend: zero modifiche a questo file.
+ * Basta cambiare il provider in main.ts da MockQuestRepository a
+ * HttpQuestRepository.
  *
- * Popup quest:
- * Sostituito il pattern "template string HTML" con componente Angular
- * standalone QuestPopupComponent. Istanziato dinamicamente via
- * createComponent() al click sul marker. Distrutto al close del popup
- * per evitare memory leak.
+ * Popup: componente Angular standalone QuestPopupComponent istanziato
+ * dinamicamente al click. Distrutto al close per evitare memory leak.
  *
  * TODO 2B-bis: integrare Capacitor Geolocation per GPS reale.
  * TODO 2D: header overlay con collection chip.
@@ -65,9 +64,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
   // ----------------------------------------------------------------
 
   private readonly questService = inject(QuestService);
-  // Servizi necessari per createComponent() di componenti standalone:
-  // - ApplicationRef per registrare il componente nel change detection
-  // - EnvironmentInjector per la DI del componente
   private readonly appRef = inject(ApplicationRef);
   private readonly envInjector = inject(EnvironmentInjector);
 
@@ -78,16 +74,15 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private map: L.Map | null = null;
   private userMarker: L.Marker | null = null;
 
-  // Layer separati permettono di mostrare/nascondere zone e quest in
-  // modo indipendente (es. futuri filtri "solo discovered").
-  private zonesLayer: L.LayerGroup | null = null;
-  private questsLayer: L.LayerGroup | null = null;
+  // Layer separati per primary (cerchi) e secondary (marker).
+  // Permettono filtri futuri "solo primary" / "solo secondary".
+  private primaryLayer: L.LayerGroup | null = null;
+  private secondaryLayer: L.LayerGroup | null = null;
 
   /**
-   * Mappa popupOpen -> ComponentRef.
-   * Permette di tracciare quale popup ha quale componente Angular dietro,
-   * e di distruggere il componente al close per evitare memory leak.
-   * La chiave e' l'id della quest o della zona.
+   * Mappa popupKey -> ComponentRef.
+   * Traccia quale popup ha quale componente Angular dietro, e permette
+   * di distruggere il componente al close per evitare memory leak.
    */
   private readonly activePopupComponents = new Map<
     string,
@@ -118,17 +113,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
   // ----------------------------------------------------------------
 
   constructor() {
-    // Effect 1: re-render zone quando il signal zones() cambia.
-    // Si attiva al primo loadZones() e a ogni reload futuro.
+    // Effect: re-render dei marker quando quests() o completions() cambiano.
+    // Combinato in un solo effect perche' lo stato giocatore (discovered/
+    // available) dipende da entrambi.
     effect(() => {
-      const zones = this.questService.zones();
-      this.renderZones(zones);
-    });
-
-    // Effect 2: re-render quest marker quando il signal quests() cambia.
-    // Si attiva al primo loadQuests() e dopo ogni markAsDiscovered.
-    effect(() => {
+      // Tracciati: signal "quests" e "completions" via playerStatusOf
+      // letto dentro renderQuests().
       const quests = this.questService.quests();
+      this.questService.completions(); // forza dipendenza
       this.renderQuests(quests);
     });
 
@@ -144,14 +136,17 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.initMap();
     this.addUserMarker();
 
-    // Carica i dati dopo che la mappa esiste. Gli effect() ridisegneranno
-    // automaticamente i marker quando i signal si popolano.
-    this.questService.loadZones();
+    // Se il servizio ha già dati cachati (navigazione back), l'effect può
+    // essere già stato eseguito prima che la mappa fosse pronta e aver
+    // restituito early. Ridisegniamo esplicitamente dopo l'init.
+    this.renderQuests(this.questService.quests());
+
+    // Carica dati dal repository. Gli effect ridisegneranno i marker.
     this.questService.loadQuests();
+    this.questService.loadCompletions();
   }
 
   ngOnDestroy(): void {
-    // Distruggi tutti i ComponentRef dei popup aperti per evitare memory leak.
     this.activePopupComponents.forEach((ref) => ref.destroy());
     this.activePopupComponents.clear();
 
@@ -159,10 +154,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
       this.map.remove();
       this.map = null;
     }
-
     this.userMarker = null;
-    this.zonesLayer = null;
-    this.questsLayer = null;
+    this.primaryLayer = null;
+    this.secondaryLayer = null;
   }
 
   // ----------------------------------------------------------------
@@ -188,91 +182,107 @@ export class HomePage implements AfterViewInit, OnDestroy {
       subdomains: 'abcd',
     }).addTo(this.map);
 
-    // Inizializza i layer group vuoti — popolati poi dagli effect.
-    this.zonesLayer = L.layerGroup().addTo(this.map);
-    this.questsLayer = L.layerGroup().addTo(this.map);
+    // Layer group vuoti, popolati dagli effect.
+    this.primaryLayer = L.layerGroup().addTo(this.map);
+    this.secondaryLayer = L.layerGroup().addTo(this.map);
   }
 
   // ----------------------------------------------------------------
-  // Rendering zone (reattivo)
+  // Rendering quest (reattivo)
   // ----------------------------------------------------------------
 
   /**
-   * Pulisce e ridisegna le zone dal signal.
-   * Chiamato automaticamente dall'effect quando questService.zones() cambia.
+   * Ridisegna primary e secondary quest dai signal.
+   * Chiamato dall'effect quando quests() o completions() cambiano.
    */
-  private renderZones(zones: Zone[]): void {
-    if (!this.map || !this.zonesLayer) return;
+  private renderQuests(quests: AnyQuest[]): void {
+    if (!this.map || !this.primaryLayer || !this.secondaryLayer) return;
 
-    // Pulizia: rimuovi le zone precedenti.
-    this.zonesLayer.clearLayers();
+    // Pulisci entrambi i layer.
+    this.primaryLayer.clearLayers();
+    this.secondaryLayer.clearLayers();
 
-    zones.forEach((zone) => {
-      const circle = L.circle([zone.center.lat, zone.center.lng], {
-        radius: zone.radiusMeters,
-        color: '#C8930F',
-        fillColor: '#C8930F',
-        fillOpacity: 0.08,
-        opacity: 0.45,
-        weight: 1.5,
-        dashArray: '4 6',
-      });
-
-      // Popup montato dinamicamente al click.
-      this.bindDynamicPopup(circle, 'zone-' + zone.id, () => {
-        const ref = this.createPopupComponent();
-        ref.setInput('zoneData', zone);
-        return ref;
-      });
-
-      circle.addTo(this.zonesLayer!);
-    });
-  }
-
-  // ----------------------------------------------------------------
-  // Rendering quest marker (reattivo)
-  // ----------------------------------------------------------------
-
-  /**
-   * Pulisce e ridisegna i marker quest dal signal.
-   * Chiamato automaticamente dall'effect quando questService.quests() cambia.
-   */
-  private renderQuests(quests: Quest[]): void {
-    if (!this.map || !this.questsLayer) return;
-
-    this.questsLayer.clearLayers();
-
+    // Distribuisci le quest nei layer per tipo.
     quests.forEach((quest) => {
-      const icon = this.createQuestIcon(quest);
-
-      const marker = L.marker([quest.position.lat, quest.position.lng], {
-        icon,
-        interactive: true,
-        riseOnHover: true,
-      });
-
-      // Popup montato dinamicamente al click.
-      this.bindDynamicPopup(marker, 'quest-' + quest.id, () => {
-        const ref = this.createPopupComponent();
-        ref.setInput('questData', quest);
-        return ref;
-      });
-
-      marker.addTo(this.questsLayer!);
+      if (quest.type === QuestType.PRIMARY) {
+        this.renderPrimaryQuest(quest);
+      } else {
+        this.renderSecondaryQuest(quest);
+      }
     });
   }
 
   /**
-   * Crea un L.DivIcon per una quest in base allo stato e categoria.
-   * L'SVG dell'icona viene dal registry quest-icons.
+   * Renderizza una primary quest come cerchio (area di ricerca del QR).
+   * Il cerchio NON e' il marker della quest: e' la zona entro cui il QR
+   * e' nascosto.
    */
-  private createQuestIcon(quest: Quest): L.DivIcon {
-    const iconSvg = getQuestIcon(quest);
+  private renderPrimaryQuest(quest: PrimaryQuest): void {
+    if (!this.primaryLayer) return;
+
+    const playerStatus = this.questService.playerStatusOf(quest.id);
+
+    // Colore del cerchio in base allo stato giocatore.
+    // discovered -> forest, locked -> muted, available -> ocra
+    const fillColor =
+      playerStatus === 'discovered'
+        ? '#6BA046'
+        : playerStatus === 'locked'
+          ? '#666'
+          : '#C8930F';
+
+    const circle = L.circle([quest.searchArea.lat, quest.searchArea.lng], {
+      radius: quest.searchRadiusMeters,
+      color: fillColor,
+      fillColor: fillColor,
+      fillOpacity: playerStatus === 'discovered' ? 0.05 : 0.08,
+      opacity: playerStatus === 'discovered' ? 0.3 : 0.45,
+      weight: 1.5,
+      dashArray: '4 6',
+    });
+
+    this.bindDynamicPopup(circle, 'primary-' + quest.id, () =>
+      this.createPopupForQuest(quest, playerStatus),
+    );
+
+    circle.addTo(this.primaryLayer);
+  }
+
+  /**
+   * Renderizza una secondary quest come marker puntuale.
+   */
+  private renderSecondaryQuest(quest: SecondaryQuest): void {
+    if (!this.secondaryLayer) return;
+
+    const playerStatus = this.questService.playerStatusOf(quest.id);
+    const icon = this.createQuestIcon(quest, playerStatus);
+
+    const marker = L.marker([quest.position.lat, quest.position.lng], {
+      icon,
+      interactive: true,
+      riseOnHover: true,
+    });
+
+    this.bindDynamicPopup(marker, 'secondary-' + quest.id, () =>
+      this.createPopupForQuest(quest, playerStatus),
+    );
+
+    marker.addTo(this.secondaryLayer);
+  }
+
+  /**
+   * Crea un L.DivIcon per una quest in base a tipo e stato giocatore.
+   */
+  private createQuestIcon(
+    quest: AnyQuest,
+    playerStatus: ReturnType<QuestService['playerStatusOf']>,
+  ): L.DivIcon {
+    const iconSvg = getQuestIcon(quest, playerStatus);
 
     return L.divIcon({
       className: 'quest-marker-wrapper',
       html: `
-        <div class="quest-marker quest-marker--${quest.status}">
+        <div class="quest-marker quest-marker--${playerStatus}">
           <div class="quest-marker__pin">${iconSvg}</div>
         </div>
       `,
@@ -287,44 +297,31 @@ export class HomePage implements AfterViewInit, OnDestroy {
   // ----------------------------------------------------------------
 
   /**
-   * Aggancia un popup Leaflet a un layer (marker o cerchio) in modo che
-   * al click sia montato un componente Angular vero (QuestPopupComponent).
-   *
-   * Il componente viene istanziato lazy (al primo open) e distrutto al close
-   * per evitare memory leak. La key serve a tracciare quale componente
-   * appartiene a quale layer nella mappa interna.
-   *
-   * @param layer marker o circle a cui agganciare il popup
-   * @param key identificatore univoco per il tracking (es. "quest-q-duomo")
-   * @param createRef factory che crea e popola il ComponentRef
+   * Aggancia un popup Leaflet a un layer (marker o cerchio) montando
+   * dinamicamente un componente Angular al click.
    */
   private bindDynamicPopup(
     layer: L.Layer,
     key: string,
     createRef: () => ComponentRef<QuestPopupComponent>,
   ): void {
-    // Aggancia un popup vuoto: il contenuto viene generato lazy al click.
     const popup = L.popup({
       closeButton: true,
       autoClose: true,
       closeOnClick: true,
-      // className applicata al wrapper esterno del popup, per styling globale.
       className: 'tq-quest-popup',
-    });
+    }).setContent('');
 
     layer.bindPopup(popup);
 
-    // Quando il popup si apre, crea il componente e iniettalo nel popup.
     layer.on('popupopen', () => {
       const ref = createRef();
       this.activePopupComponents.set(key, ref);
-      // setContent accetta HTMLElement: passiamo il nativeElement del componente.
       popup.setContent(ref.location.nativeElement);
-      // Forza una change detection iniziale.
       ref.changeDetectorRef.detectChanges();
+      popup.update();
     });
 
-    // Quando il popup si chiude, distruggi il componente.
     layer.on('popupclose', () => {
       const ref = this.activePopupComponents.get(key);
       if (ref) {
@@ -335,20 +332,19 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Crea un'istanza di QuestPopupComponent dinamicamente.
-   * Va completata con setInput(...) prima di essere mostrata.
-   *
-   * Pattern: createComponent() di Angular 17+ per componenti standalone.
-   * Non serve ViewContainerRef ne ComponentFactoryResolver.
+   * Crea un QuestPopupComponent popolato con i dati di una quest specifica.
    */
-  private createPopupComponent(): ComponentRef<QuestPopupComponent> {
+  private createPopupForQuest(
+    quest: AnyQuest,
+    playerStatus: ReturnType<QuestService['playerStatusOf']>,
+  ): ComponentRef<QuestPopupComponent> {
     const componentRef = createComponent(QuestPopupComponent, {
       environmentInjector: this.envInjector,
     });
 
-    // Attacca il componente al ApplicationRef cosi' il change detection
-    // di Angular lo include nel ciclo. Senza, il componente esiste in DOM
-    // ma i suoi signal non triggerano re-render.
+    componentRef.setInput('questData', quest);
+    componentRef.setInput('status', playerStatus);
+
     this.appRef.attachView(componentRef.hostView);
 
     return componentRef;
@@ -379,11 +375,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
       keyboard: false,
     }).addTo(this.map);
 
-    // TODO 2B-bis: in chat dedicata, integrare Capacitor Geolocation:
-    //   import { Geolocation } from '@capacitor/geolocation';
-    //   const watchId = await Geolocation.watchPosition({}, (pos) => {
-    //     if (pos) this.userMarker?.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-    //   });
-    //   // E in ngOnDestroy: Geolocation.clearWatch({ id: watchId });
+    // TODO 2B-bis: integrare Capacitor Geolocation per GPS reale.
   }
 }

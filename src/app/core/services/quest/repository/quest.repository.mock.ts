@@ -1,13 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
-import { QuestRepository } from './quest.repository';
+import { QuestRepository, QuestSearchFilter } from './quest.repository';
 import {
-  GeoBounds,
-  Quest,
-  QuestCategory,
+  AnyQuest,
+  CheckInRequest,
+  CheckInResponse,
+  Completion,
+  CompletionEntry,
+  PrimaryQuest,
   QuestStatus,
-  Zone,
+  QuestType,
+  ScanQrRequest,
+  ScanQrResponse,
+  SecondaryQuest,
+  Collectible,
+  CollectibleRarity,
+  CollectibleEntry
 } from '../quest.types';
 
 /**
@@ -15,216 +24,445 @@ import {
  * con dati hardcoded in memoria.
  *
  * NATURA TEMPORANEA: questo file vive finche' il backend non implementa
- * gli endpoint quest. Quando arriveranno, configureremo l'app per usare
- * HttpQuestRepository e questo file potra' essere cancellato.
+ * gli endpoint quest. Quando l'integrazione sara' verificata, configurare
+ * l'app per usare HttpQuestRepository e cancellare questo file.
+ *
+ * Allineamento ai DTO OpenAPI v0.2.0:
+ * I dati hardcoded usano i tipi veri di shared-types (PrimaryQuest,
+ * SecondaryQuest, Completion). Quando il backend sara' live, lo switch
+ * sara' trasparente: stesso shape dei dati, fonte diversa.
  *
  * Simulazione realistica:
- * - I metodi restituiscono Observable con delay() artificiale per
- *   imitare la latenza di rete. Questo permette di testare lo stato
- *   di loading senza un backend.
- * - markAsDiscovered() modifica in-place l'array MOCK_QUESTS cosi'
- *   le successive chiamate a getQuestsInBounds() riflettono la
- *   modifica. Comportamento allineato a quello che fara' il backend.
+ * - delay(250ms) su ogni metodo per imitare latenza HTTP
+ * - checkIn() e scan() validano distanze e stati come fara' il backend
+ * - I completion sono mantenuti in memoria e crescono ad ogni completamento
+ *   riuscito (cosi' loadQuests + derivePlayerStatus mostrano lo stato corretto)
  *
  * Dati mock:
- * 2 zone (Trento Storica, Doss Trento) + 8 quest secondarie distribuite
- * con mix realistico di stati. Coordinate di punti di interesse reali
- * di Trento. Vedi commento sulle costanti per dettagli.
+ * - 3 PrimaryQuest (con QR + collectible): Duomo, Castello, Mausoleo
+ * - 5 SecondaryQuest (check-in): Fontana Nettuno, Belenzani, Torre Vanga,
+ *   Bottega Casaro, Belvedere
+ * - 2 Completion iniziali (Fontana Nettuno e Mausoleo gia' fatti)
  */
 @Injectable()
 export class MockQuestRepository extends QuestRepository {
   // Latenza simulata per imitare una richiesta HTTP reale.
-  // 250ms = veloce ma percepibile (utile per testare loading state).
   private readonly MOCK_LATENCY_MS = 250;
 
   // ----------------------------------------------------------------
   // API pubblica del repository
   // ----------------------------------------------------------------
 
-  override getZones(): Observable<Zone[]> {
-    return of(this.zones).pipe(delay(this.MOCK_LATENCY_MS));
-  }
+  override getQuests(filter?: QuestSearchFilter): Observable<AnyQuest[]> {
+    let result = this.quests;
 
-  override getQuestsInBounds(bounds?: GeoBounds): Observable<Quest[]> {
-    // Filtra solo le quest dentro il bounding box se fornito.
-    // Nel mock tutte le quest sono a Trento, quindi quasi sempre passeranno.
-    const filtered = bounds
-      ? this.quests.filter((q) => this.isWithinBounds(q.position, bounds))
-      : this.quests;
+    // Filtro per tipo
+    if (filter?.type !== undefined) {
+      result = result.filter((q) => q.type === filter.type);
+    }
 
-    return of(filtered).pipe(
+    // Filtro geografico approssimato (bounding box invece di cerchio per
+    // semplicita'; il backend usera' una query geo-spatial vera).
+    if (filter && filter.radiusMeters > 0) {
+      result = result.filter((q) => {
+        const pos = this.getQuestPosition(q);
+        const distance = this.haversineMeters(
+          filter.lat,
+          filter.lng,
+          pos.lat,
+          pos.lng,
+        );
+        return distance <= filter.radiusMeters;
+      });
+    }
+
+    return of(result).pipe(
       delay(this.MOCK_LATENCY_MS),
-      // Restituiamo una copia per evitare che chi consuma muti l'array interno.
-      // In produzione HTTP questo e' naturale (ogni request e' un nuovo oggetto).
+      // Copia per evitare mutazioni accidentali sull'array interno.
       map((quests) => quests.map((q) => ({ ...q }))),
     );
   }
 
-  override markAsDiscovered(questId: string): Observable<Quest> {
+  override getQuestById(questId: string): Observable<AnyQuest> {
+    const quest = this.quests.find((q) => q.id === questId);
+    if (!quest) {
+      return throwError(() => new Error(`Quest non trovata: ${questId}`));
+    }
+    return of({ ...quest }).pipe(delay(this.MOCK_LATENCY_MS));
+  }
+
+  override getCompletions(
+    limit = 20,
+    offset = 0,
+  ): Observable<CompletionEntry[]> {
+    // Ordina per data decrescente (come da spec OpenAPI).
+    const sorted = [...this.completions].sort(
+      (a, b) =>
+        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
+    );
+    const paged = sorted.slice(offset, offset + limit);
+
+    // Denormalizza: aggiunge la quest associata a ogni completion.
+    const entries: CompletionEntry[] = paged.map((completion) => {
+      const quest = this.quests.find((q) => q.id === completion.questId);
+      if (!quest) {
+        throw new Error(
+          `Completion ${completion.id} riferisce a quest mancante ${completion.questId}`,
+        );
+      }
+      return { completion: { ...completion }, quest: { ...quest } };
+    });
+
+    return of(entries).pipe(delay(this.MOCK_LATENCY_MS));
+  }
+
+  override checkIn(
+    questId: string,
+    body: CheckInRequest,
+  ): Observable<CheckInResponse> {
     const quest = this.quests.find((q) => q.id === questId);
 
     if (!quest) {
       return throwError(() => new Error(`Quest non trovata: ${questId}`));
     }
-
-    if (quest.status === 'locked') {
+    if (quest.type !== QuestType.SECONDARY) {
       return throwError(
-        () => new Error(`Quest bloccata, non puo' essere scoperta: ${questId}`),
+        () =>
+          new Error(
+            `Check-in non valido: la quest ${questId} non e' secondary`,
+          ),
+      );
+    }
+    if (this.isAlreadyCompleted(questId)) {
+      return throwError(() => new Error(`Quest gia' completata: ${questId}`));
+    }
+
+    const secondary = quest as SecondaryQuest;
+    const distance = this.haversineMeters(
+      body.position.lat,
+      body.position.lng,
+      secondary.position.lat,
+      secondary.position.lng,
+    );
+
+    if (distance > secondary.checkInRadiusMeters) {
+      return throwError(
+        () =>
+          new Error(
+            `Fuori raggio: ${Math.round(distance)}m / ${secondary.checkInRadiusMeters}m`,
+          ),
       );
     }
 
-    // Muta lo stato in memoria. In produzione questo sara' fatto dal backend.
-    quest.status = 'discovered';
+    // Successo: crea il completion.
+    const completion: Completion = {
+      id: `c-${Date.now()}`,
+      questId,
+      pointsAwarded: secondary.basePoints,
+      position: body.position,
+      completedAt: new Date().toISOString(),
+    };
+    this.completions.push(completion);
+    this.playerTotalPoints += completion.pointsAwarded;
 
-    return of({ ...quest }).pipe(delay(this.MOCK_LATENCY_MS));
+    const response: CheckInResponse = {
+      completion,
+      pointsAwarded: completion.pointsAwarded,
+      totalPoints: this.playerTotalPoints,
+      distanceFromTargetMeters: distance,
+    };
+
+    return of(response).pipe(delay(this.MOCK_LATENCY_MS));
+  }
+
+  override scan(
+    questId: string,
+    body: ScanQrRequest,
+  ): Observable<ScanQrResponse> {
+    const quest = this.quests.find((q) => q.id === questId);
+
+    if (!quest) {
+      return throwError(() => new Error(`Quest non trovata: ${questId}`));
+    }
+    if (quest.type !== QuestType.PRIMARY) {
+      return throwError(
+        () =>
+          new Error(`Scan non valido: la quest ${questId} non e' primary`),
+      );
+    }
+    if (this.isAlreadyCompleted(questId)) {
+      return throwError(() => new Error(`Quest gia' completata: ${questId}`));
+    }
+
+    const primary = quest as PrimaryQuest;
+    const distance = this.haversineMeters(
+      body.position.lat,
+      body.position.lng,
+      primary.searchArea.lat,
+      primary.searchArea.lng,
+    );
+
+    if (distance > primary.searchRadiusMeters) {
+      return throwError(
+        () =>
+          new Error(
+            `Fuori raggio: ${Math.round(distance)}m / ${primary.searchRadiusMeters}m`,
+          ),
+      );
+    }
+
+    // Validazione token mock: accetta qualsiasi stringa non vuota.
+    // Il backend reale verifichera' il token contro il DB.
+    if (!body.qrToken || body.qrToken.length < 4) {
+      return throwError(() => new Error(`Token QR non valido`));
+    }
+
+    const completion: Completion = {
+      id: `c-${Date.now()}`,
+      questId,
+      pointsAwarded: primary.basePoints,
+      position: body.position,
+      completedAt: new Date().toISOString(),
+    };
+    this.completions.push(completion);
+    this.playerTotalPoints += completion.pointsAwarded;
+
+    // Recupera il collectible associato (mock: sempre disponibile).
+    const collectible = this.collectibles.find(
+      (c) => c.id === primary.collectibleId,
+    );
+    if (!collectible) {
+      return throwError(
+        () =>
+          new Error(`Collectible non trovato per quest primary ${questId}`),
+      );
+    }
+
+    const response: ScanQrResponse = {
+      completion,
+      pointsAwarded: completion.pointsAwarded,
+      totalPoints: this.playerTotalPoints,
+      collectible: { ...collectible },
+      distanceFromTargetMeters: distance,
+    };
+
+    return of(response).pipe(delay(this.MOCK_LATENCY_MS));
   }
 
   // ----------------------------------------------------------------
-  // Utility interne
+  // Utility private
   // ----------------------------------------------------------------
 
-  /** Test inclusione punto in bounding box. */
-  private isWithinBounds(
-    pos: { lat: number; lng: number },
-    bounds: GeoBounds,
-  ): boolean {
-    return (
-      pos.lat >= bounds.southWest.lat &&
-      pos.lat <= bounds.northEast.lat &&
-      pos.lng >= bounds.southWest.lng &&
-      pos.lng <= bounds.northEast.lng
-    );
+  /**
+   * Estrae la posizione di una quest indipendentemente dal tipo.
+   * Primary -> searchArea. Secondary -> position.
+   */
+  private getQuestPosition(quest: AnyQuest): { lat: number; lng: number } {
+    return quest.type === QuestType.PRIMARY ? quest.searchArea : quest.position;
+  }
+
+  /** Distanza Haversine tra due punti in metri. */
+  private haversineMeters(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+  ): number {
+    const R = 6371000; // raggio terrestre in metri
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  private isAlreadyCompleted(questId: string): boolean {
+    return this.completions.some((c) => c.questId === questId);
   }
 
   // ================================================================
   // DATI MOCK
   // ================================================================
-  // Hardcoded in-memory. Coordinate reali di punti di interesse di
-  // Trento. Mix di stati per testare visivamente la mappa.
-  //
-  // QUANDO RIMUOVERE: insieme all'intera classe MockQuestRepository,
-  // quando il backend sara' pronto e si passera' a HttpQuestRepository.
+  // Hardcoded in-memory. Allineati ai DTO veri di shared-types.
+  // Coordinate reali di punti di interesse di Trento.
   // ================================================================
 
-  private readonly zones: Zone[] = [
+  /** Punti totali del giocatore (somma dei completion). */
+  private playerTotalPoints = 90; // = 30 (Fontana) + 60 (Mausoleo), match coi completion iniziali
+
+  /** Collectibles disponibili. Ognuno e' sbloccato da una primary quest. */
+  // Cast a `any` localmente perche' non sappiamo la shape esatta di
+  // CollectibleRarity dal tuo shared-types (potrebbe essere enum vs string).
+  // Quando importi il vero tipo, rimuovi i cast.
+  private readonly collectibles: Collectible[] = [
     {
-      id: 'zone-trento-storica',
-      name: 'Trento Storica',
+      id: 'col-leone-san-marco',
+      name: 'Leone di San Marco',
       description:
-        "Il cuore antico della citta'. Tra il Castello del Buonconsiglio " +
-        'e Piazza Duomo si concentrano secoli di storia trentina.',
-      center: { lat: 46.0689, lng: 11.1217 },
-      radiusMeters: 450,
+        "Scultura sul portale della cattedrale, simbolo dei legami " +
+        'veneziani di Trento medievale.',
+      imageUrl: '/assets/collectibles/leone-san-marco.png',
+      rarity: CollectibleRarity.RARE,
+      createdAt: '2025-01-15T10:00:00Z',
     },
     {
-      id: 'zone-doss-trento',
-      name: 'Doss Trento',
+      id: 'col-stemma-buonconsiglio',
+      name: 'Stemma del Buonconsiglio',
       description:
-        "Il colle che domina la citta'. Vista panoramica, archeologia " +
-        'romana e il Mausoleo di Cesare Battisti.',
-      center: { lat: 46.0741, lng: 11.1124 },
-      radiusMeters: 280,
+        'Lo stemma dei principi vescovi che governarono Trento per secoli.',
+      imageUrl: '/assets/collectibles/stemma-buonconsiglio.png',
+      rarity: CollectibleRarity.UNCOMMON,
+      createdAt: '2025-01-15T10:00:00Z',
+    },
+    {
+      id: 'col-aquila-battisti',
+      name: 'Aquila di Cesare Battisti',
+      description:
+        'Simbolo del mausoleo dedicato al patriota trentino.',
+      imageUrl: '/assets/collectibles/aquila-battisti.png',
+      rarity: CollectibleRarity.LEGENDARY,
+      createdAt: '2025-01-15T10:00:00Z',
     },
   ];
 
-  private readonly quests: Quest[] = [
-    // --- Zona Trento Storica ---
+  /** Quest del Trentino — primary + secondary. */
+  private readonly quests: AnyQuest[] = [
+    // ============================================================
+    // PRIMARY QUEST (QR + collectible)
+    // ============================================================
     {
       id: 'q-duomo',
       name: 'Cattedrale di San Vigilio',
       description:
         'La cattedrale romanico-gotica simbolo della citta\'. Cerca il ' +
         'leone di San Marco scolpito sul portale.',
-      position: { lat: 46.0667, lng: 11.1211 },
-      status: 'discovered' satisfies QuestStatus,
-      category: 'monument' satisfies QuestCategory,
-      zoneId: 'zone-trento-storica',
-      points: 50,
-    },
-    {
-      id: 'q-fontana-nettuno',
-      name: 'Fontana del Nettuno',
-      description:
-        'Il dio del mare al centro di una citta\' di montagna. Settecento ' +
-        'in piazza Duomo.',
-      position: { lat: 46.0666, lng: 11.1213 },
-      status: 'discovered',
-      category: 'tradition',
-      zoneId: 'zone-trento-storica',
-      points: 30,
-    },
+      type: QuestType.PRIMARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 50,
+      createdAt: '2025-01-15T10:00:00Z',
+      searchArea: { lat: 46.0667, lng: 11.1211 },
+      searchRadiusMeters: 80,
+      collectibleId: 'col-leone-san-marco',
+    } as PrimaryQuest,
     {
       id: 'q-buonconsiglio',
       name: 'Castello del Buonconsiglio',
       description:
         'Residenza dei principi vescovi. Affreschi, torri e secoli di ' +
         'potere temporale.',
-      position: { lat: 46.0727, lng: 11.1239 },
-      status: 'available',
-      category: 'monument',
-      zoneId: 'zone-trento-storica',
-      points: 80,
-    },
-    {
-      id: 'q-via-belenzani',
-      name: 'Via Belenzani',
-      description:
-        'La via dei palazzi affrescati. Ogni facciata e\' una pagina di ' +
-        'storia rinascimentale.',
-      position: { lat: 46.0683, lng: 11.1217 },
-      status: 'available',
-      category: 'culture',
-      zoneId: 'zone-trento-storica',
-      points: 40,
-    },
-    {
-      id: 'q-torre-vanga',
-      name: 'Torre Vanga',
-      description:
-        'Antica torre di guardia medievale, oggi sede di mostre temporanee.',
-      position: { lat: 46.0709, lng: 11.1183 },
-      status: 'available',
-      category: 'monument',
-      zoneId: 'zone-trento-storica',
-      points: 45,
-    },
-    {
-      id: 'q-mercato-vigilio',
-      name: 'Bottega del Casaro',
-      description:
-        'Piccola bottega storica vicino al mercato. Trentingrana stagionato ' +
-        '24 mesi.',
-      position: { lat: 46.0676, lng: 11.1197 },
-      status: 'locked',
-      category: 'food',
-      zoneId: 'zone-trento-storica',
-      points: 25,
-    },
-
-    // --- Zona Doss Trento ---
+      type: QuestType.PRIMARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 80,
+      createdAt: '2025-01-15T10:00:00Z',
+      searchArea: { lat: 46.0727, lng: 11.1239 },
+      searchRadiusMeters: 100,
+      collectibleId: 'col-stemma-buonconsiglio',
+    } as PrimaryQuest,
     {
       id: 'q-mausoleo',
       name: 'Mausoleo di Cesare Battisti',
       description:
         'Monumento funebre eretto in cima al Doss. Vista sull\'intera ' +
         "Valle dell'Adige.",
-      position: { lat: 46.0741, lng: 11.1116 },
-      status: 'discovered',
-      category: 'monument',
-      zoneId: 'zone-doss-trento',
-      points: 60,
-    },
+      type: QuestType.PRIMARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 60,
+      createdAt: '2025-01-15T10:00:00Z',
+      searchArea: { lat: 46.0741, lng: 11.1116 },
+      searchRadiusMeters: 60,
+      collectibleId: 'col-aquila-battisti',
+    } as PrimaryQuest,
+
+    // ============================================================
+    // SECONDARY QUEST (check-in geolocalizzato)
+    // ============================================================
+    {
+      id: 'q-fontana-nettuno',
+      name: 'Fontana del Nettuno',
+      description:
+        'Il dio del mare al centro di una citta\' di montagna. Settecento ' +
+        'in piazza Duomo.',
+      type: QuestType.SECONDARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 30,
+      createdAt: '2025-01-15T10:00:00Z',
+      position: { lat: 46.0666, lng: 11.1213 },
+      checkInRadiusMeters: 30,
+    } as SecondaryQuest,
+    {
+      id: 'q-via-belenzani',
+      name: 'Via Belenzani',
+      description:
+        'La via dei palazzi affrescati. Ogni facciata e\' una pagina di ' +
+        'storia rinascimentale.',
+      type: QuestType.SECONDARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 40,
+      createdAt: '2025-01-15T10:00:00Z',
+      position: { lat: 46.0683, lng: 11.1217 },
+      checkInRadiusMeters: 40,
+    } as SecondaryQuest,
+    {
+      id: 'q-torre-vanga',
+      name: 'Torre Vanga',
+      description:
+        'Antica torre di guardia medievale, oggi sede di mostre temporanee.',
+      type: QuestType.SECONDARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 45,
+      createdAt: '2025-01-15T10:00:00Z',
+      position: { lat: 46.0709, lng: 11.1183 },
+      checkInRadiusMeters: 30,
+    } as SecondaryQuest,
+    {
+      id: 'q-mercato-vigilio',
+      name: 'Bottega del Casaro',
+      description:
+        'Piccola bottega storica vicino al mercato. Trentingrana stagionato ' +
+        '24 mesi.',
+      type: QuestType.SECONDARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 25,
+      createdAt: '2025-01-15T10:00:00Z',
+      position: { lat: 46.0676, lng: 11.1197 },
+      checkInRadiusMeters: 20,
+    } as SecondaryQuest,
     {
       id: 'q-belvedere-doss',
       name: 'Belvedere del Doss',
       description:
         'Il punto panoramico piu\' classico. All\'alba la luce taglia ' +
         "orizzontalmente la citta' sottostante.",
+      type: QuestType.SECONDARY,
+      status: QuestStatus.ACTIVE,
+      basePoints: 35,
+      createdAt: '2025-01-15T10:00:00Z',
       position: { lat: 46.0739, lng: 11.1131 },
-      status: 'available',
-      category: 'nature',
-      zoneId: 'zone-doss-trento',
-      points: 35,
+      checkInRadiusMeters: 50,
+    } as SecondaryQuest,
+  ];
+
+  /**
+   * Completion iniziali del giocatore.
+   * Simulano "il giocatore ha gia' visitato Fontana del Nettuno e il
+   * Mausoleo" — utile per testare il rendering dello stato discovered.
+   */
+  private readonly completions: Completion[] = [
+    {
+      id: 'c-init-001',
+      questId: 'q-fontana-nettuno',
+      pointsAwarded: 30,
+      position: { lat: 46.0666, lng: 11.1213 },
+      completedAt: '2025-03-10T14:23:00Z',
+    },
+    {
+      id: 'c-init-002',
+      questId: 'q-mausoleo',
+      pointsAwarded: 60,
+      position: { lat: 46.0741, lng: 11.1116 },
+      completedAt: '2025-03-12T09:15:00Z',
     },
   ];
 }

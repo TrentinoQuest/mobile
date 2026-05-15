@@ -1,8 +1,39 @@
 import { Observable } from 'rxjs';
-import { GeoBounds, Quest, Zone } from '../quest.types';
+import {
+  AnyQuest,
+  CheckInRequest,
+  CheckInResponse,
+  Completion,
+  CompletionEntry,
+  QuestType,
+  ScanQrRequest,
+  ScanQrResponse,
+} from '../quest.types';
+
+/**
+ * Filtro geografico per la query delle quest.
+ * Allineato ai query parameter di GET /quests (lat, lng, radiusMeters).
+ *
+ * Se omesso, il backend restituisce TUTTE le quest attive (uso solo
+ * in fase di sviluppo o per il backoffice; il client mobile dovrebbe
+ * sempre passare un filtro per limitare il payload).
+ */
+export interface QuestSearchFilter {
+  /** Centro geografico della ricerca. */
+  lat: number;
+  /** Longitudine del centro. */
+  lng: number;
+  /** Raggio in metri (100 <= r <= 50000). */
+  radiusMeters: number;
+  /** Filtra solo quest principali o solo secondarie. */
+  type?: QuestType;
+}
 
 /**
  * QuestRepository — contratto astratto per l'accesso ai dati quest.
+ *
+ * Allineato al contratto OpenAPI v0.2.0 del backend. Tutti i metodi
+ * mappano 1:1 a un endpoint REST (vedi commento di ogni metodo).
  *
  * Pattern: Repository.
  * Astrae completamente la fonte dei dati. Il QuestService (e per
@@ -11,57 +42,84 @@ import { GeoBounds, Quest, Zone } from '../quest.types';
  *
  * Implementazioni:
  * - MockQuestRepository: dati hardcoded in memoria (sviluppo iniziale)
- * - HttpQuestRepository: chiamate REST al backend (produzione, TODO)
+ * - HttpQuestRepository: chiamate REST al backend (produzione)
  *
  * Configurazione:
  * Il binding tra QuestRepository e la sua implementazione concreta
- * avviene in app.config.ts via Angular DI provider:
+ * avviene in main.ts via Angular DI provider:
  *
  *   { provide: QuestRepository, useClass: MockQuestRepository }
- *
- * Per passare al backend basta cambiare quella riga.
+ *   // oppure quando il backend e' pronto:
+ *   { provide: QuestRepository, useClass: HttpQuestRepository }
  *
  * Stile API:
- * Tutti i metodi restituiscono Observable<T>, non Promise. Motivo: le
- * Observable supportano nativamente:
- * - cancellazione (unsubscribe se l'utente naviga via)
- * - retry/error handling con operatori RxJS
- * - stream di valori (utile per real-time future, es. WebSocket)
+ * Tutti i metodi restituiscono Observable<T> per supportare cancellazione,
+ * retry, e composizione con operatori RxJS.
  *
  * E' una classe abstract (non interface) perche' Angular DI puo' usare
- * la classe come token di injection. Con un'interface dovremmo definire
- * un InjectionToken separato — la classe astratta e' piu' ergonomica.
+ * la classe come token di injection.
  */
 export abstract class QuestRepository {
   /**
-   * Recupera tutte le zone (quest principali) della regione.
+   * Recupera le quest attive sul territorio.
    *
-   * In produzione: GET /api/zones
-   * Cached side: il backend probabilmente cachera' queste (cambiano poco).
+   * Endpoint: GET /quests
+   * Query: lat, lng, radiusMeters, type (tutti opzionali)
+   *
+   * Restituisce AnyQuest[] = (PrimaryQuest | SecondaryQuest)[].
+   * Il client discrimina via quest.type per il rendering.
+   *
+   * @param filter filtro geografico/tipo. Se omesso, tutte le quest.
    */
-  abstract getZones(): Observable<Zone[]>;
+  abstract getQuests(filter?: QuestSearchFilter): Observable<AnyQuest[]>;
 
   /**
-   * Recupera tutte le quest secondarie dentro un bounding box geografico.
+   * Recupera i dettagli di una singola quest per ID.
    *
-   * In produzione: GET /api/quests?sw_lat=..&sw_lng=..&ne_lat=..&ne_lng=..
+   * Endpoint: GET /quests/{id}
    *
-   * Lo stato (discovered/available/locked) e' calcolato lato server in
-   * base all'utente autenticato.
-   *
-   * @param bounds area geografica entro cui cercare; se omesso, tutte
-   *   le quest dell'utente (sconsigliato in produzione per dimensione
-   *   payload).
+   * Usato in futuro per la Quest Detail page.
    */
-  abstract getQuestsInBounds(bounds?: GeoBounds): Observable<Quest[]>;
+  abstract getQuestById(questId: string): Observable<AnyQuest>;
 
   /**
-   * Marca una quest come scoperta dall'utente corrente.
-   * Chiamato dopo scansione QR validata + GPS in range.
+   * Feed dei completamenti del giocatore corrente.
    *
-   * In produzione: POST /api/quests/{id}/discover
+   * Endpoint: GET /player/completions
+   * Query: limit, offset
    *
-   * @returns la Quest aggiornata con il nuovo stato.
+   * Restituisce CompletionEntry[] (completion + quest associata
+   * denormalizzata, evita chiamate aggiuntive).
+   *
+   * Usato dalla home per derivare lo stato delle quest (discovered/available).
    */
-  abstract markAsDiscovered(questId: string): Observable<Quest>;
+  abstract getCompletions(limit?: number, offset?: number): Observable<CompletionEntry[]>;
+
+  /**
+   * Completa una quest secondaria via check-in geolocalizzato.
+   *
+   * Endpoint: POST /quests/{id}/check-in
+   * Body: { position: GeoPoint }
+   *
+   * Il backend valida che la posizione sia entro checkInRadiusMeters
+   * dalla posizione della quest. Risposta 409 se gia' completata o
+   * fuori raggio.
+   *
+   * @param questId ID della secondary quest
+   * @param body posizione GPS corrente del giocatore
+   */
+  abstract checkIn(questId: string, body: CheckInRequest): Observable<CheckInResponse>;
+
+  /**
+   * Completa una quest principale via scansione QR + validazione GPS.
+   *
+   * Endpoint: POST /quests/{id}/scan
+   * Body: { qrToken: string, position: GeoPoint }
+   *
+   * Sblocca il collectible associato alla quest.
+   *
+   * @param questId ID della primary quest
+   * @param body token QR scansionato + posizione GPS
+   */
+  abstract scan(questId: string, body: ScanQrRequest): Observable<ScanQrResponse>;
 }
