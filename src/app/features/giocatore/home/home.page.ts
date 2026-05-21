@@ -22,7 +22,7 @@ import {
   SecondaryQuest,
 } from '../../../core/services/quest/quest.types';
 import { QuestPopupComponent } from '../components/quest-popup/quest-popup.component';
-
+import { HomeHeaderComponent } from '../components/home-header/home-header.component';
 /**
  * Home Giocatore — vista principale mappa-centrica.
  *
@@ -53,7 +53,7 @@ import { QuestPopupComponent } from '../components/quest-popup/quest-popup.compo
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent],
+  imports: [IonContent , HomeHeaderComponent],
 })
 export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true })
