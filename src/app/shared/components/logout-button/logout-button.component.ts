@@ -4,6 +4,7 @@ import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logOutOutline } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { QuestService } from '../../../core/services/quest/quest.service';
 
 /**
  * LogoutButton — Bottone di logout riutilizzabile.
@@ -26,6 +27,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 })
 export class LogoutButtonComponent {
   private readonly authService = inject(AuthService);
+  private readonly questService = inject(QuestService);
   private readonly router = inject(Router);
 
   constructor() {
@@ -33,6 +35,7 @@ export class LogoutButtonComponent {
   }
 
   async onLogout(): Promise<void> {
+    this.questService.reset();
     this.authService.logout();
     await this.router.navigate(['/']);
   }

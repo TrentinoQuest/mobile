@@ -144,6 +144,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // Carica dati dal repository. Gli effect ridisegneranno i marker.
     this.questService.loadQuests();
     this.questService.loadCompletions();
+
+    // Leaflet misura il container durante initMap(). Se il layout Ionic
+    // non ha ancora calcolato le dimensioni (primo render dopo login),
+    // il container risulta 0×0 e i tile non vengono caricati.
+    // invalidateSize() sul microtask successivo forza il recalcolo.
+    setTimeout(() => this.map?.invalidateSize(), 0);
   }
 
   ngOnDestroy(): void {
