@@ -24,6 +24,9 @@ import { QuestRepository } from './app/core/services/quest/repository/quest.repo
 import { MockQuestRepository } from './app/core/services/quest/repository/quest.repository.mock';
 import { HttpQuestRepository } from './app/core/services/quest/repository/quest.repository.http';
 
+import { GeolocationRepository } from './app/core/services/geolocation/repository/geolocation.repository';
+import { GeolocationRepositoryCapacitor } from './app/core/services/geolocation/repository/geolocation.repository.capacitor';
+
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
  * componente venga renderizzato, eliminando il flash of unstyled content.
@@ -99,5 +102,15 @@ bootstrapApplication(AppComponent, {
           ? HttpQuestRepository
           : MockQuestRepository,
     },
+
+    // ============================================================
+    // Geolocation data layer
+    // ============================================================
+    // Binding del contratto GeolocationRepository all'implementazione
+    // Capacitor (funziona sia su native sia su browser desktop via
+    // fallback W3C Geolocation). Nessun toggle environment: una
+    // futura repository mock potra' essere aggiunta qui se servisse
+    // per test o sviluppo offline.
+    { provide: GeolocationRepository, useClass: GeolocationRepositoryCapacitor },
   ],
 });

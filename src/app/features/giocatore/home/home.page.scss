@@ -231,3 +231,31 @@
     }
   }
 }
+
+/* ============================================================================
+ * HomePage — Sotto-step 2B-bis
+ * ============================================================================
+ * Posizionamento del permission banner GPS sopra la mappa.
+ *
+ * Il banner e' un overlay flottante: vive dentro ion-content ma posizionato
+ * in absolute per non spingere giu' la mappa. Si auto-mostra/nasconde
+ * via @if interno al componente (vedi permission-banner.component.html).
+ *
+ * Sopra Leaflet (z-index --tq-z-map-overlay = 1000), sotto la tab bar
+ * (--tq-z-tab-bar = 1020). I margini interni del banner sono gia' gestiti
+ * dal componente stesso (margin: 8px nel suo .scss).
+ *
+ * Safe area top per iOS notch / Android display cutout.
+ * ========================================================================== */
+
+.home {
+  tq-permission-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--tq-z-map-overlay);
+    /* Spazio per notch / status bar su mobile. */
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}

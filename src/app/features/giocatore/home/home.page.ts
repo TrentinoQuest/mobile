@@ -14,6 +14,7 @@ import {
 import { IonContent } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
 import { QuestService } from '../../../core/services/quest/quest.service';
+import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
 import { getQuestIcon } from '../../../core/services/quest/quest-icons';
 import {
   AnyQuest,
@@ -23,6 +24,8 @@ import {
 } from '../../../core/services/quest/quest.types';
 import { QuestPopupComponent } from '../components/quest-popup/quest-popup.component';
 import { HomeHeaderComponent } from '../components/home-header/home-header.component';
+import { PermissionBannerComponent } from '../../../shared/components/permission-banner/permission banner.component';
+
 /**
  * Home Giocatore — vista principale mappa-centrica.
  *
@@ -37,6 +40,12 @@ import { HomeHeaderComponent } from '../components/home-header/home-header.compo
  * - SecondaryQuest -> L.marker puntuale sulla position (check-in entro
  *   checkInRadiusMeters)
  *
+ * Posizione utente (Step 2B-bis):
+ * Il marker utente e' reattivo al signal GeolocationService.position().
+ * Quando arriva il primo fix valido, la mappa fa flyTo sulla posizione
+ * (one-shot per sessione). Se accuracy > 50m, viene disegnato un cerchio
+ * di incertezza intorno al marker (raggio = accuracy in metri).
+ *
  * Migrazione al backend: zero modifiche a questo file.
  * Basta cambiare il provider in main.ts da MockQuestRepository a
  * HttpQuestRepository.
@@ -44,7 +53,6 @@ import { HomeHeaderComponent } from '../components/home-header/home-header.compo
  * Popup: componente Angular standalone QuestPopupComponent istanziato
  * dinamicamente al click. Distrutto al close per evitare memory leak.
  *
- * TODO 2B-bis: integrare Capacitor Geolocation per GPS reale.
  * TODO 2D: header overlay con collection chip.
  * TODO 2F: gestire click su quest -> navigate(Quest Detail).
  */
@@ -53,7 +61,7 @@ import { HomeHeaderComponent } from '../components/home-header/home-header.compo
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent , HomeHeaderComponent],
+  imports: [IonContent, HomeHeaderComponent, PermissionBannerComponent],
 })
 export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true })
@@ -64,6 +72,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   // ----------------------------------------------------------------
 
   private readonly questService = inject(QuestService);
+  private readonly geolocationService = inject(GeolocationService);
   private readonly appRef = inject(ApplicationRef);
   private readonly envInjector = inject(EnvironmentInjector);
 
@@ -73,11 +82,18 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   private map: L.Map | null = null;
   private userMarker: L.Marker | null = null;
+  private uncertaintyCircle: L.Circle | null = null;
 
   // Layer separati per primary (cerchi) e secondary (marker).
   // Permettono filtri futuri "solo primary" / "solo secondary".
   private primaryLayer: L.LayerGroup | null = null;
   private secondaryLayer: L.LayerGroup | null = null;
+
+  /**
+   * Flag one-shot per l'auto-center al primo fix valido di sessione.
+   * Resettato a false in ngAfterViewInit (back nav → nuovo auto-center).
+   */
+  private hasAutoCentered = false;
 
   /**
    * Mappa popupKey -> ComponentRef.
@@ -94,8 +110,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
   // ----------------------------------------------------------------
 
   private readonly INITIAL_CENTER: L.LatLngTuple = [46.0667, 11.1167];
-  private readonly MOCK_USER_POSITION: L.LatLngTuple = [46.0681, 11.1211];
   private readonly INITIAL_ZOOM = 14;
+  private readonly USER_FOCUS_ZOOM = 16;
   private readonly MIN_ZOOM = 9;
   private readonly MAX_ZOOM = 18;
   private readonly TRENTINO_BOUNDS: L.LatLngBoundsLiteral = [
@@ -107,6 +123,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly TILE_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
     '&copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+  /**
+   * Soglia accuracy oltre la quale disegniamo l'alone di incertezza
+   * attorno al marker user. Sotto questa soglia il fix e' considerato
+   * "abbastanza preciso" per essere mostrato senza qualificazione.
+   * Decisione di progetto sulla UX (vedi piano Fase 3).
+   */
+  private readonly ACCURACY_THRESHOLD_METERS = 50;
 
   // ----------------------------------------------------------------
   // Effects reattivi sui dati
@@ -124,6 +148,17 @@ export class HomePage implements AfterViewInit, OnDestroy {
       this.renderQuests(quests);
     });
 
+    // Effect: sincronizza marker user e alone incertezza con la posizione GPS.
+    // Reagisce a ogni nuovo fix dal GeolocationService. Al primo fix valido
+    // della sessione, esegue il flyTo one-shot. Sui fix successivi aggiorna
+    // solo le coordinate (no animazione, no strappo della camera).
+    effect(() => {
+      const position = this.geolocationService.position();
+      if (position) {
+        this.syncUserGpsLayers(position.lat, position.lng, position.accuracy);
+      }
+    });
+
     // TODO 2D: aggiungere effect per loading() ed error() quando ci
     //   sara' UI per stati di caricamento e di errore.
   }
@@ -134,12 +169,29 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.addUserMarker();
+
+    // Reset del flag auto-center: ogni volta che il componente viene
+    // ricostruito (es. dopo back navigation), permettiamo un nuovo
+    // flyTo al primo fix successivo.
+    this.hasAutoCentered = false;
 
     // Se il servizio ha già dati cachati (navigazione back), l'effect può
     // essere già stato eseguito prima che la mappa fosse pronta e aver
     // restituito early. Ridisegniamo esplicitamente dopo l'init.
     this.renderQuests(this.questService.quests());
+
+    // Stessa cosa per il GPS: se il GeolocationService ha gia' una
+    // posizione (probabile: il watch parte al login), sincronizziamo
+    // subito i layer utente. Senza questo, dovremmo aspettare il
+    // prossimo fix del watch (fino a 5s).
+    const currentPosition = this.geolocationService.position();
+    if (currentPosition) {
+      this.syncUserGpsLayers(
+        currentPosition.lat,
+        currentPosition.lng,
+        currentPosition.accuracy,
+      );
+    }
 
     // Carica dati dal repository. Gli effect ridisegneranno i marker.
     this.questService.loadQuests();
@@ -161,8 +213,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
       this.map = null;
     }
     this.userMarker = null;
+    this.uncertaintyCircle = null;
     this.primaryLayer = null;
     this.secondaryLayer = null;
+
+    // Nota: NON fermiamo il watch GPS. Il GeolocationService e' singleton
+    // e il watch resta attivo per tutta la sessione (decisione di progetto:
+    // "watch always on dopo login"). Lo stop avviene solo al logout, gestito
+    // dall'AppComponent.
   }
 
   // ----------------------------------------------------------------
@@ -357,13 +415,71 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   // ----------------------------------------------------------------
-  // User marker
+  // User GPS layers (marker + alone incertezza)
   // ----------------------------------------------------------------
 
-  private addUserMarker(): void {
+  /**
+   * Sincronizza marker user e cerchio di incertezza con la posizione GPS
+   * corrente. Idempotente: crea i layer la prima volta, aggiorna le
+   * coordinate alle chiamate successive.
+   *
+   * Al primo fix di sessione (hasAutoCentered === false) esegue il flyTo
+   * one-shot sulla posizione utente. I fix successivi NON ricentrano la
+   * mappa: l'utente che esplora la mappa non vuole essere strappato via
+   * a ogni aggiornamento GPS.
+   */
+  private syncUserGpsLayers(lat: number, lng: number, accuracy: number): void {
     if (!this.map) return;
 
-    const userIcon = L.divIcon({
+    const latLng: L.LatLngTuple = [lat, lng];
+
+    // 1. Marker user — crea la prima volta, aggiorna le successive.
+    if (this.userMarker === null) {
+      this.userMarker = L.marker(latLng, {
+        icon: this.createUserIcon(),
+        interactive: false,
+        keyboard: false,
+      }).addTo(this.map);
+    } else {
+      this.userMarker.setLatLng(latLng);
+    }
+
+    // 2. Alone di incertezza — visibile solo se accuracy supera la soglia.
+    //    Sotto soglia: il fix e' considerato "preciso", niente alone.
+    //    Sopra soglia: cerchio con raggio = accuracy (in metri, scala mappa).
+    if (accuracy > this.ACCURACY_THRESHOLD_METERS) {
+      if (this.uncertaintyCircle === null) {
+        this.uncertaintyCircle = L.circle(latLng, {
+          radius: accuracy,
+          color: 'rgba(184, 134, 11, 0.4)',
+          fillColor: 'rgba(184, 134, 11, 1)',
+          fillOpacity: 0.12,
+          weight: 1,
+          interactive: false,
+        }).addTo(this.map);
+      } else {
+        this.uncertaintyCircle.setLatLng(latLng);
+        this.uncertaintyCircle.setRadius(accuracy);
+      }
+    } else if (this.uncertaintyCircle !== null) {
+      // Accuracy migliorata sotto soglia: rimuovi il cerchio.
+      this.map.removeLayer(this.uncertaintyCircle);
+      this.uncertaintyCircle = null;
+    }
+
+    // 3. Auto-center one-shot al primo fix valido della sessione.
+    if (!this.hasAutoCentered) {
+      this.map.flyTo(latLng, this.USER_FOCUS_ZOOM, { duration: 1.5 });
+      this.hasAutoCentered = true;
+    }
+  }
+
+  /**
+   * Crea il L.DivIcon del marker user (dot ocra + pulse animato).
+   * Stili definiti in home.page.scss (.user-marker__dot, .user-marker__pulse).
+   */
+  private createUserIcon(): L.DivIcon {
+    return L.divIcon({
       className: 'user-marker-wrapper',
       html: `
         <div class="user-marker">
@@ -374,13 +490,5 @@ export class HomePage implements AfterViewInit, OnDestroy {
       iconSize: [48, 48],
       iconAnchor: [24, 24],
     });
-
-    this.userMarker = L.marker(this.MOCK_USER_POSITION, {
-      icon: userIcon,
-      interactive: false,
-      keyboard: false,
-    }).addTo(this.map);
-
-    // TODO 2B-bis: integrare Capacitor Geolocation per GPS reale.
   }
 }
