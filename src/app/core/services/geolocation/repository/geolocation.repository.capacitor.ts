@@ -10,32 +10,21 @@
 //  - enableHighAccuracy: true → GPS satellitare, accuracy bassa
 //  - timeout: 10s
 //  - maximumAge: 5s (riusiamo fix recenti per non drenare batteria)
+//
+// QUIRK DI @capacitor/geolocation SU WEB:
+// L'implementazione web del plugin NON espone checkPermissions() e
+// requestPermissions(): entrambi lanciano "Not implemented on web".
+// Su web i permessi sono gestiti inline dal browser durante getCurrentPosition
+// e watchPosition (il browser mostra il prompt al primo accesso, l'esito si
+// scopre solo dal callback success/error). Intercettiamo questi errori e
+// ritorniamo valori sensati ('prompt') cosi' il service procede al watch
+// senza crashare. Su native il comportamento e' invariato.
 
 import { Injectable } from '@angular/core';
 import { Geolocation, type Position as CapacitorPosition } from '@capacitor/geolocation';
 import type { Position, PermissionState, GeoError, GeoErrorCode } from '../geolocation types';
 import { GeolocationRepository, WatchCallback } from './geolocation.repository';
 
-/**
- * Opzioni di acquisizione applicate a getCurrentPosition e watchPosition.
- *
- *  enableHighAccuracy: true
- *    Forza l'uso del GPS satellitare quando disponibile, anziche'
- *    accontentarsi di localizzazione wifi/cell-tower. Necessario
- *    per ottenere accuracy nei 5-20m richiesti dalla feature di
- *    check-in geolocalizzato (raggi quest 5-80m).
- *
- *  timeout: 10000
- *    Dopo 10 secondi senza fix, Capacitor invoca la callback con
- *    errore TIMEOUT. Sufficientemente generoso da gestire i cold
- *    start del GPS in zone con cielo coperto.
- *
- *  maximumAge: 5000
- *    Accetta fix gia' acquisiti negli ultimi 5 secondi senza
- *    rifare la misurazione. Risparmia batteria sul watch continuo.
- *    5s e' anche ben sotto la soglia STALE_FIX del backend (60s),
- *    quindi un fix riusato passa sempre la validazione anti-cheat.
- */
 const POSITION_OPTIONS = {
   enableHighAccuracy: true,
   timeout: 10000,
@@ -49,9 +38,14 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
       const status = await Geolocation.checkPermissions();
       return mapPermissionState(status.location);
     } catch (err) {
-      // Su alcuni browser, checkPermissions non e' supportata.
-      // Restituiamo 'unknown' per non bloccare il flow: il consumer
-      // procedera' a requestPermissions, che funziona ovunque.
+      // Su web, checkPermissions non e' implementata e tira sempre eccezione.
+      // Ritorniamo 'prompt' per far procedere il bootstrap al watch, che e'
+      // l'unico modo su web di rilevare il vero stato del permesso.
+      if (isNotImplementedOnWeb(err)) {
+        return 'prompt';
+      }
+      // Altri errori (es. plugin not installed su versione vecchia): non
+      // bloccare il flow, fallback a unknown e lascia che il watch tenti.
       console.warn('[Geolocation] checkPermissions fallita, fallback a unknown', err);
       return 'unknown';
     }
@@ -62,6 +56,14 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
       const status = await Geolocation.requestPermissions();
       return mapPermissionState(status.location);
     } catch (err) {
+      // Su web, requestPermissions non e' implementata. Ritorniamo 'prompt'
+      // cosi' il service procede a chiamare watchPosition: e' quello che
+      // su web fa scattare il prompt browser nativo, e dai suoi callback
+      // (success o error PERMISSION_DENIED) il service aggiornera' il
+      // signal permission al valore corretto.
+      if (isNotImplementedOnWeb(err)) {
+        return 'prompt';
+      }
       throw mapError(err);
     }
   }
@@ -76,9 +78,6 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
   }
 
   async watchPosition(callback: WatchCallback): Promise<string> {
-    // Capacitor watchPosition firma: (options, callback) => Promise<string>
-    // La callback Capacitor ha la stessa shape della nostra
-    // (position | null, error | null), ma con tipi nativi.
     const watchId = await Geolocation.watchPosition(POSITION_OPTIONS, (cap, err) => {
       if (err) {
         callback(null, mapError(err));
@@ -87,8 +86,6 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
       if (cap) {
         callback(mapPosition(cap), null);
       }
-      // Se entrambi null, ignoriamo: edge case mai documentato ma
-      // difensivo per non propagare callback senza dato utile.
     });
 
     return watchId;
@@ -106,14 +103,25 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
 }
 
 // -----------------------------------------------------------------------------
-// Mapping nativi → dominio
+// Helpers
 // -----------------------------------------------------------------------------
 
 /**
- * Converte una CapacitorPosition (che a sua volta espone le coords nello
- * stesso shape dell'API W3C) nella nostra Position di dominio.
- *
- * accuracy e timestamp sono entrambi nativamente presenti, basta proiettare.
+ * Riconosce l'errore specifico lanciato dall'implementazione web di
+ * @capacitor/geolocation quando si chiamano metodi non supportati
+ * (checkPermissions, requestPermissions). Il messaggio nativo e' esattamente
+ * "Not implemented on web." ma usiamo un match case-insensitive contains
+ * per essere robusti a future variazioni minori del wording.
+ */
+function isNotImplementedOnWeb(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const message = (err as { message?: unknown }).message;
+  if (typeof message !== 'string') return false;
+  return message.toLowerCase().includes('not implemented on web');
+}
+
+/**
+ * Converte una CapacitorPosition nella nostra Position di dominio.
  */
 function mapPosition(cap: CapacitorPosition): Position {
   return {
