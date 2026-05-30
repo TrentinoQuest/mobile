@@ -36,9 +36,13 @@
         </ion-input>
       </ion-item>
       <ion-note id="email-error" color="danger" class="register-form__error">
-        @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. } @else if
-        (email.touched && email.errors?.['email']) { Inserisci un'email valida. } @else if
-        (emailAlreadyExists()) { Questa email è già registrata. }
+        @if (email.touched && email.errors?.['required']) {
+          L'email è obbligatoria.
+        } @else if (email.touched && email.errors?.['email']) {
+          Inserisci un'email valida.
+        } @else if (emailAlreadyExists()) {
+          Questa email è già registrata.
+        }
       </ion-note>
 
       <!-- Username -->
@@ -59,10 +63,15 @@
         </ion-input>
       </ion-item>
       <ion-note id="username-error" color="danger" class="register-form__error">
-        @if (username.touched && username.errors?.['required']) { L'username è obbligatorio. } @else
-        if (username.touched && username.errors?.['minlength']) { Almeno 3 caratteri. } @else if
-        (username.touched && username.errors?.['maxlength']) { Massimo 30 caratteri. } @else if
-        (usernameAlreadyTaken()) { Questo username è già in uso. }
+        @if (username.touched && username.errors?.['required']) {
+          L'username è obbligatorio.
+        } @else if (username.touched && username.errors?.['minlength']) {
+          Almeno 3 caratteri.
+        } @else if (username.touched && username.errors?.['maxlength']) {
+          Massimo 30 caratteri.
+        } @else if (usernameAlreadyTaken()) {
+          Questo username è già in uso.
+        }
       </ion-note>
 
       <!-- Password -->
