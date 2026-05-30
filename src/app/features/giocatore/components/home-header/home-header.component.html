@@ -39,10 +39,7 @@
       aria-valuemax="100"
       [attr.aria-label]="'Collezione completata al ' + progressPercent() + ' percento'"
     >
-      <div
-        class="home-header__chip-bar-fill"
-        [style.width.%]="progressPercent()"
-      ></div>
+      <div class="home-header__chip-bar-fill" [style.width.%]="progressPercent()"></div>
     </div>
 
     <!-- Punti totali (secondari rispetto alla collezione) -->

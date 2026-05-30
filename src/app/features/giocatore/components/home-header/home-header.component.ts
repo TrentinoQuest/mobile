@@ -87,7 +87,7 @@ export class HomeHeaderComponent {
   protected readonly total = this.questService.totalCount;
 
   /** Punti totali (somma dei pointsAwarded dei completion). */
-  protected readonly points = this.questService.totalCount;  ///Change
+  protected readonly points = this.questService.totalCount; ///Change
 
   /** Loading: usato per mostrare skeleton mentre i dati arrivano. */
   protected readonly loading = this.questService.loading;

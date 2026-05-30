@@ -8,9 +8,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="register-content">
-
   <div class="register-wrapper">
-
     <header class="register-intro">
       <h1 class="register-intro__title">Crea il tuo account</h1>
       <p class="register-intro__subtitle">
@@ -18,17 +16,13 @@
       </p>
     </header>
 
-    <form
-      class="register-form"
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      novalidate>
-
+    <form class="register-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <!-- Email -->
       <ion-item
         class="register-form__item"
         [class.register-form__item--invalid]="(email.touched && email.invalid) || emailAlreadyExists()"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Email</ion-label>
         <ion-input
           type="email"
@@ -37,24 +31,22 @@
           formControlName="email"
           placeholder="nome@esempio.it"
           [attr.aria-invalid]="(email.touched && email.invalid) || emailAlreadyExists() ? 'true' : null"
-          aria-describedby="email-error">
+          aria-describedby="email-error"
+        >
         </ion-input>
       </ion-item>
       <ion-note id="email-error" color="danger" class="register-form__error">
-        @if (email.touched && email.errors?.['required']) {
-          L'email è obbligatoria.
-        } @else if (email.touched && email.errors?.['email']) {
-          Inserisci un'email valida.
-        } @else if (emailAlreadyExists()) {
-          Questa email è già registrata.
-        }
+        @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. } @else if
+        (email.touched && email.errors?.['email']) { Inserisci un'email valida. } @else if
+        (emailAlreadyExists()) { Questa email è già registrata. }
       </ion-note>
 
       <!-- Username -->
       <ion-item
         class="register-form__item"
         [class.register-form__item--invalid]="(username.touched && username.invalid) || usernameAlreadyTaken()"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Username</ion-label>
         <ion-input
           type="text"
@@ -62,26 +54,23 @@
           formControlName="username"
           placeholder="il-tuo-username"
           [attr.aria-invalid]="(username.touched && username.invalid) || usernameAlreadyTaken() ? 'true' : null"
-          aria-describedby="username-error">
+          aria-describedby="username-error"
+        >
         </ion-input>
       </ion-item>
       <ion-note id="username-error" color="danger" class="register-form__error">
-        @if (username.touched && username.errors?.['required']) {
-          L'username è obbligatorio.
-        } @else if (username.touched && username.errors?.['minlength']) {
-          Almeno 3 caratteri.
-        } @else if (username.touched && username.errors?.['maxlength']) {
-          Massimo 30 caratteri.
-        } @else if (usernameAlreadyTaken()) {
-          Questo username è già in uso.
-        }
+        @if (username.touched && username.errors?.['required']) { L'username è obbligatorio. } @else
+        if (username.touched && username.errors?.['minlength']) { Almeno 3 caratteri. } @else if
+        (username.touched && username.errors?.['maxlength']) { Massimo 30 caratteri. } @else if
+        (usernameAlreadyTaken()) { Questo username è già in uso. }
       </ion-note>
 
       <!-- Password -->
       <ion-item
         class="register-form__item"
         [class.register-form__item--invalid]="password.touched && password.invalid"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Password</ion-label>
         <ion-input
           [type]="passwordVisible() ? 'text' : 'password'"
@@ -89,7 +78,8 @@
           formControlName="password"
           placeholder="Almeno 8 caratteri"
           [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
-          aria-describedby="password-error">
+          aria-describedby="password-error"
+        >
         </ion-input>
         <ion-button
           slot="end"
@@ -98,26 +88,23 @@
           type="button"
           class="register-form__visibility-toggle"
           (click)="togglePasswordVisibility()"
-          [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'">
-          <ion-icon
-            slot="icon-only"
-            [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'">
+          [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'"
+        >
+          <ion-icon slot="icon-only" [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'">
           </ion-icon>
         </ion-button>
       </ion-item>
       <ion-note id="password-error" color="danger" class="register-form__error">
-        @if (password.touched && password.errors?.['required']) {
-          La password è obbligatoria.
-        } @else if (password.touched && password.errors?.['minlength']) {
-          Almeno 8 caratteri.
-        }
+        @if (password.touched && password.errors?.['required']) { La password è obbligatoria. }
+        @else if (password.touched && password.errors?.['minlength']) { Almeno 8 caratteri. }
       </ion-note>
 
       <!-- Conferma Password -->
       <ion-item
         class="register-form__item"
         [class.register-form__item--invalid]="(confirmPassword.touched && confirmPassword.invalid) || passwordsMismatch"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Conferma password</ion-label>
         <ion-input
           [type]="confirmPasswordVisible() ? 'text' : 'password'"
@@ -125,7 +112,8 @@
           formControlName="confirmPassword"
           placeholder="Ripeti la password"
           [attr.aria-invalid]="(confirmPassword.touched && confirmPassword.invalid) || passwordsMismatch ? 'true' : null"
-          aria-describedby="confirm-password-error">
+          aria-describedby="confirm-password-error"
+        >
         </ion-input>
         <ion-button
           slot="end"
@@ -134,19 +122,18 @@
           type="button"
           class="register-form__visibility-toggle"
           (click)="toggleConfirmPasswordVisibility()"
-          [attr.aria-label]="confirmPasswordVisible() ? 'Nascondi password' : 'Mostra password'">
+          [attr.aria-label]="confirmPasswordVisible() ? 'Nascondi password' : 'Mostra password'"
+        >
           <ion-icon
             slot="icon-only"
-            [name]="confirmPasswordVisible() ? 'eye-off-outline' : 'eye-outline'">
+            [name]="confirmPasswordVisible() ? 'eye-off-outline' : 'eye-outline'"
+          >
           </ion-icon>
         </ion-button>
       </ion-item>
       <ion-note id="confirm-password-error" color="danger" class="register-form__error">
-        @if (confirmPassword.touched && confirmPassword.errors?.['required']) {
-          Conferma la password.
-        } @else if (passwordsMismatch) {
-          Le password non coincidono.
-        }
+        @if (confirmPassword.touched && confirmPassword.errors?.['required']) { Conferma la
+        password. } @else if (passwordsMismatch) { Le password non coincidono. }
       </ion-note>
 
       <!-- Submit -->
@@ -157,15 +144,12 @@
         expand="block"
         size="default"
         class="register-form__submit"
-        [disabled]="submitting()">
+        [disabled]="submitting()"
+      >
         @if (submitting()) {
-          <ion-spinner name="crescent" slot="start"></ion-spinner>
-          Registrazione in corso...
-        } @else {
-          Registrati
-        }
+        <ion-spinner name="crescent" slot="start"></ion-spinner>
+        Registrazione in corso... } @else { Registrati }
       </ion-button>
-
     </form>
 
     <!-- Link al login -->
@@ -173,7 +157,5 @@
       Hai già un account?
       <a routerLink="/auth/login" class="register-login-prompt__link">Accedi</a>
     </p>
-
   </div>
-
 </ion-content>

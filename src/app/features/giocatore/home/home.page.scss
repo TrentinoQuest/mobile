@@ -51,19 +51,17 @@
     font-family: var(--tq-font-sans);
   }
 
-
-/* ----------------------------------------------------------------
+  /* ----------------------------------------------------------------
  * Z-index dei controlli Leaflet "ammorbiditi" per non superare
  * la tab bar. NON tocchiamo gli z-index dei pane interni della
  * mappa (tile/marker/popup): sono regolati da Leaflet stesso
  * e ogni override rompe l'ordine di rendering.
  * ---------------------------------------------------------------- */
-::ng-deep .leaflet-top,
-::ng-deep .leaflet-bottom,
-::ng-deep .leaflet-control {
-  z-index: 1 !important;
-}
-
+  ::ng-deep .leaflet-top,
+  ::ng-deep .leaflet-bottom,
+  ::ng-deep .leaflet-control {
+    z-index: 1 !important;
+  }
 
   /* ----------------------------------------------------------------
    * Attribution control: posizionata in basso a sinistra, discreta,
@@ -159,7 +157,6 @@
   }
 }
 
-
 /* ============================================================================
  * HomePage — Sotto-step 2C
  * ============================================================================
@@ -249,7 +246,7 @@
  * ========================================================================== */
 
 .home {
-  tq-permission-banner {
+  app-permission-banner {
     position: absolute;
     top: 0;
     left: 0;

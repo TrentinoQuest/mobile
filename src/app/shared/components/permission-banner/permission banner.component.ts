@@ -15,15 +15,11 @@ import { IonButton, IonIcon, IonNote, ToastController } from '@ionic/angular/sta
 import { addIcons } from 'ionicons';
 import { locationOutline, settingsOutline } from 'ionicons/icons';
 import { Capacitor } from '@capacitor/core';
-import {
-  NativeSettings,
-  AndroidSettings,
-  IOSSettings,
-} from 'capacitor-native-settings';
+import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
 import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
 
 @Component({
-  selector: 'tq-permission-banner',
+  selector: 'app-permission-banner',
   standalone: true,
   imports: [IonButton, IonIcon, IonNote],
   templateUrl: './permission-banner.component.html',
@@ -46,9 +42,7 @@ export class PermissionBannerComponent {
    * (es. utente concede via impostazioni e torna nell'app: il watch
    * riparte, permission diventa 'granted', il banner sparisce).
    */
-  protected readonly isVisible = computed(
-    () => this.geolocationService.permission() === 'denied',
-  );
+  protected readonly isVisible = computed(() => this.geolocationService.permission() === 'denied');
 
   constructor() {
     addIcons({ locationOutline, settingsOutline });

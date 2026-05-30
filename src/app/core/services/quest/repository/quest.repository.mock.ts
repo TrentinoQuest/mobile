@@ -16,7 +16,7 @@ import {
   SecondaryQuest,
   Collectible,
   CollectibleRarity,
-  CollectibleEntry
+  CollectibleEntry,
 } from '../quest.types';
 
 /**
@@ -66,12 +66,7 @@ export class MockQuestRepository extends QuestRepository {
     if (filter && filter.radiusMeters > 0) {
       result = result.filter((q) => {
         const pos = this.getQuestPosition(q);
-        const distance = this.haversineMeters(
-          filter.lat,
-          filter.lng,
-          pos.lat,
-          pos.lng,
-        );
+        const distance = this.haversineMeters(filter.lat, filter.lng, pos.lat, pos.lng);
         return distance <= filter.radiusMeters;
       });
     }
@@ -91,14 +86,10 @@ export class MockQuestRepository extends QuestRepository {
     return of({ ...quest }).pipe(delay(this.MOCK_LATENCY_MS));
   }
 
-  override getCompletions(
-    limit = 20,
-    offset = 0,
-  ): Observable<CompletionEntry[]> {
+  override getCompletions(limit = 20, offset = 0): Observable<CompletionEntry[]> {
     // Ordina per data decrescente (come da spec OpenAPI).
     const sorted = [...this.completions].sort(
-      (a, b) =>
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
     );
     const paged = sorted.slice(offset, offset + limit);
 
@@ -116,10 +107,7 @@ export class MockQuestRepository extends QuestRepository {
     return of(entries).pipe(delay(this.MOCK_LATENCY_MS));
   }
 
-  override checkIn(
-    questId: string,
-    body: CheckInRequest,
-  ): Observable<CheckInResponse> {
+  override checkIn(questId: string, body: CheckInRequest): Observable<CheckInResponse> {
     const quest = this.quests.find((q) => q.id === questId);
 
     if (!quest) {
@@ -127,10 +115,7 @@ export class MockQuestRepository extends QuestRepository {
     }
     if (quest.type !== QuestType.SECONDARY) {
       return throwError(
-        () =>
-          new Error(
-            `Check-in non valido: la quest ${questId} non e' secondary`,
-          ),
+        () => new Error(`Check-in non valido: la quest ${questId} non e' secondary`),
       );
     }
     if (this.isAlreadyCompleted(questId)) {
@@ -148,9 +133,7 @@ export class MockQuestRepository extends QuestRepository {
     if (distance > secondary.checkInRadiusMeters) {
       return throwError(
         () =>
-          new Error(
-            `Fuori raggio: ${Math.round(distance)}m / ${secondary.checkInRadiusMeters}m`,
-          ),
+          new Error(`Fuori raggio: ${Math.round(distance)}m / ${secondary.checkInRadiusMeters}m`),
       );
     }
 
@@ -175,20 +158,14 @@ export class MockQuestRepository extends QuestRepository {
     return of(response).pipe(delay(this.MOCK_LATENCY_MS));
   }
 
-  override scan(
-    questId: string,
-    body: ScanQrRequest,
-  ): Observable<ScanQrResponse> {
+  override scan(questId: string, body: ScanQrRequest): Observable<ScanQrResponse> {
     const quest = this.quests.find((q) => q.id === questId);
 
     if (!quest) {
       return throwError(() => new Error(`Quest non trovata: ${questId}`));
     }
     if (quest.type !== QuestType.PRIMARY) {
-      return throwError(
-        () =>
-          new Error(`Scan non valido: la quest ${questId} non e' primary`),
-      );
+      return throwError(() => new Error(`Scan non valido: la quest ${questId} non e' primary`));
     }
     if (this.isAlreadyCompleted(questId)) {
       return throwError(() => new Error(`Quest gia' completata: ${questId}`));
@@ -204,10 +181,7 @@ export class MockQuestRepository extends QuestRepository {
 
     if (distance > primary.searchRadiusMeters) {
       return throwError(
-        () =>
-          new Error(
-            `Fuori raggio: ${Math.round(distance)}m / ${primary.searchRadiusMeters}m`,
-          ),
+        () => new Error(`Fuori raggio: ${Math.round(distance)}m / ${primary.searchRadiusMeters}m`),
       );
     }
 
@@ -228,14 +202,9 @@ export class MockQuestRepository extends QuestRepository {
     this.playerTotalPoints += completion.pointsAwarded;
 
     // Recupera il collectible associato (mock: sempre disponibile).
-    const collectible = this.collectibles.find(
-      (c) => c.id === primary.collectibleId,
-    );
+    const collectible = this.collectibles.find((c) => c.id === primary.collectibleId);
     if (!collectible) {
-      return throwError(
-        () =>
-          new Error(`Collectible non trovato per quest primary ${questId}`),
-      );
+      return throwError(() => new Error(`Collectible non trovato per quest primary ${questId}`));
     }
 
     const response: ScanQrResponse = {
@@ -262,12 +231,7 @@ export class MockQuestRepository extends QuestRepository {
   }
 
   /** Distanza Haversine tra due punti in metri. */
-  private haversineMeters(
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number,
-  ): number {
+  private haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371000; // raggio terrestre in metri
     const toRad = (deg: number) => (deg * Math.PI) / 180;
     const dLat = toRad(lat2 - lat1);
@@ -301,7 +265,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'col-leone-san-marco',
       name: 'Leone di San Marco',
       description:
-        "Scultura sul portale della cattedrale, simbolo dei legami " +
+        'Scultura sul portale della cattedrale, simbolo dei legami ' +
         'veneziani di Trento medievale.',
       imageUrl: '/assets/collectibles/leone-san-marco.png',
       rarity: CollectibleRarity.RARE,
@@ -310,8 +274,7 @@ export class MockQuestRepository extends QuestRepository {
     {
       id: 'col-stemma-buonconsiglio',
       name: 'Stemma del Buonconsiglio',
-      description:
-        'Lo stemma dei principi vescovi che governarono Trento per secoli.',
+      description: 'Lo stemma dei principi vescovi che governarono Trento per secoli.',
       imageUrl: '/assets/collectibles/stemma-buonconsiglio.png',
       rarity: CollectibleRarity.UNCOMMON,
       createdAt: '2025-01-15T10:00:00Z',
@@ -319,8 +282,7 @@ export class MockQuestRepository extends QuestRepository {
     {
       id: 'col-aquila-battisti',
       name: 'Aquila di Cesare Battisti',
-      description:
-        'Simbolo del mausoleo dedicato al patriota trentino.',
+      description: 'Simbolo del mausoleo dedicato al patriota trentino.',
       imageUrl: '/assets/collectibles/aquila-battisti.png',
       rarity: CollectibleRarity.LEGENDARY,
       createdAt: '2025-01-15T10:00:00Z',
@@ -336,7 +298,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-duomo',
       name: 'Cattedrale di San Vigilio',
       description:
-        'La cattedrale romanico-gotica simbolo della citta\'. Cerca il ' +
+        "La cattedrale romanico-gotica simbolo della citta'. Cerca il " +
         'leone di San Marco scolpito sul portale.',
       type: QuestType.PRIMARY,
       status: QuestStatus.ACTIVE,
@@ -350,8 +312,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-buonconsiglio',
       name: 'Castello del Buonconsiglio',
       description:
-        'Residenza dei principi vescovi. Affreschi, torri e secoli di ' +
-        'potere temporale.',
+        'Residenza dei principi vescovi. Affreschi, torri e secoli di ' + 'potere temporale.',
       type: QuestType.PRIMARY,
       status: QuestStatus.ACTIVE,
       basePoints: 80,
@@ -364,8 +325,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-mausoleo',
       name: 'Mausoleo di Cesare Battisti',
       description:
-        'Monumento funebre eretto in cima al Doss. Vista sull\'intera ' +
-        "Valle dell'Adige.",
+        "Monumento funebre eretto in cima al Doss. Vista sull'intera " + "Valle dell'Adige.",
       type: QuestType.PRIMARY,
       status: QuestStatus.ACTIVE,
       basePoints: 60,
@@ -382,8 +342,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-fontana-nettuno',
       name: 'Fontana del Nettuno',
       description:
-        'Il dio del mare al centro di una citta\' di montagna. Settecento ' +
-        'in piazza Duomo.',
+        "Il dio del mare al centro di una citta' di montagna. Settecento " + 'in piazza Duomo.',
       type: QuestType.SECONDARY,
       status: QuestStatus.ACTIVE,
       basePoints: 30,
@@ -395,8 +354,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-via-belenzani',
       name: 'Via Belenzani',
       description:
-        'La via dei palazzi affrescati. Ogni facciata e\' una pagina di ' +
-        'storia rinascimentale.',
+        "La via dei palazzi affrescati. Ogni facciata e' una pagina di " + 'storia rinascimentale.',
       type: QuestType.SECONDARY,
       status: QuestStatus.ACTIVE,
       basePoints: 40,
@@ -407,8 +365,7 @@ export class MockQuestRepository extends QuestRepository {
     {
       id: 'q-torre-vanga',
       name: 'Torre Vanga',
-      description:
-        'Antica torre di guardia medievale, oggi sede di mostre temporanee.',
+      description: 'Antica torre di guardia medievale, oggi sede di mostre temporanee.',
       type: QuestType.SECONDARY,
       status: QuestStatus.ACTIVE,
       basePoints: 45,
@@ -420,8 +377,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-mercato-vigilio',
       name: 'Bottega del Casaro',
       description:
-        'Piccola bottega storica vicino al mercato. Trentingrana stagionato ' +
-        '24 mesi.',
+        'Piccola bottega storica vicino al mercato. Trentingrana stagionato ' + '24 mesi.',
       type: QuestType.SECONDARY,
       status: QuestStatus.ACTIVE,
       basePoints: 25,
@@ -433,7 +389,7 @@ export class MockQuestRepository extends QuestRepository {
       id: 'q-belvedere-doss',
       name: 'Belvedere del Doss',
       description:
-        'Il punto panoramico piu\' classico. All\'alba la luce taglia ' +
+        "Il punto panoramico piu' classico. All'alba la luce taglia " +
         "orizzontalmente la citta' sottostante.",
       type: QuestType.SECONDARY,
       status: QuestStatus.ACTIVE,

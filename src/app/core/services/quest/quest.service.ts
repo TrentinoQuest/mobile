@@ -102,16 +102,12 @@ export class QuestService {
 
   /** Computed: solo le primary quest (per render come cerchi sulla mappa). */
   readonly primaryQuests = computed<PrimaryQuest[]>(() =>
-    this._quests().filter(
-      (q): q is PrimaryQuest => q.type === QuestType.PRIMARY,
-    ),
+    this._quests().filter((q): q is PrimaryQuest => q.type === QuestType.PRIMARY),
   );
 
   /** Computed: solo le secondary quest (per render come marker puntuali). */
   readonly secondaryQuests = computed<SecondaryQuest[]>(() =>
-    this._quests().filter(
-      (q): q is SecondaryQuest => q.type === QuestType.SECONDARY,
-    ),
+    this._quests().filter((q): q is SecondaryQuest => q.type === QuestType.SECONDARY),
   );
 
   // ----------------------------------------------------------------
@@ -334,7 +330,7 @@ export class QuestService {
       case 400:
         return `Richiesta non valida (${context})`;
       case 401:
-        return 'Sessione scaduta. Effettua di nuovo l\'accesso.';
+        return "Sessione scaduta. Effettua di nuovo l'accesso.";
       case 403:
         return 'Non hai i permessi per questa operazione.';
       case 404:
@@ -362,9 +358,9 @@ export class QuestService {
 
 const ERROR_CODE_MESSAGES: Record<string, string> = {
   // --- Quest completion ---
-  QUEST_ALREADY_COMPLETED: 'Hai gia\' scoperto questa quest.',
-  QUEST_NOT_FOUND: 'Questa quest non esiste piu\'.',
-  QUEST_INACTIVE: 'Questa quest non e\' attualmente disponibile.',
+  QUEST_ALREADY_COMPLETED: "Hai gia' scoperto questa quest.",
+  QUEST_NOT_FOUND: "Questa quest non esiste piu'.",
+  QUEST_INACTIVE: "Questa quest non e' attualmente disponibile.",
 
   // --- GPS / posizione ---
   OUT_OF_RANGE: 'Sei troppo lontano. Avvicinati al luogo della quest.',
@@ -374,17 +370,17 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
   GPS_REQUIRED: 'Serve la tua posizione per completare questa quest.',
 
   // --- Anti-cheat GPS (shared-types v0.5.0+) ---
-  OUT_OF_RANGE_ACCURACY: 'GPS troppo impreciso. Spostati all\'aperto e riprova.',
-  STALE_FIX: 'La posizione GPS e\' troppo vecchia. Aspetta un nuovo fix e riprova.',
+  OUT_OF_RANGE_ACCURACY: "GPS troppo impreciso. Spostati all'aperto e riprova.",
+  STALE_FIX: "La posizione GPS e' troppo vecchia. Aspetta un nuovo fix e riprova.",
 
   // --- QR token ---
-  INVALID_QR_TOKEN: 'Il QR scansionato non e\' valido per questa quest.',
-  QR_EXPIRED: 'Il QR e\' scaduto o e\' stato sostituito.',
+  INVALID_QR_TOKEN: "Il QR scansionato non e' valido per questa quest.",
+  QR_EXPIRED: "Il QR e' scaduto o e' stato sostituito.",
   QR_QUEST_MISMATCH: 'Il QR non corrisponde a questa quest.',
 
   // --- Auth ---
-  TOKEN_EXPIRED: 'Sessione scaduta. Effettua di nuovo l\'accesso.',
-  REFRESH_TOKEN_INVALID: 'Sessione non valida. Effettua di nuovo l\'accesso.',
+  TOKEN_EXPIRED: "Sessione scaduta. Effettua di nuovo l'accesso.",
+  REFRESH_TOKEN_INVALID: "Sessione non valida. Effettua di nuovo l'accesso.",
 
   // --- Generic validation ---
   VALIDATION_ERROR: 'Dati non validi.',

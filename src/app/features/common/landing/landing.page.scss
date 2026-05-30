@@ -88,7 +88,9 @@
   border-radius: var(--landing-card-radius);
   // Shadow piu morbida e meno pronunciata su tema scuro
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out;
 
   &:active {
     transform: scale(0.98);
@@ -169,11 +171,11 @@
   &__text {
     margin: 0;
     font-size: 0.95rem;
-    color: var(--ion-color-medium);  // grigio chiaro su tema scuro
+    color: var(--ion-color-medium); // grigio chiaro su tema scuro
   }
 
   &__link {
-    color: var(--ion-color-primary-tint);  // giallo piu chiaro per contrasto
+    color: var(--ion-color-primary-tint); // giallo piu chiaro per contrasto
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 0.15em;

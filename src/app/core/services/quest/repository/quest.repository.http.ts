@@ -60,34 +60,16 @@ export class HttpQuestRepository extends QuestRepository {
     return this.http.get<AnyQuest>(`${this.apiUrl}/quests/${questId}`);
   }
 
-  override getCompletions(
-    limit = 20,
-    offset = 0,
-  ): Observable<CompletionEntry[]> {
+  override getCompletions(limit = 20, offset = 0): Observable<CompletionEntry[]> {
     const params = new HttpParams().set('limit', limit).set('offset', offset);
-    return this.http.get<CompletionEntry[]>(
-      `${this.apiUrl}/player/completions`,
-      { params },
-    );
+    return this.http.get<CompletionEntry[]>(`${this.apiUrl}/player/completions`, { params });
   }
 
-  override checkIn(
-    questId: string,
-    body: CheckInRequest,
-  ): Observable<CheckInResponse> {
-    return this.http.post<CheckInResponse>(
-      `${this.apiUrl}/quests/${questId}/check-in`,
-      body,
-    );
+  override checkIn(questId: string, body: CheckInRequest): Observable<CheckInResponse> {
+    return this.http.post<CheckInResponse>(`${this.apiUrl}/quests/${questId}/check-in`, body);
   }
 
-  override scan(
-    questId: string,
-    body: ScanQrRequest,
-  ): Observable<ScanQrResponse> {
-    return this.http.post<ScanQrResponse>(
-      `${this.apiUrl}/quests/${questId}/scan`,
-      body,
-    );
+  override scan(questId: string, body: ScanQrRequest): Observable<ScanQrResponse> {
+    return this.http.post<ScanQrResponse>(`${this.apiUrl}/quests/${questId}/scan`, body);
   }
 }

@@ -13,6 +13,6 @@ export const environment = {
    */
   healthCheckUrl: 'https://api.trentinoquest.example/health',
 
-    // In produzione usiamo sempre il backend reale.
+  // In produzione usiamo sempre il backend reale.
   questRepository: 'http' as 'mock' | 'http',
 };

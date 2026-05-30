@@ -9,8 +9,8 @@ describe('QuestPopupComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ QuestPopupComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [QuestPopupComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QuestPopupComponent);

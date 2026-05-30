@@ -84,10 +84,7 @@ export type PlayerQuestStatus = 'discovered' | 'available' | 'locked';
  * @param completions lista dei completion del giocatore corrente
  * @returns lo stato per la UI (colore marker, icona, ecc.)
  */
-export function derivePlayerStatus(
-  quest: AnyQuest,
-  completions: Completion[],
-): PlayerQuestStatus {
+export function derivePlayerStatus(quest: AnyQuest, completions: Completion[]): PlayerQuestStatus {
   // Discovered: c'e' un completion con questo questId.
   const isCompleted = completions.some((c) => c.questId === quest.id);
   if (isCompleted) return 'discovered';

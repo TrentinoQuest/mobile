@@ -88,11 +88,7 @@
     font-style: italic;
     color: var(--tq-bone);
     /* Sottile decorazione ocra per dare carattere al nome. */
-    background: linear-gradient(
-      to bottom,
-      transparent 60%,
-      rgba(var(--tq-ocra-rgb), 0.18) 60%
-    );
+    background: linear-gradient(to bottom, transparent 60%, rgba(var(--tq-ocra-rgb), 0.18) 60%);
   }
 }
 
@@ -156,11 +152,7 @@
 .home-header__chip-bar-fill {
   /* Fill ocra che si espande con transition al cambio di width. */
   height: 100%;
-  background: linear-gradient(
-    to right,
-    var(--tq-ocra) 0%,
-    var(--tq-ocra-tint) 100%
-  );
+  background: linear-gradient(to right, var(--tq-ocra) 0%, var(--tq-ocra-tint) 100%);
   border-radius: var(--tq-radius-pill);
 
   /* Transition lenta e fluida quando il valore cambia (es. dopo scan). */
@@ -199,6 +191,11 @@
  * ============================================================ */
 
 @keyframes home-header-skeleton {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }

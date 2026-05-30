@@ -32,7 +32,7 @@
 
 .offline-icon {
   font-size: var(--offline-icon-size);
-  color: var(--ion-color-medium);  // grigio chiaro su scuro
+  color: var(--ion-color-medium); // grigio chiaro su scuro
   margin-bottom: 1.25rem;
 }
 
@@ -40,7 +40,7 @@
   margin: 0 0 0.75rem;
   font-size: var(--offline-title-size);
   font-weight: 800;
-  color: var(--ion-text-color);  // bianco-attenuato su scuro
+  color: var(--ion-text-color); // bianco-attenuato su scuro
   letter-spacing: -0.02em;
 }
 
@@ -48,7 +48,7 @@
   margin: 0 0 2rem;
   font-size: var(--offline-message-size);
   line-height: 1.5;
-  color: var(--ion-color-medium);  // grigio chiaro su scuro
+  color: var(--ion-color-medium); // grigio chiaro su scuro
 }
 
 .offline-retry {

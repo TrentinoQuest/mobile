@@ -16,9 +16,9 @@
 // =============================================================================
 :root {
   /* Famiglie tipografiche */
-  --tq-font-sans:  'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --tq-font-sans: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --tq-font-serif: 'Playfair Display', Georgia, serif;
-  --tq-font-mono:  'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --tq-font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
 
   /* Scala di spaziatura (base 4 px) */
   --tq-space-1: 4px;
@@ -31,8 +31,8 @@
   --tq-space-8: 32px;
 
   /* Raggi */
-  --tq-radius-sm:   4px;
-  --tq-radius-md:   8px;
+  --tq-radius-sm: 4px;
+  --tq-radius-md: 8px;
   --tq-radius-pill: 999px;
 
   /* Durate animazioni */
@@ -67,12 +67,12 @@
   --tq-text-disabled: rgba(224, 224, 224, 0.35);
 
   /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
-  --tq-bg-rgb:   18, 18, 18;
+  --tq-bg-rgb: 18, 18, 18;
 
   /** Ocra desaturato: leggibile su sfondo scuro senza abbagliare **/
   --tq-ocra: #b8860b;
-  --tq-ocra-rgb:   184, 134, 11;
-  --tq-ocra-tint:  #c9950d;
+  --tq-ocra-rgb: 184, 134, 11;
+  --tq-ocra-tint: #c9950d;
   --tq-ocra-shade: #a2770a;
   /** Verde bosco schiarito: contrasto sufficiente su sfondo scuro **/
   --tq-forest: #5a8a3a;
@@ -195,7 +195,7 @@
   --ion-color-step-900: #dadada;
   --ion-color-step-950: #e5e5e5;
 
-    /* ------------------------------------------------------------------------
+  /* ------------------------------------------------------------------------
  * Z-INDEX — gerarchia degli overlay
  * ------------------------------------------------------------------------
  * Valori alti per battere lo z-index interno di Leaflet (.leaflet-pane
@@ -211,12 +211,12 @@
  * - toast:         toast notification, sempre in cima
  * ------------------------------------------------------------------------ */
 
---tq-z-map:          0;
---tq-z-map-overlay:  1000;
---tq-z-sheet:        1010;
---tq-z-tab-bar:      1020;
---tq-z-modal:        1030;
---tq-z-toast:        1040;
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
 }
 
 // =============================================================================
@@ -243,12 +243,12 @@
   --tq-text-disabled: rgba(26, 24, 21, 0.35);
 
   /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
-  --tq-bg-rgb:   250, 247, 240;
+  --tq-bg-rgb: 250, 247, 240;
 
   /** Ocra piu' scuro: contrasto AA garantito su sfondo bianco **/
   --tq-ocra: #8b6508;
-  --tq-ocra-rgb:   139, 101, 8;
-  --tq-ocra-tint:  #9a7219;
+  --tq-ocra-rgb: 139, 101, 8;
+  --tq-ocra-tint: #9a7219;
   --tq-ocra-shade: #7a5a07;
   /** Verde bosco piu' scuro: contrasto AA garantito su sfondo bianco **/
   --tq-forest: #4a7a2c;
@@ -384,11 +384,10 @@
  * - toast:         toast notification, sempre in cima
  * ------------------------------------------------------------------------ */
 
---tq-z-map:          0;
---tq-z-map-overlay:  1000;
---tq-z-sheet:        1010;
---tq-z-tab-bar:      1020;
---tq-z-modal:        1030;
---tq-z-toast:        1040;
-
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
 }

@@ -37,7 +37,6 @@
 /* dark.system.css disabilitato: il tema e' gestito via data-theme da ThemeService */
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
-
 /* ===========================================================
  * Leaflet base styles.
  * Obbligatorio per rendering corretto di tile, marker e controlli mappa.
@@ -47,7 +46,6 @@
  * ===========================================================
  */
 @import 'leaflet/dist/leaflet.css';
-
 
 /* ============================================================================
  * Keyframes globali
@@ -102,7 +100,6 @@
  * scopate non li raggiungono.
  * ========================================================================== */
 
-
 /* ============================================================================
  * QUEST MARKERS
  * ============================================================================
@@ -148,7 +145,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #F4EBDC;
+  border: 2px solid #f4ebdc;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.3),
     0 4px 12px -2px rgba(0, 0, 0, 0.5);
@@ -161,12 +158,12 @@
 }
 
 .quest-marker--available .quest-marker__pin {
-  background: #C8930F;
+  background: #c8930f;
   color: rgba(0, 0, 0, 0.75);
 }
 
 .quest-marker--discovered .quest-marker__pin {
-  background: #6BA046;
+  background: #6ba046;
   color: rgba(0, 0, 0, 0.75);
 }
 .quest-marker--discovered {
@@ -182,7 +179,6 @@
   opacity: 0.85;
 }
 
-
 /* ============================================================================
  * LEAFLET POPUP — frame esterno warm-dark
  * ============================================================================
@@ -193,8 +189,8 @@
  * ========================================================================== */
 
 .leaflet-popup-content-wrapper {
-  background: #1A1815 !important;
-  color: #F4EBDC !important;
+  background: #1a1815 !important;
+  color: #f4ebdc !important;
   border-radius: 12px !important;
   box-shadow:
     0 8px 24px -8px rgba(0, 0, 0, 0.6),
@@ -204,12 +200,16 @@
 
 .leaflet-popup-content {
   margin: 12px 16px !important;
-  font-family: 'Geist', -apple-system, system-ui, sans-serif !important;
+  font-family:
+    'Geist',
+    -apple-system,
+    system-ui,
+    sans-serif !important;
   line-height: 1.45 !important;
 }
 
 .leaflet-popup-tip {
-  background: #1A1815 !important;
+  background: #1a1815 !important;
 }
 
 .leaflet-popup-close-button {
@@ -218,6 +218,6 @@
   padding: 6px 8px !important;
 
   &:hover {
-    color: #C8930F !important;
+    color: #c8930f !important;
   }
 }

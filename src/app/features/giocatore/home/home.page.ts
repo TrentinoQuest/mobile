@@ -100,10 +100,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
    * Traccia quale popup ha quale componente Angular dietro, e permette
    * di distruggere il componente al close per evitare memory leak.
    */
-  private readonly activePopupComponents = new Map<
-    string,
-    ComponentRef<QuestPopupComponent>
-  >();
+  private readonly activePopupComponents = new Map<string, ComponentRef<QuestPopupComponent>>();
 
   // ----------------------------------------------------------------
   // Costanti di configurazione mappa
@@ -118,8 +115,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
     [45.6, 10.4],
     [46.6, 12.0],
   ];
-  private readonly TILE_URL =
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  private readonly TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
   private readonly TILE_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
     '&copy; <a href="https://carto.com/attributions">CARTO</a>';
@@ -186,11 +182,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // prossimo fix del watch (fino a 5s).
     const currentPosition = this.geolocationService.position();
     if (currentPosition) {
-      this.syncUserGpsLayers(
-        currentPosition.lat,
-        currentPosition.lng,
-        currentPosition.accuracy,
-      );
+      this.syncUserGpsLayers(currentPosition.lat, currentPosition.lng, currentPosition.accuracy);
     }
 
     // Carica dati dal repository. Gli effect ridisegneranno i marker.
@@ -289,11 +281,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // Colore del cerchio in base allo stato giocatore.
     // discovered -> forest, locked -> muted, available -> ocra
     const fillColor =
-      playerStatus === 'discovered'
-        ? '#6BA046'
-        : playerStatus === 'locked'
-          ? '#666'
-          : '#C8930F';
+      playerStatus === 'discovered' ? '#6BA046' : playerStatus === 'locked' ? '#666' : '#C8930F';
 
     const circle = L.circle([quest.searchArea.lat, quest.searchArea.lng], {
       radius: quest.searchRadiusMeters,

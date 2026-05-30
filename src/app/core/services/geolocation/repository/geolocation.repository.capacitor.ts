@@ -97,7 +97,7 @@ export class GeolocationRepositoryCapacitor extends GeolocationRepository {
     } catch (err) {
       // Idempotenza richiesta dal contratto: errori su clearWatch
       // (es. id sconosciuto) non devono propagare.
-      console.warn('[Geolocation] clearWatch fallita (probabilmente id gia\' rimosso)', err);
+      console.warn("[Geolocation] clearWatch fallita (probabilmente id gia' rimosso)", err);
     }
   }
 }
@@ -182,8 +182,7 @@ function extractErrorCode(err: unknown): GeoErrorCode {
 
   const errObj = err as { code?: unknown; message?: unknown };
   const numericCode = typeof errObj.code === 'number' ? errObj.code : null;
-  const messageStr =
-    typeof errObj.message === 'string' ? errObj.message.toLowerCase() : '';
+  const messageStr = typeof errObj.message === 'string' ? errObj.message.toLowerCase() : '';
 
   // Codici numerici W3C (browser e Capacitor web fallback)
   if (numericCode === 1) return 'PERMISSION_DENIED';
@@ -222,12 +221,12 @@ function messageForCode(code: GeoErrorCode): string {
     case 'PERMISSION_PROMPT':
       return 'Permesso di geolocalizzazione non ancora richiesto.';
     case 'POSITION_UNAVAILABLE':
-      return 'Posizione non disponibile. Verifica che il GPS sia attivo e di non essere in modalita\' aereo.';
+      return "Posizione non disponibile. Verifica che il GPS sia attivo e di non essere in modalita' aereo.";
     case 'TIMEOUT':
-      return 'Tempo scaduto durante l\'acquisizione della posizione. Riprova tra qualche secondo.';
+      return "Tempo scaduto durante l'acquisizione della posizione. Riprova tra qualche secondo.";
     case 'NOT_SUPPORTED':
       return 'Geolocalizzazione non supportata su questo dispositivo.';
     case 'UNKNOWN':
-      return 'Errore sconosciuto durante l\'acquisizione della posizione.';
+      return "Errore sconosciuto durante l'acquisizione della posizione.";
   }
 }

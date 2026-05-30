@@ -1,5 +1,4 @@
 <ion-content [fullscreen]="true" class="landing-content">
-
   <!-- =================================================================
        SEZIONE 1 — Hero: identità di brand
        ================================================================= -->
@@ -11,41 +10,41 @@
   <!-- =================================================================
        SEZIONE 2 — Card percorsi: scelta del ruolo
        ================================================================= -->
-<section class="paths" aria-label="Scegli il tuo percorso">
+  <section class="paths" aria-label="Scegli il tuo percorso">
+    <!-- Card Giocatore -->
+    <ion-card class="path-card path-card--player" routerLink="/giocatore/register" button="true">
+      <ion-card-content class="path-card__content">
+        <ion-icon name="compass-outline" class="path-card__icon" aria-hidden="true"></ion-icon>
+        <h2 class="path-card__title">Sono un esploratore</h2>
+        <p class="path-card__subtitle">Trova quest e colleziona scoperte.</p>
+        <ion-button
+          fill="solid"
+          expand="block"
+          class="path-card__cta path-card__cta--player"
+          aria-label="Inizia a esplorare il Trentino come giocatore"
+        >
+          Inizia a esplorare
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
 
-  <!-- Card Giocatore -->
-  <ion-card class="path-card path-card--player" routerLink="/giocatore/register" button="true">
-    <ion-card-content class="path-card__content">
-      <ion-icon name="compass-outline" class="path-card__icon" aria-hidden="true"></ion-icon>
-      <h2 class="path-card__title">Sono un esploratore</h2>
-      <p class="path-card__subtitle">Trova quest e colleziona scoperte.</p>
-      <ion-button
-        fill="solid"
-        expand="block"
-        class="path-card__cta path-card__cta--player"
-        aria-label="Inizia a esplorare il Trentino come giocatore">
-        Inizia a esplorare
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Card Attività Locale -->
-  <ion-card class="path-card path-card--business" routerLink="/attivita/register" button="true">
-    <ion-card-content class="path-card__content">
-      <ion-icon name="storefront-outline" class="path-card__icon" aria-hidden="true"></ion-icon>
-      <h2 class="path-card__title">Sono un'attività locale</h2>
-      <p class="path-card__subtitle">Offri sconti agli esploratori.</p>
-      <ion-button
-        fill="solid"
-        expand="block"
-        class="path-card__cta path-card__cta--business"
-        aria-label="Affilia la tua attività locale al sistema">
-        Affilia la tua attività
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-</section>
+    <!-- Card Attività Locale -->
+    <ion-card class="path-card path-card--business" routerLink="/attivita/register" button="true">
+      <ion-card-content class="path-card__content">
+        <ion-icon name="storefront-outline" class="path-card__icon" aria-hidden="true"></ion-icon>
+        <h2 class="path-card__title">Sono un'attività locale</h2>
+        <p class="path-card__subtitle">Offri sconti agli esploratori.</p>
+        <ion-button
+          fill="solid"
+          expand="block"
+          class="path-card__cta path-card__cta--business"
+          aria-label="Affilia la tua attività locale al sistema"
+        >
+          Affilia la tua attività
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </section>
 
   <!-- =================================================================
        SEZIONE 3 — Login per utenti esistenti
@@ -56,5 +55,4 @@
       <a routerLink="/auth/login" class="login-prompt__link">Accedi</a>
     </p>
   </section>
-
 </ion-content>

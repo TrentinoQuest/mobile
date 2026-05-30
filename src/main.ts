@@ -97,10 +97,7 @@ bootstrapApplication(AppComponent, {
     // QuestService riceve automaticamente l'implementazione corrente via DI.
     {
       provide: QuestRepository,
-      useClass:
-        environment.questRepository === 'http'
-          ? HttpQuestRepository
-          : MockQuestRepository,
+      useClass: environment.questRepository === 'http' ? HttpQuestRepository : MockQuestRepository,
     },
 
     // ============================================================

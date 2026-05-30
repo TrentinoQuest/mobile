@@ -127,8 +127,7 @@ export class GeolocationService {
         // (politica "una volta sola"). La UI mostrera' il banner CTA.
         this.setError({
           code: 'PERMISSION_DENIED',
-          message:
-            'Permesso GPS negato. Attivalo nelle impostazioni per usare la mappa.',
+          message: 'Permesso GPS negato. Attivalo nelle impostazioni per usare la mappa.',
         });
         return;
       }
@@ -142,8 +141,7 @@ export class GeolocationService {
       if (alreadyAsked) {
         this.setError({
           code: 'PERMISSION_DENIED',
-          message:
-            'Permesso GPS non concesso. Attivalo nelle impostazioni per usare la mappa.',
+          message: 'Permesso GPS non concesso. Attivalo nelle impostazioni per usare la mappa.',
         });
         return;
       }
@@ -155,7 +153,7 @@ export class GeolocationService {
       // non lasciare il service in stato 'requesting' permanente.
       this.setError({
         code: 'UNKNOWN',
-        message: 'Errore durante l\'inizializzazione del GPS.',
+        message: "Errore durante l'inizializzazione del GPS.",
         originalError: err,
       });
     }
@@ -175,8 +173,7 @@ export class GeolocationService {
     } else {
       this.setError({
         code: 'PERMISSION_DENIED',
-        message:
-          'Permesso GPS negato. Attivalo nelle impostazioni per usare la mappa.',
+        message: 'Permesso GPS negato. Attivalo nelle impostazioni per usare la mappa.',
       });
     }
   }
@@ -195,7 +192,7 @@ export class GeolocationService {
    */
   async startWatching(): Promise<void> {
     if (this.currentWatchId !== null) {
-      console.warn('[GeolocationService] Watch gia\' attivo, ignoro startWatching');
+      console.warn("[GeolocationService] Watch gia' attivo, ignoro startWatching");
       return;
     }
 

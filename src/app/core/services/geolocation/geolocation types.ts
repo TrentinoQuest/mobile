@@ -55,10 +55,10 @@ export interface Position extends GeoFix {}
  *   denied  ──openAppSettings() + ritorno app──> checkPermissions()──> ...
  */
 export type PermissionState =
-  | 'unknown'    // service appena creato, non ha ancora interrogato l'OS
-  | 'prompt'     // OS non ha ancora chiesto all'utente; safe da invocare il prompt
-  | 'granted'    // utente ha concesso il permesso
-  | 'denied';    // utente ha negato; richiede intervento manuale in impostazioni
+  | 'unknown' // service appena creato, non ha ancora interrogato l'OS
+  | 'prompt' // OS non ha ancora chiesto all'utente; safe da invocare il prompt
+  | 'granted' // utente ha concesso il permesso
+  | 'denied'; // utente ha negato; richiede intervento manuale in impostazioni
 
 // -----------------------------------------------------------------------------
 // Stato operativo del service

@@ -56,10 +56,7 @@ const LOCKED_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
  * Priorita': locked > tipo quest.
  * Una quest locked mostra sempre il lucchetto, indipendentemente dal tipo.
  */
-export function getQuestIcon(
-  quest: AnyQuest,
-  playerStatus: PlayerQuestStatus,
-): string {
+export function getQuestIcon(quest: AnyQuest, playerStatus: PlayerQuestStatus): string {
   if (playerStatus === 'locked') return LOCKED_SVG;
   return quest.type === QuestType.PRIMARY ? PRIMARY_SVG : SECONDARY_SVG;
 }
