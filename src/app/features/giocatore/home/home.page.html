@@ -1,22 +1,28 @@
 <!--
   Home Giocatore — vista mappa-centrica.
 
-  Sotto-step 2A: solo la mappa. Niente header, niente overlay UI.
-  Gli overlay (collection chip, controlli, card vicino-a-te, bottom sheet)
-  arrivano nei sotto-step successivi e si posizioneranno in absolute
-  sopra il container mappa.
+  Sotto-step 2B: solo la mappa. Niente header, niente overlay UI.
+  Sotto-step 2B-bis: integrato Capacitor Geolocation. Marker user reattivo,
+  alone di incertezza per fix imprecisi, permission banner per accessi negati.
 
   ion-content con [scrollY]="false": la mappa ha il suo gesture handling
   (pan, pinch-zoom), non vogliamo che ion-content intercetti gli swipe.
 -->
 <ion-content [fullscreen]="true" [scrollY]="false" class="home">
   <!--
+    Permission banner GPS: si auto-mostra solo quando il permesso e' stato
+    negato. Posizionato in absolute via .scss, flotta sopra la mappa senza
+    spingerla giu'. Auto-sparisce quando l'utente concede via impostazioni
+    e torna nell'app.
+  -->
+  <tq-permission-banner />
+
+  <!--
     Container della mappa: Leaflet inietta canvas + tile dentro questo div.
     #mapContainer e' la ViewChild referenziata nel TS.
   -->
   <div #mapContainer class="home__map"></div>
 
-    <!-- Header overlay: greeting + collection chip. -->
+  <!-- Header overlay: greeting + collection chip. -->
   <app-home-header></app-home-header>
-
 </ion-content>
