@@ -37,7 +37,6 @@
 /* dark.system.css disabilitato: il tema e' gestito via data-theme da ThemeService */
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
-
 /* ===========================================================
  * Leaflet base styles.
  * Obbligatorio per rendering corretto di tile, marker e controlli mappa.
@@ -47,3 +46,178 @@
  * ===========================================================
  */
 @import 'leaflet/dist/leaflet.css';
+
+/* ============================================================================
+ * Keyframes globali
+ * ============================================================================
+ * I keyframes dichiarati dentro componenti con ViewEncapsulation possono
+ * ricevere hash da Angular che li rende irraggiungibili dalla property
+ * "animation: ...". Per le animazioni usate in marker Leaflet (iniettati
+ * fuori dall'albero Angular) li teniamo globali qui.
+ * ========================================================================== */
+
+/* Wrapper esterno aggiunto da Leaflet (className di L.divIcon): rimuove
+   il background bianco di default che Leaflet applicherebbe. */
+.user-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Animazione del ring che pulsa attorno al marker utente. */
+@keyframes user-marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* Forziamo l'animation sul pulse anche se la regola scopata nel
+   home.page.scss non venisse applicata per encapsulation. */
+.user-marker__pulse {
+  /* Auto-sufficiente: definisce tutto quello che serve all'animazione visibile. */
+  background: rgba(200, 147, 15, 0.6) !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
+}
+
+/* ============================================================================
+ * AGGIUNTE A src/global.scss
+ * ============================================================================
+ * Aggiungi questo blocco IN FONDO al tuo src/global.scss esistente,
+ * dopo la sezione "Stili globali per marker Leaflet" del user marker.
+ *
+ * I quest marker e i popup vivono qui (non nel componente) perche'
+ * Leaflet li inietta nel DOM fuori dall'albero Angular, e le regole
+ * scopate non li raggiungono.
+ * ========================================================================== */
+
+/* ============================================================================
+ * QUEST MARKERS
+ * ============================================================================
+ * Struttura HTML iniettata da L.divIcon (vedi home.page.ts):
+ *
+ *   .leaflet-marker-icon.quest-marker-wrapper
+ *     .quest-marker.quest-marker--{status}        <- discovered / available / locked
+ *       .quest-marker__pin                         <- contenitore circolare
+ *         <svg>                                    <- icona categoria o lucchetto
+ *
+ * Stati e colori:
+ * - available: ocra full opacity (default, gioco attivo)
+ * - discovered: forest con opacity ridotta (gia' fatto)
+ * - locked: muted con icona lucchetto
+ * ========================================================================== */
+
+/* Wrapper esterno di Leaflet: trasparente, senza bordo. */
+.quest-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.quest-marker {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    transform: scale(1.1);
+  }
+}
+
+.quest-marker__pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #f4ebdc;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 4px 12px -2px rgba(0, 0, 0, 0.5);
+
+  svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.quest-marker--available .quest-marker__pin {
+  background: #c8930f;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.quest-marker--discovered .quest-marker__pin {
+  background: #6ba046;
+  color: rgba(0, 0, 0, 0.75);
+}
+.quest-marker--discovered {
+  opacity: 0.65;
+}
+
+.quest-marker--locked .quest-marker__pin {
+  background: rgba(244, 235, 220, 0.25);
+  border-color: rgba(244, 235, 220, 0.35);
+  color: rgba(244, 235, 220, 0.65);
+}
+.quest-marker--locked {
+  opacity: 0.85;
+}
+
+/* ============================================================================
+ * LEAFLET POPUP — frame esterno warm-dark
+ * ============================================================================
+ * Il contenuto interno del popup e' renderizzato da QuestPopupComponent
+ * (gli stili sono scoped al componente).
+ *
+ * Qui stiliziamo SOLO il wrapper esterno iniettato da Leaflet.
+ * ========================================================================== */
+
+.leaflet-popup-content-wrapper {
+  background: #1a1815 !important;
+  color: #f4ebdc !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 8px 24px -8px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(244, 235, 220, 0.08) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px !important;
+  font-family:
+    'Geist',
+    -apple-system,
+    system-ui,
+    sans-serif !important;
+  line-height: 1.45 !important;
+}
+
+.leaflet-popup-tip {
+  background: #1a1815 !important;
+}
+
+.leaflet-popup-close-button {
+  color: rgba(244, 235, 220, 0.55) !important;
+  font-size: 20px !important;
+  padding: 6px 8px !important;
+
+  &:hover {
+    color: #c8930f !important;
+  }
+}

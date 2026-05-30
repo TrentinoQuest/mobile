@@ -8,27 +8,19 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="login-content">
-
   <div class="login-wrapper">
-
     <header class="login-intro">
       <h1 class="login-intro__title">Bentornato</h1>
-      <p class="login-intro__subtitle">
-        Accedi per continuare la tua esplorazione.
-      </p>
+      <p class="login-intro__subtitle">Accedi per continuare la tua esplorazione.</p>
     </header>
 
-    <form
-      class="login-form"
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      novalidate>
-
+    <form class="login-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <!-- Email -->
       <ion-item
         class="login-form__item"
         [class.login-form__item--invalid]="email.touched && email.invalid"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Email</ion-label>
         <ion-input
           type="email"
@@ -37,22 +29,21 @@
           formControlName="email"
           placeholder="nome@esempio.it"
           [attr.aria-invalid]="email.touched && email.invalid ? 'true' : null"
-          aria-describedby="email-error">
+          aria-describedby="email-error"
+        >
         </ion-input>
       </ion-item>
       <ion-note id="email-error" color="danger" class="login-form__error">
-        @if (email.touched && email.errors?.['required']) {
-          L'email è obbligatoria.
-        } @else if (email.touched && email.errors?.['email']) {
-          Inserisci un'email valida.
-        }
+        @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. } @else if
+        (email.touched && email.errors?.['email']) { Inserisci un'email valida. }
       </ion-note>
 
       <!-- Password -->
       <ion-item
         class="login-form__item"
         [class.login-form__item--invalid]="password.touched && password.invalid"
-        lines="full">
+        lines="full"
+      >
         <ion-label position="stacked">Password</ion-label>
         <ion-input
           [type]="passwordVisible() ? 'text' : 'password'"
@@ -60,7 +51,8 @@
           formControlName="password"
           placeholder="La tua password"
           [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
-          aria-describedby="password-error">
+          aria-describedby="password-error"
+        >
         </ion-input>
         <ion-button
           slot="end"
@@ -69,17 +61,14 @@
           type="button"
           class="login-form__visibility-toggle"
           (click)="togglePasswordVisibility()"
-          [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'">
-          <ion-icon
-            slot="icon-only"
-            [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'">
+          [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'"
+        >
+          <ion-icon slot="icon-only" [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'">
           </ion-icon>
         </ion-button>
       </ion-item>
       <ion-note id="password-error" color="danger" class="login-form__error">
-        @if (password.touched && password.errors?.['required']) {
-          La password è obbligatoria.
-        }
+        @if (password.touched && password.errors?.['required']) { La password è obbligatoria. }
       </ion-note>
 
       <!-- Link recupero password -->
@@ -97,15 +86,12 @@
         expand="block"
         size="default"
         class="login-form__submit"
-        [disabled]="submitting()">
+        [disabled]="submitting()"
+      >
         @if (submitting()) {
-          <ion-spinner name="crescent" slot="start"></ion-spinner>
-          Accesso in corso...
-        } @else {
-          Accedi
-        }
+        <ion-spinner name="crescent" slot="start"></ion-spinner>
+        Accesso in corso... } @else { Accedi }
       </ion-button>
-
     </form>
 
     <!-- Link a registrazione -->
@@ -113,7 +99,5 @@
       Non hai un account?
       <a routerLink="/" class="login-register-prompt__link">Iscriviti</a>
     </p>
-
   </div>
-
 </ion-content>

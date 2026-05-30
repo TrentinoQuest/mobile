@@ -20,6 +20,13 @@ import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { refreshInterceptor } from './app/core/interceptors/refresh.interceptor';
 
+import { QuestRepository } from './app/core/services/quest/repository/quest.repository';
+import { MockQuestRepository } from './app/core/services/quest/repository/quest.repository.mock';
+import { HttpQuestRepository } from './app/core/services/quest/repository/quest.repository.http';
+
+import { GeolocationRepository } from './app/core/services/geolocation/repository/geolocation.repository';
+import { GeolocationRepositoryCapacitor } from './app/core/services/geolocation/repository/geolocation.repository.capacitor';
+
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
  * componente venga renderizzato, eliminando il flash of unstyled content.
@@ -81,5 +88,26 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAppInitializer(initializeTheme),
     provideAppInitializer(initializeApp),
+
+    // ============================================================
+    // Quest data layer
+    // ============================================================
+    // Binding del contratto QuestRepository alla sua implementazione concreta.
+    // Per passare al backend reale: cambia MockQuestRepository in HttpQuestRepository.
+    // QuestService riceve automaticamente l'implementazione corrente via DI.
+    {
+      provide: QuestRepository,
+      useClass: environment.questRepository === 'http' ? HttpQuestRepository : MockQuestRepository,
+    },
+
+    // ============================================================
+    // Geolocation data layer
+    // ============================================================
+    // Binding del contratto GeolocationRepository all'implementazione
+    // Capacitor (funziona sia su native sia su browser desktop via
+    // fallback W3C Geolocation). Nessun toggle environment: una
+    // futura repository mock potra' essere aggiunta qui se servisse
+    // per test o sviluppo offline.
+    { provide: GeolocationRepository, useClass: GeolocationRepositoryCapacitor },
   ],
 });

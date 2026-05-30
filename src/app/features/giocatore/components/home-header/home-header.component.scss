@@ -1,0 +1,201 @@
+/* ============================================================================
+ * HomeHeaderComponent
+ * ============================================================================
+ * Header overlay in glass blur sopra la mappa Leaflet.
+ *
+ * Posizionamento:
+ * Il componente si auto-posiziona via :host con position absolute top.
+ * La HomePage non deve aggiungere padding o wrapper extra.
+ *
+ * Effetto visivo:
+ * - Background gradient verticale (opaco in alto, semi-trasparente verso
+ *   il basso) per ancorare il testo senza coprire la mappa
+ * - backdrop-filter blur per fondersi visivamente con la mappa
+ * - Niente bordi netti: il bordo inferiore e' sfumato dal gradient
+ * ========================================================================== */
+
+:host {
+  /* Posizionamento overlay sulla home. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--tq-z-map-overlay);
+
+  /* Display block per riempire la width allocata. */
+  display: block;
+
+  /* Padding: rispetta safe area inset (notch iPhone). */
+  padding-top: env(safe-area-inset-top, 0);
+
+  /* Non intercettare gli eventi pointer sulle aree vuote dell'header:
+     l'utente deve poter pannare la mappa anche se tocca lo spazio
+     vuoto sotto il testo. Riabilitato sugli elementi interattivi. */
+  pointer-events: none;
+
+  /* Background "glass": gradient opaco in alto, trasparente in basso. */
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--tq-bg-rgb), 0.92) 0%,
+    rgba(var(--tq-bg-rgb), 0.85) 50%,
+    rgba(var(--tq-bg-rgb), 0.55) 80%,
+    rgba(var(--tq-bg-rgb), 0) 100%
+  );
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.home-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tq-space-5);
+  /* Padding aumentato sui lati. Verticale resta come prima. */
+  padding: var(--tq-space-6) var(--tq-space-6) var(--tq-space-8);
+  pointer-events: auto;
+}
+
+/* ============================================================
+ * SALUTO NARRATIVO
+ * ============================================================ */
+
+.home-header__greeting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tq-space-1);
+}
+
+.home-header__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--tq-ocra);
+  margin: 0;
+}
+
+.home-header__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+
+  /* em annidato: il username e' enfasi visiva nello stesso italic. */
+  em {
+    /* Già italic dal parent — non ribadire. Solo enfasi di colore. */
+    font-style: italic;
+    color: var(--tq-bone);
+    /* Sottile decorazione ocra per dare carattere al nome. */
+    background: linear-gradient(to bottom, transparent 60%, rgba(var(--tq-ocra-rgb), 0.18) 60%);
+  }
+}
+
+/* ============================================================
+ * COLLECTION CHIP
+ * ============================================================ */
+
+.home-header__chip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tq-space-2);
+}
+
+.home-header__chip-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.home-header__chip-label {
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--tq-text-secondary);
+  text-transform: uppercase;
+}
+
+.home-header__chip-counter {
+  font-family: var(--tq-font-mono);
+  font-size: 14px;
+  color: var(--tq-text-muted);
+
+  strong {
+    font-weight: 500;
+    color: var(--tq-bone);
+    /* Numero "discovered" in evidenza, contatore totale dimmed. */
+  }
+}
+
+.home-header__chip-skeleton {
+  /* Placeholder durante il primo caricamento. */
+  color: var(--tq-text-disabled);
+  /* Lieve animation di "respiro" per indicare attesa. */
+  animation: home-header-skeleton 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+ * PROGRESS BAR CONTINUA
+ * ============================================================ */
+
+.home-header__chip-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: var(--tq-hairline-strong);
+  border-radius: var(--tq-radius-pill);
+  overflow: hidden;
+}
+
+.home-header__chip-bar-fill {
+  /* Fill ocra che si espande con transition al cambio di width. */
+  height: 100%;
+  background: linear-gradient(to right, var(--tq-ocra) 0%, var(--tq-ocra-tint) 100%);
+  border-radius: var(--tq-radius-pill);
+
+  /* Transition lenta e fluida quando il valore cambia (es. dopo scan). */
+  transition: width var(--tq-duration-slow) var(--tq-ease-out);
+
+  /* Lieve glow caldo per il vibe gamificato. */
+  box-shadow: 0 0 8px rgba(var(--tq-ocra-rgb), 0.4);
+
+  /* Min-width 0 per non sporgere quando il valore e' 0%. */
+  min-width: 0;
+}
+
+/* ============================================================
+ * PUNTI TOTALI
+ * ============================================================ */
+
+.home-header__chip-points {
+  font-family: var(--tq-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--tq-ocra);
+  margin: 0;
+  /* Allineato a destra per coerenza col contatore. */
+  align-self: flex-end;
+}
+
+.home-header__chip-points-unit {
+  /* "pt" leggermente dimmed per gerarchia visiva. */
+  color: var(--tq-text-muted);
+  font-weight: 400;
+}
+
+/* ============================================================
+ * ANIMAZIONE SKELETON
+ * ============================================================ */
+
+@keyframes home-header-skeleton {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

@@ -1,17 +1,11 @@
 <ion-content [fullscreen]="true" class="offline-content">
-
   <div class="offline-wrapper">
-
-    <ion-icon
-      name="cloud-offline-outline"
-      class="offline-icon"
-      aria-hidden="true">
-    </ion-icon>
+    <ion-icon name="cloud-offline-outline" class="offline-icon" aria-hidden="true"> </ion-icon>
 
     <h1 class="offline-title">Sei offline</h1>
 
     <p class="offline-message">
-      Non riusciamo a contattare il server.<br>
+      Non riusciamo a contattare il server.<br />
       Controlla la connessione e riprova.
     </p>
 
@@ -22,19 +16,15 @@
       class="offline-retry"
       (click)="retryNow()"
       [disabled]="retrying()"
-      aria-label="Riprova a connetterti al server">
+      aria-label="Riprova a connetterti al server"
+    >
       @if (retrying()) {
-        <ion-spinner name="crescent" slot="start"></ion-spinner>
-        Controllo in corso...
-      } @else {
-        Riprova
-      }
+      <ion-spinner name="crescent" slot="start"></ion-spinner>
+      Controllo in corso... } @else { Riprova }
     </ion-button>
 
     <p class="offline-hint">
       Stiamo controllando automaticamente la connessione ogni pochi secondi.
     </p>
-
   </div>
-
 </ion-content>

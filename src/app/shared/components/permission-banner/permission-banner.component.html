@@ -1,0 +1,24 @@
+@if (isVisible()) {
+  <div class="permission-banner" role="alert">
+    <ion-icon class="permission-banner__icon" name="location-outline" aria-hidden="true"></ion-icon>
+
+    <div class="permission-banner__content">
+      <p class="permission-banner__title">GPS non attivo</p>
+      <ion-note class="permission-banner__message">
+        Attiva la geolocalizzazione per vedere dove sei sulla mappa e completare le quest.
+      </ion-note>
+    </div>
+
+    <ion-button
+      class="permission-banner__cta"
+      size="small"
+      fill="solid"
+      color="warning"
+      [disabled]="isOpening()"
+      (click)="onOpenSettings()"
+    >
+      <ion-icon slot="start" name="settings-outline" aria-hidden="true"></ion-icon>
+      Attiva GPS
+    </ion-button>
+  </div>
+}

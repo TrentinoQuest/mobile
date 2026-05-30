@@ -1,0 +1,81 @@
+/* ============================================================================
+ * QuestPopupComponent
+ * ============================================================================
+ * Stili interni del popup quest.
+ *
+ * NOTA: il componente e' montato dentro Leaflet via createComponent +
+ * appendChild, quindi vive nel DOM ma NON come figlio normale dell'albero
+ * Angular. ViewEncapsulation funziona comunque perche' Angular emette
+ * gli stili scoped via attributo sull'host element.
+ *
+ * Il "frame" esterno del popup (cornice, freccia che punta al marker) e'
+ * stilizzato in global.scss perche' .leaflet-popup-* sono iniettati da
+ * Leaflet fuori da questo componente.
+ * ========================================================================== */
+
+:host {
+  display: block;
+}
+
+.quest-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+  max-width: 260px;
+}
+
+.quest-popup__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  margin: 0;
+  /* Default ocra (available). */
+  color: var(--tq-ocra);
+
+  &.quest-popup__kicker--discovered {
+    color: var(--tq-forest);
+  }
+  &.quest-popup__kicker--locked {
+    color: var(--tq-text-muted);
+  }
+}
+
+.quest-popup__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--tq-bone);
+  margin: 0;
+}
+
+.quest-popup__type {
+  font-family: var(--tq-font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tq-text-muted);
+  margin: 0;
+  /* Caps small per distinguere il "metadato" dal "contenuto". */
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.quest-popup__desc {
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--tq-text-secondary);
+  margin: 4px 0 0;
+}
+
+.quest-popup__meta {
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--tq-ocra);
+  margin: 4px 0 0;
+}

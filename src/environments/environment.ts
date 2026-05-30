@@ -18,6 +18,17 @@ export const environment = {
    * raggiungibilita del backend (Decisione bonus livello 3).
    */
   healthCheckUrl: 'http://localhost:3000/health',
+
+  /**
+   * Quale implementazione di QuestRepository iniettare.
+   * 'mock' = dati hardcoded in memoria (sviluppo offline)
+   * 'http' = chiamate REST al backend (richiede backend running)
+   *
+   * In dev manteniamo 'mock' di default finche' il backend quest non
+   * e' implementato. Per testare l'integrazione, cambia a 'http' e
+   * verifica che il backend risponda.
+   */
+  questRepository: 'http' as 'mock' | 'http',
 };
 
 /*

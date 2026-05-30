@@ -1,0 +1,50 @@
+<!--
+  Header overlay sopra la mappa.
+
+  Struttura:
+  - Saluto serif italic (kicker mono sopra)
+  - Collection chip: label "collezione" + contatore + progress bar + punti
+  - Tutto in glass blur, niente sfondo solido
+-->
+<header class="home-header" aria-label="Riepilogo esplorazione">
+  <!-- Saluto narrativo -->
+  <div class="home-header__greeting">
+    <p class="home-header__kicker">— TRENTINO QUEST —</p>
+    <h1 class="home-header__title">
+      {{ greeting() }},<br />
+      <em>{{ username() }}</em>
+    </h1>
+  </div>
+
+  <!-- Collection chip -->
+  <div class="home-header__chip">
+    <div class="home-header__chip-header">
+      <span class="home-header__chip-label">Collezione</span>
+      <span class="home-header__chip-counter">
+        @if (loading() && total() === 0) {
+          <!-- Skeleton durante il primo caricamento -->
+          <span class="home-header__chip-skeleton">— / —</span>
+        } @else {
+          <strong>{{ discovered() }}</strong> / {{ total() }}
+        }
+      </span>
+    </div>
+
+    <!-- Progress bar continua: fill ocra in transition -->
+    <div
+      class="home-header__chip-bar"
+      role="progressbar"
+      [attr.aria-valuenow]="progressPercent()"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-label]="'Collezione completata al ' + progressPercent() + ' percento'"
+    >
+      <div class="home-header__chip-bar-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+
+    <!-- Punti totali (secondari rispetto alla collezione) -->
+    <p class="home-header__chip-points">
+      {{ points() }} <span class="home-header__chip-points-unit">pt</span>
+    </p>
+  </div>
+</header>

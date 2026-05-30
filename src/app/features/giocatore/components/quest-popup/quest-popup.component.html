@@ -1,0 +1,24 @@
+<!--
+  Popup quest montato dentro Leaflet via createComponent().
+
+  Mostra:
+  - kicker stato giocatore (discovered/available/locked) in colore
+  - titolo della quest
+  - tipo (primary/secondary)
+  - descrizione
+  - punti base assegnati al completamento
+-->
+<div class="quest-popup">
+  @if (quest(); as q) {
+    <p class="quest-popup__kicker" [class]="statusModifier()">
+      {{ statusLabel() }}
+    </p>
+    <h3 class="quest-popup__title">{{ q.name }}</h3>
+    <p class="quest-popup__type">{{ typeLabel() }}</p>
+    <p class="quest-popup__desc">{{ q.description }}</p>
+    <p class="quest-popup__meta">{{ q.basePoints }} pt</p>
+  } @else {
+    <!-- Stato vuoto: in produzione non dovrebbe mai accadere. -->
+    <p class="quest-popup__desc">Nessun dato disponibile.</p>
+  }
+</div>

@@ -9,6 +9,41 @@
 // =============================================================================
 
 // =============================================================================
+// TOKEN INDIPENDENTI DAL TEMA
+// =============================================================================
+// Tipografia, spaziatura, raggi e timing: non dipendono dal colore.
+// Definiti una sola volta — nessuna duplicazione tra dark e light.
+// =============================================================================
+:root {
+  /* Famiglie tipografiche */
+  --tq-font-sans: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --tq-font-serif: 'Playfair Display', Georgia, serif;
+  --tq-font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Scala di spaziatura (base 4 px) */
+  --tq-space-1: 4px;
+  --tq-space-2: 8px;
+  --tq-space-3: 12px;
+  --tq-space-4: 16px;
+  --tq-space-5: 20px;
+  --tq-space-6: 24px;
+  --tq-space-7: 28px;
+  --tq-space-8: 32px;
+
+  /* Raggi */
+  --tq-radius-sm: 4px;
+  --tq-radius-md: 8px;
+  --tq-radius-pill: 999px;
+
+  /* Durate animazioni */
+  --tq-duration-fast: 150ms;
+  --tq-duration-slow: 500ms;
+
+  /* Easing */
+  --tq-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+// =============================================================================
 // TEMA SCURO
 // =============================================================================
 :root[data-theme='dark'] {
@@ -23,9 +58,22 @@
   --tq-text-secondary: rgba(224, 224, 224, 0.72);
   --tq-text-muted: rgba(224, 224, 224, 0.55);
   --tq-hairline: rgba(224, 224, 224, 0.1);
+  --tq-hairline-strong: rgba(224, 224, 224, 0.25);
+
+  /* "Bone": crema calda usata per testo/bordi su sfondo scuro */
+  --tq-bone: #f4ebdc;
+
+  /* Testo disabilitato/placeholder */
+  --tq-text-disabled: rgba(224, 224, 224, 0.35);
+
+  /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
+  --tq-bg-rgb: 18, 18, 18;
 
   /** Ocra desaturato: leggibile su sfondo scuro senza abbagliare **/
   --tq-ocra: #b8860b;
+  --tq-ocra-rgb: 184, 134, 11;
+  --tq-ocra-tint: #c9950d;
+  --tq-ocra-shade: #a2770a;
   /** Verde bosco schiarito: contrasto sufficiente su sfondo scuro **/
   --tq-forest: #5a8a3a;
   /** Ruggine calda: variante luminosa per dark mode **/
@@ -146,6 +194,29 @@
   --ion-color-step-850: #cfcfcf;
   --ion-color-step-900: #dadada;
   --ion-color-step-950: #e5e5e5;
+
+  /* ------------------------------------------------------------------------
+ * Z-INDEX — gerarchia degli overlay
+ * ------------------------------------------------------------------------
+ * Valori alti per battere lo z-index interno di Leaflet (.leaflet-pane
+ * arriva fino a 700). Spazi di 10 tra livelli per future granularita'
+ * (es. tooltip sopra tab bar ma sotto modal).
+ *
+ * Livelli (dal basso verso l'alto):
+ * - map:           container della mappa, sotto tutto
+ * - map-overlay:   header, controlli, card flottanti sopra la mappa
+ * - sheet:         bottom sheet (es. lista quest vicine)
+ * - tab-bar:       tab bar persistente del giocatore
+ * - modal:         modali fullscreen (scan QR, profilo dettagli)
+ * - toast:         toast notification, sempre in cima
+ * ------------------------------------------------------------------------ */
+
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
 }
 
 // =============================================================================
@@ -163,9 +234,22 @@
   --tq-text-secondary: rgba(26, 24, 21, 0.72);
   --tq-text-muted: rgba(26, 24, 21, 0.55);
   --tq-hairline: rgba(26, 24, 21, 0.1);
+  --tq-hairline-strong: rgba(26, 24, 21, 0.22);
+
+  /* "Bone": colore caldo scuro usato per testo/bordi su sfondo chiaro */
+  --tq-bone: #1a1815;
+
+  /* Testo disabilitato/placeholder */
+  --tq-text-disabled: rgba(26, 24, 21, 0.35);
+
+  /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
+  --tq-bg-rgb: 250, 247, 240;
 
   /** Ocra piu' scuro: contrasto AA garantito su sfondo bianco **/
   --tq-ocra: #8b6508;
+  --tq-ocra-rgb: 139, 101, 8;
+  --tq-ocra-tint: #9a7219;
+  --tq-ocra-shade: #7a5a07;
   /** Verde bosco piu' scuro: contrasto AA garantito su sfondo bianco **/
   --tq-forest: #4a7a2c;
   /** Ruggine scura: contrasto AA garantito su sfondo bianco **/
@@ -283,4 +367,27 @@
   --ion-color-step-850: #262626;
   --ion-color-step-900: #1a1a1a;
   --ion-color-step-950: #0d0d0d;
+
+  /* ------------------------------------------------------------------------
+ * Z-INDEX — gerarchia degli overlay
+ * ------------------------------------------------------------------------
+ * Valori alti per battere lo z-index interno di Leaflet (.leaflet-pane
+ * arriva fino a 700). Spazi di 10 tra livelli per future granularita'
+ * (es. tooltip sopra tab bar ma sotto modal).
+ *
+ * Livelli (dal basso verso l'alto):
+ * - map:           container della mappa, sotto tutto
+ * - map-overlay:   header, controlli, card flottanti sopra la mappa
+ * - sheet:         bottom sheet (es. lista quest vicine)
+ * - tab-bar:       tab bar persistente del giocatore
+ * - modal:         modali fullscreen (scan QR, profilo dettagli)
+ * - toast:         toast notification, sempre in cima
+ * ------------------------------------------------------------------------ */
+
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
 }

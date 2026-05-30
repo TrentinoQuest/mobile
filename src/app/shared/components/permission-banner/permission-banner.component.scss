@@ -1,0 +1,65 @@
+// src/app/shared/components/permission-banner/permission-banner.component.scss
+//
+// Banner persistente in stile "alert non bloccante": fondo scuro coerente
+// col tema dell'app, accento giallo ocra sul bottone CTA per attirare
+// l'attenzione senza essere allarmante.
+//
+// Layout: orizzontale con icona a sinistra, contenuto al centro,
+// bottone a destra. Su schermi stretti (<400px) il bottone va a
+// capo sotto il testo per leggibilita'.
+
+.permission-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(184, 134, 11, 0.12); // tinta giallo ocra trasparente
+  border-left: 3px solid var(--ion-color-warning, #b8860b);
+  border-radius: 8px;
+  margin: 8px;
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 24px;
+    color: var(--ion-color-warning, #b8860b);
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0; // permette al testo di wrappare
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ion-text-color, #fff);
+  }
+
+  &__message {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ion-color-medium, #92949c);
+  }
+
+  &__cta {
+    flex-shrink: 0;
+    margin: 0;
+    --color: #121212; // testo scuro su bottone giallo, per contrasto
+  }
+}
+
+// Layout responsive: su mobile stretto, bottone a capo
+@media (max-width: 400px) {
+  .permission-banner {
+    flex-wrap: wrap;
+
+    &__cta {
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+}
