@@ -1,50 +1,310 @@
-/* ============================================================================
- * AlbumPage (stub)
- * ============================================================================
- * Placeholder minimale. Quando svilupperemo la versione vera, riscriviamo
- * tutto. Mantiene la struttura tipografica del design per coerenza visiva
- * con il resto dell'app durante lo sviluppo.
- * ========================================================================== */
-
-.album-stub {
+.album {
   --background: var(--tq-bg);
 }
 
-.album-stub__inner {
+// ── Header glass ────────────────────────────────────────────────────────────
+
+.album__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  padding-top: 50px;
+  padding-bottom: 14px;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--tq-bg-rgb), 0.95),
+    rgba(var(--tq-bg-rgb), 0.6) 80%,
+    transparent
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.album__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  min-height: 38px;
+}
+
+.album__header-center {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  /* Altezza piena meno tab bar + safe area per non sovrapporsi. */
-  min-height: calc(100% - 64px - env(safe-area-inset-bottom, 0));
-  padding: 24px;
-  gap: 12px;
+  gap: 2px;
 }
 
-.album-stub__kicker {
+.album__header-sub {
   font-family: var(--tq-font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  color: var(--tq-ocra);
-  margin: 0 0 8px;
+  font-size: 9px;
+  color: rgba(var(--tq-ocra-rgb), 0.7);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
 }
 
-.album-stub__title {
+.album__header-title {
   font-family: var(--tq-font-serif);
   font-style: italic;
-  font-weight: 400;
-  font-size: 44px;
-  line-height: 1.1;
+  font-size: 19px;
   color: var(--tq-bone);
-  margin: 0;
+  line-height: 1.1;
 }
 
-.album-stub__note {
-  font-family: var(--tq-font-sans);
-  font-size: 14px;
+.album__header-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(var(--tq-bg-rgb), 0.06);
+  border: 1px solid var(--tq-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--tq-bone);
+  flex-shrink: 0;
+}
+
+// ── Body scrollabile ─────────────────────────────────────────────────────────
+
+.album__body {
+  position: absolute;
+  inset: 0;
+  padding-top: 110px;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+}
+
+// ── Loading ──────────────────────────────────────────────────────────────────
+
+.album__loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.album__loading-ring {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--tq-hairline);
+  border-top-color: var(--tq-ocra);
+  animation: album-spin 0.8s linear infinite;
+}
+
+@keyframes album-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Hero ─────────────────────────────────────────────────────────────────────
+
+.album__hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 22px 18px;
+}
+
+.album__radial {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+
+  svg { display: block; }
+}
+
+.album__radial-track {
+  stroke: var(--tq-hairline);
+}
+
+.album__radial-arc {
+  stroke: var(--tq-ocra);
+  transition: stroke-dashoffset 0.6s var(--tq-ease-out);
+}
+
+.album__radial-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--tq-font-mono);
+  font-size: 13px;
+  color: var(--tq-ocra);
+  letter-spacing: -0.3px;
+}
+
+.album__hero-info {
+  flex: 1;
+}
+
+.album__hero-count {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.album__hero-big {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 44px;
+  color: var(--tq-ocra);
+  line-height: 1;
+}
+
+.album__hero-sep {
+  font-family: var(--tq-font-serif);
+  font-size: 22px;
   color: var(--tq-text-muted);
-  margin: 8px 0 0;
+}
+
+.album__hero-sub {
+  font-size: 12px;
+  color: var(--tq-text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.album__hero-level {
+  font-family: var(--tq-font-mono);
+  font-size: 9.5px;
+  color: var(--tq-ocra);
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+// ── Filtri ───────────────────────────────────────────────────────────────────
+
+.album__filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 22px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.album__filter-chip {
+  flex-shrink: 0;
+  background: rgba(244, 235, 220, 0.05);
+  color: var(--tq-bone);
+  border: 1px solid var(--tq-hairline);
+  padding: 8px 14px;
+  border-radius: var(--tq-radius-pill);
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--tq-duration-fast), color var(--tq-duration-fast),
+              border-color var(--tq-duration-fast);
+
+  &--active {
+    background: var(--tq-ocra);
+    color: #1a1815;
+    border-color: var(--tq-ocra);
+    font-weight: 700;
+  }
+}
+
+// ── Griglia card ─────────────────────────────────────────────────────────────
+
+.album__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 22px;
+}
+
+.album__card {
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 108 / 146;
+
+  &--locked {
+    background: var(--tq-panel);
+    border: 1px dashed var(--tq-hairline);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--tq-text-muted);
+  }
+
+  &--unlocked {
+    border: 1px solid rgba(244, 235, 220, 0.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.album__card-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.album__card-lock-icon {
+  opacity: 0.5;
+}
+
+.album__card-mystery {
+  font-family: var(--tq-font-mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.album__card-num {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: var(--tq-font-mono);
+  font-size: 7px;
+  color: rgba(244, 235, 220, 0.5);
+  letter-spacing: 0.5px;
+  z-index: 1;
+}
+
+.album__card-name {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  font-family: var(--tq-font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--tq-bone);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+// ── Errore ───────────────────────────────────────────────────────────────────
+
+.album__error {
+  margin: 16px 22px;
+  padding: 12px 16px;
+  border-radius: var(--tq-radius-md);
+  background: rgba(196, 103, 58, 0.12);
+  border: 1px solid rgba(196, 103, 58, 0.3);
+  color: var(--tq-rust);
+  font-size: 13px;
+  text-align: center;
+}
+
+// ── Spaziatura fondo ─────────────────────────────────────────────────────────
+
+.album__spacer {
+  height: 32px;
 }

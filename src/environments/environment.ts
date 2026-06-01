@@ -29,6 +29,13 @@ export const environment = {
    * verifica che il backend risponda.
    */
   questRepository: 'http' as 'mock' | 'http',
+
+  /**
+   * Quale implementazione di PlayerProfileRepository iniettare.
+   * 'mock' = dati hardcoded (sviluppo offline)
+   * 'http' = chiamate REST al backend
+   */
+  playerProfileRepository: 'mock' as 'mock' | 'http',
 };
 
 /*

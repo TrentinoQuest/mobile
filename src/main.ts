@@ -27,6 +27,10 @@ import { HttpQuestRepository } from './app/core/services/quest/repository/quest.
 import { GeolocationRepository } from './app/core/services/geolocation/repository/geolocation.repository';
 import { GeolocationRepositoryCapacitor } from './app/core/services/geolocation/repository/geolocation.repository.capacitor';
 
+import { PlayerProfileRepository } from './app/core/services/player-profile/repository/player-profile.repository';
+import { MockPlayerProfileRepository } from './app/core/services/player-profile/repository/player-profile.repository.mock';
+import { HttpPlayerProfileRepository } from './app/core/services/player-profile/repository/player-profile.repository.http';
+
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
  * componente venga renderizzato, eliminando il flash of unstyled content.
@@ -109,5 +113,16 @@ bootstrapApplication(AppComponent, {
     // futura repository mock potra' essere aggiunta qui se servisse
     // per test o sviluppo offline.
     { provide: GeolocationRepository, useClass: GeolocationRepositoryCapacitor },
+
+    // ============================================================
+    // Player Profile data layer
+    // ============================================================
+    {
+      provide: PlayerProfileRepository,
+      useClass:
+        environment.playerProfileRepository === 'http'
+          ? HttpPlayerProfileRepository
+          : MockPlayerProfileRepository,
+    },
   ],
 });

@@ -1,24 +1,141 @@
-<ion-content [fullscreen]="true" class="profilo-stub">
-  <div class="profilo-stub__inner">
-    <p class="profilo-stub__kicker">— PROFILO —</p>
-    <h1 class="profilo-stub__title">Il tuo viaggio</h1>
-    <p class="profilo-stub__note">In costruzione</p>
+<ion-content [fullscreen]="true" class="profilo">
 
-    <!--
-      Sezione tema: gia' funzionante, da Claude Code.
-      La esponiamo qui per testare il theming nel contesto della navigazione.
-    -->
-    <section class="profilo-stub__section">
-      <h2 class="profilo-stub__section-title">Tema</h2>
-      <app-theme-selector></app-theme-selector>
-    </section>
+  <div class="profilo__body">
 
-    <!--
-      Logout: temporaneo qui dentro, in versione vera sara' in un'area
-      "Account & Sicurezza" piu' strutturata.
-    -->
-    <section class="profilo-stub__section">
-      <app-logout-button></app-logout-button>
-    </section>
+    <!-- Gear icon (impostazioni) -->
+    <div class="profilo__topbar">
+      <button class="profilo__gear-btn" type="button" aria-label="Impostazioni">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 01-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 01-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8L4.2 7a2 2 0 012.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 012.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Avatar + identità -->
+    <div class="profilo__identity">
+      <div class="profilo__avatar">
+        {{ username().charAt(0).toUpperCase() }}
+      </div>
+      <div class="profilo__username">{{ username() }}</div>
+      <div class="profilo__since">Esploratore da {{ registrationSince() }}</div>
+      <div class="profilo__level-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
+          <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4M10 13v3M14 13v3"/>
+        </svg>
+        <span>COLLEZIONISTA · LIVELLO {{ level() }}</span>
+      </div>
+    </div>
+
+    <!-- Griglia statistiche -->
+    <div class="profilo__stats">
+      <div class="profilo__stat-card">
+        <div class="profilo__stat-big">{{ unlockedCount() }} / {{ totalCount() }}</div>
+        <div class="profilo__stat-label">LUOGHI SCOPERTI</div>
+        <div class="profilo__stat-hint">continua a esplorare</div>
+      </div>
+      <div class="profilo__stat-card">
+        <div class="profilo__stat-big">{{ totalPoints() | number:'1.0-0' }}</div>
+        <div class="profilo__stat-label">PUNTI TOTALI</div>
+        <div class="profilo__stat-hint">livello {{ level() }}</div>
+      </div>
+      <div class="profilo__stat-card profilo__stat-card--accent">
+        <div class="profilo__stat-big profilo__stat-big--accent">6 g</div>
+        <div class="profilo__stat-label">STREAK ATTIVA</div>
+        <div class="profilo__stat-hint profilo__stat-hint--accent">continua oggi</div>
+      </div>
+      <div class="profilo__stat-card">
+        <div class="profilo__stat-big profilo__stat-big--serif">Val di Non</div>
+        <div class="profilo__stat-label">VALLE PREFERITA</div>
+        <div class="profilo__stat-hint">4 scoperte</div>
+      </div>
+    </div>
+
+    <!-- Riconoscimenti -->
+    <div class="profilo__section">
+      <div class="profilo__section-header">
+        <span class="profilo__section-title">Riconoscimenti</span>
+        <span class="profilo__section-count">3 / 12</span>
+      </div>
+      <div class="profilo__achievements">
+        @for (a of achievements; track a.label) {
+          <div class="profilo__achievement" [class.profilo__achievement--locked]="!a.unlocked">
+            <div class="profilo__achievement-icon" [class.profilo__achievement-icon--active]="a.unlocked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   [attr.stroke]="a.unlocked ? 'var(--tq-ocra)' : 'rgba(244,235,220,0.3)'"
+                   stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path [attr.d]="achievementIcon(a.icon)"/>
+              </svg>
+            </div>
+            <span class="profilo__achievement-label">{{ a.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Impostazioni tema -->
+    <div class="profilo__section">
+      <div class="profilo__section-header">
+        <span class="profilo__section-title">Aspetto</span>
+      </div>
+      <div class="profilo__theme-wrap">
+        <app-theme-selector/>
+      </div>
+    </div>
+
+    <!-- Menu impostazioni -->
+    <div class="profilo__section">
+      <div class="profilo__settings-list">
+        @for (row of settingsRows; track row.label; let last = $last) {
+          <button class="profilo__settings-row" [class.profilo__settings-row--last]="last" type="button">
+            <div class="profilo__settings-icon-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.6"
+                   stroke-linecap="round" stroke-linejoin="round">
+                @switch (row.icon) {
+                  @case ('bell') {
+                    <path d="M6 17V11a6 6 0 0112 0v6l2 2H4l2-2zM10 21a2 2 0 004 0"/>
+                  }
+                  @case ('layers') {
+                    <path d="M12 3l9 5-9 5-9-5 9-5z"/>
+                    <path d="M3 13l9 5 9-5M3 17l9 5 9-5"/>
+                  }
+                  @case ('person') {
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+                  }
+                  @case ('compass') {
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+                  }
+                }
+              </svg>
+            </div>
+            <span class="profilo__settings-label">{{ row.label }}</span>
+            @if (row.value) {
+              <span class="profilo__settings-value">{{ row.value }}</span>
+            }
+            <svg class="profilo__settings-chevron" width="14" height="14" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.7"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="profilo__logout-wrap">
+      <button class="profilo__logout-btn" type="button" (click)="logout()">
+        Esci
+      </button>
+      <div class="profilo__version">TRENTINO QUEST · v 1.0.0</div>
+    </div>
+
   </div>
+
 </ion-content>
