@@ -256,3 +256,39 @@
     padding-top: env(safe-area-inset-top, 0);
   }
 }
+
+/* ============================================================================
+ * Bottone centra-su-di-me
+ * ============================================================================
+ * FAB flottante bottom-right, sopra la mappa (z-map-overlay) e sotto la
+ * tab bar (z-tab-bar). Si allontana dal bordo inferiore della tab bar.
+ * ========================================================================== */
+
+.home__locate-btn {
+  position: fixed;
+  right: 16px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--tq-z-map-overlay);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(var(--tq-bg-rgb), 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(244, 235, 220, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  color: var(--tq-bone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+
+  &:active {
+    transform: scale(0.92);
+    background: rgba(var(--tq-ocra-rgb), 0.18);
+    border-color: rgba(var(--tq-ocra-rgb), 0.4);
+    color: var(--tq-ocra);
+  }
+}

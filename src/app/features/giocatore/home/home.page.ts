@@ -212,6 +212,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
     }, this.REFRESH_INTERVAL_MS);
   }
 
+  protected centerOnUser(): void {
+    const pos = this.geolocationService.position();
+    if (!pos || !this.map) return;
+    this.map.flyTo([pos.lat, pos.lng], this.USER_FOCUS_ZOOM, { duration: 0.8 });
+  }
+
   ionViewWillEnter(): void {
     // Leaflet non ridisegna quando il tab torna in primo piano dopo essere
     // stato nascosto: invalidateSize() ricalcola container e ricarica i tile.

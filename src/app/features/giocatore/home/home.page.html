@@ -25,4 +25,16 @@
 
   <!-- Header overlay: greeting + collection chip. -->
   <app-home-header></app-home-header>
+
+  <!-- Bottone centra sulla posizione utente -->
+  <button class="home__locate-btn" type="button" aria-label="Centra sulla mia posizione"
+          (click)="centerOnUser()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" opacity="0"/>
+    </svg>
+  </button>
 </ion-content>
