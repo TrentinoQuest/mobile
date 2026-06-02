@@ -1,20 +1,188 @@
-<!--
-  Modal placeholder per la scansione QR.
-  Volutamente minimalista: centrato, un titolo, una nota esplicativa,
-  un bottone per chiudere. La modal di scan vera avra' una struttura
-  completamente diversa (preview camera, mirino, hint testuali).
--->
-<ion-content [fullscreen]="true" class="scan-placeholder">
-  <div class="scan-placeholder__inner">
-    <h2 class="scan-placeholder__title">Scansione QR</h2>
+<ion-content [fullscreen]="true" class="scan-modal">
 
-    <p class="scan-placeholder__hint">
-      Qui montera' la camera con il decoder QR.<br />
-      Per ora e' un placeholder per testare il flusso di apertura.
-    </p>
+  <!-- ============================================================
+       STATO: IDLE — viewfinder con pulsante scansiona
+       ============================================================ -->
+  @if (state() === 'idle') {
+    <div class="scan-modal__idle">
 
-    <ion-button expand="block" color="primary" (click)="dismiss()" class="scan-placeholder__btn">
-      Chiudi
-    </ion-button>
-  </div>
+      <!-- Barra superiore -->
+      <div class="scan-modal__topbar">
+        <button class="scan-modal__icon-btn" (click)="dismiss()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <span class="scan-modal__title">Cerca il QR</span>
+        <div class="scan-modal__icon-btn scan-modal__icon-btn--ghost"></div>
+      </div>
+
+      <!-- Hint -->
+      <div class="scan-modal__hint">
+        <div class="scan-modal__hint-dot"></div>
+        <div>
+          <div class="scan-modal__hint-title">Trova il QR code nascosto</div>
+          <div class="scan-modal__hint-sub">Tieni la fotocamera ferma e ben illuminata.</div>
+        </div>
+      </div>
+
+      <!-- Viewfinder -->
+      <div class="scan-modal__viewfinder-wrap">
+        <!-- Oscuramento laterale via SVG mask -->
+        <svg class="scan-modal__vf-mask" viewBox="0 0 393 852" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <mask id="tq-vf-mask">
+              <rect width="393" height="852" fill="white"/>
+              <rect x="66" y="296" width="260" height="260" rx="18" fill="black"/>
+            </mask>
+          </defs>
+          <rect width="393" height="852" fill="rgba(0,0,0,0.55)" mask="url(#tq-vf-mask)"/>
+        </svg>
+
+        <!-- Angoli del mirino -->
+        <svg class="scan-modal__corner scan-modal__corner--tl" viewBox="0 0 36 36">
+          <path d="M2 14V4a2 2 0 012-2h10" fill="none" stroke="#C8930F" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <svg class="scan-modal__corner scan-modal__corner--tr" viewBox="0 0 36 36">
+          <path d="M2 14V4a2 2 0 012-2h10" fill="none" stroke="#C8930F" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <svg class="scan-modal__corner scan-modal__corner--br" viewBox="0 0 36 36">
+          <path d="M2 14V4a2 2 0 012-2h10" fill="none" stroke="#C8930F" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <svg class="scan-modal__corner scan-modal__corner--bl" viewBox="0 0 36 36">
+          <path d="M2 14V4a2 2 0 012-2h10" fill="none" stroke="#C8930F" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Linea di scansione animata -->
+        <div class="scan-modal__scan-line"></div>
+      </div>
+
+      <!-- Pulsante azione -->
+      <div class="scan-modal__bottom">
+        <button class="scan-modal__scan-btn" (click)="startScan()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 4h6l1.5 3H20a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h3.5L9 4z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Scansiona QR
+        </button>
+        <div class="scan-modal__bottom-hint">Cerca il codice QR nascosto vicino al luogo da scoprire</div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
+       STATO: SUBMITTING — loading dopo la scansione
+       ============================================================ -->
+  @if (state() === 'submitting') {
+    <div class="scan-modal__submitting">
+      <div class="scan-modal__spinner"></div>
+      <div class="scan-modal__submitting-title">Verifica in corso…</div>
+      <div class="scan-modal__submitting-sub">Stiamo controllando la posizione e il codice.</div>
+    </div>
+  }
+
+  <!-- ============================================================
+       STATO: SUCCESS — reveal del collezionabile
+       ============================================================ -->
+  @if (state() === 'success') {
+    <div class="scan-modal__success">
+
+      <!-- Glow di sfondo -->
+      <div class="scan-modal__glow"></div>
+
+      <!-- Scintille decorative -->
+      <svg class="scan-modal__sparkles" viewBox="0 0 393 852" preserveAspectRatio="xMidYMid slice">
+        @for (spark of [[80,180,2],[320,220,1.5],[40,360,1.8],[350,400,2.2],[60,580,1.5],[330,600,2],[100,700,1.3],[300,720,1.6],[200,150,1.2]]; track $index) {
+          <circle [attr.cx]="spark[0]" [attr.cy]="spark[1]" [attr.r]="spark[2]" fill="#C8930F" opacity="0.6"/>
+        }
+      </svg>
+
+      <!-- Pulsante chiudi -->
+      <button class="scan-modal__close-btn" (click)="dismiss()">×</button>
+
+      <!-- Contenuto centrato -->
+      <div class="scan-modal__success-body">
+        <div class="scan-modal__new-label">✦ NUOVO RICORDO</div>
+        <div class="scan-modal__new-title">Hai scoperto un luogo.</div>
+
+        <!-- Carta collezionabile -->
+        <div class="scan-modal__card">
+          <!-- Arte paesaggistica SVG -->
+          <svg class="scan-modal__card-art" viewBox="0 0 220 280" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="tq-reveal-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" [attr.stop-color]="palette().skyTop"/>
+                <stop offset="100%" [attr.stop-color]="palette().skyBot"/>
+              </linearGradient>
+            </defs>
+            <rect width="220" height="280" fill="url(#tq-reveal-sky)"/>
+            <path d="M0 190 L45 170 L100 185 L150 160 L200 175 L220 168 L220 280 L0 280 Z"
+                  [attr.fill]="palette().mid" opacity="0.9"/>
+            <path d="M0 220 L55 205 L120 218 L175 200 L220 210 L220 280 L0 280 Z"
+                  [attr.fill]="palette().fg"/>
+            <circle cx="168" cy="70" r="28" [attr.fill]="palette().sun" opacity="0.4"/>
+            <circle cx="168" cy="70" r="12" [attr.fill]="palette().sun"/>
+          </svg>
+
+          <!-- Info carta -->
+          <div class="scan-modal__card-info">
+            <div class="scan-modal__card-rarity">{{ scanResult()?.collectible?.rarity | uppercase }}</div>
+            <div class="scan-modal__card-name">{{ scanResult()?.collectible?.name }}</div>
+            <div class="scan-modal__card-points">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="#C8930F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 000 5H6M18 9h1.5a2.5 2.5 0 010 5H18M8 9h8M8 15h8M12 9v6"/>
+              </svg>
+              + {{ scanResult()?.pointsAwarded }} PUNTI
+            </div>
+          </div>
+        </div>
+
+        <!-- Aggiornamento contatore luoghi -->
+        <div class="scan-modal__counter">
+          <span class="scan-modal__counter-prev">{{ prevCount() }}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="#C8930F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+          <span class="scan-modal__counter-new">{{ prevCount() + 1 }}</span>
+          <span class="scan-modal__counter-total">/ {{ totalCount() }}</span>
+        </div>
+        <div class="scan-modal__counter-label">luoghi scoperti</div>
+      </div>
+
+      <!-- CTA in basso -->
+      <div class="scan-modal__success-cta">
+        <button class="scan-modal__cta-primary" (click)="continueExploring()">
+          Continua a esplorare
+        </button>
+        <div class="scan-modal__cta-row">
+          <button class="scan-modal__cta-secondary" (click)="dismiss()">Chiudi</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
+       STATO: ERROR — messaggio di errore con retry
+       ============================================================ -->
+  @if (state() === 'error') {
+    <div class="scan-modal__error">
+      <div class="scan-modal__error-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+             stroke="#C8930F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+      </div>
+      <div class="scan-modal__error-title">Scansione non riuscita</div>
+      <div class="scan-modal__error-msg">{{ errorMessage() }}</div>
+      <button class="scan-modal__cta-primary" (click)="retryFromError()">Riprova</button>
+      <button class="scan-modal__dismiss-link" (click)="dismiss()">Chiudi</button>
+    </div>
+  }
+
 </ion-content>

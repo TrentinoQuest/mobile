@@ -4,7 +4,7 @@
 
     <!-- Gear icon (impostazioni) -->
     <div class="profilo__topbar">
-      <button class="profilo__gear-btn" type="button" aria-label="Impostazioni">
+      <button class="profilo__gear-btn" type="button" aria-label="Impostazioni" (click)="scrollToSettings()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -90,7 +90,7 @@
     <div class="profilo__section">
       <div class="profilo__settings-list">
         @for (row of settingsRows; track row.label; let last = $last) {
-          <button class="profilo__settings-row" [class.profilo__settings-row--last]="last" type="button">
+          <button class="profilo__settings-row" [class.profilo__settings-row--last]="last" type="button" (click)="onSettingsRow(row)">
             <div class="profilo__settings-icon-wrap">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="1.6"

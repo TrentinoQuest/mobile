@@ -86,8 +86,12 @@ export class HomeHeaderComponent {
   /** Quante quest totali ci sono in lista. */
   protected readonly total = this.questService.totalCount;
 
-  /** Punti totali (somma dei pointsAwarded dei completion). */
-  protected readonly points = this.questService.totalCount; ///Change
+  /** Punti totali del giocatore, letti dal profilo auth (aggiornati dopo ogni check-in/scan). */
+  protected readonly points = computed<number>(() => {
+    const user = this.authService.currentUser();
+    if (user && 'totalPoints' in user) return (user as { totalPoints: number }).totalPoints;
+    return 0;
+  });
 
   /** Loading: usato per mostrare skeleton mentre i dati arrivano. */
   protected readonly loading = this.questService.loading;

@@ -186,6 +186,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
     }
 
     // Carica dati dal repository. Gli effect ridisegneranno i marker.
+    // Fatto qui e non in ionViewWillEnter perché ionViewWillEnter non scatta
+    // per il tab di default all'apertura iniziale dell'app.
     this.questService.loadQuests();
     this.questService.loadCompletions();
 
@@ -194,6 +196,19 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // il container risulta 0×0 e i tile non vengono caricati.
     // invalidateSize() sul microtask successivo forza il recalcolo.
     setTimeout(() => this.map?.invalidateSize(), 0);
+  }
+
+  ionViewWillEnter(): void {
+    // Leaflet non ridisegna quando il tab torna in primo piano dopo essere
+    // stato nascosto: invalidateSize() ricalcola container e ricarica i tile.
+    setTimeout(() => this.map?.invalidateSize(), 100);
+
+    // Forza refresh dei dati: quest aggiunte dal backoffice o completamenti
+    // da altre sessioni diventano visibili senza riavviare l'app.
+    // (ionViewWillEnter non scatta al caricamento iniziale del tab di default,
+    // quindi il primo fetch resta in ngAfterViewInit — questo copre i ritorni.)
+    this.questService.loadQuests(undefined, true);
+    this.questService.loadCompletions(undefined, undefined, true);
   }
 
   ngOnDestroy(): void {

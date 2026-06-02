@@ -1,7 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, ViewChild, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { IonContent } from '@ionic/angular/standalone';
+import { ActionSheetController, AlertController, IonContent } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { lockClosedOutline, trashOutline } from 'ionicons/icons';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
@@ -22,6 +24,12 @@ const ITALIAN_MONTHS = [
   'dicembre',
 ];
 
+interface SettingsRow {
+  icon: string;
+  label: string;
+  value: string | null;
+}
+
 @Component({
   selector: 'app-profilo',
   templateUrl: './profilo.page.html',
@@ -30,9 +38,17 @@ const ITALIAN_MONTHS = [
   imports: [IonContent, DecimalPipe, ThemeSelectorComponent],
 })
 export class ProfiloPage {
+  @ViewChild(IonContent) private readonly content!: IonContent;
+
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(PlayerProfileService);
   private readonly router = inject(Router);
+  private readonly alertCtrl = inject(AlertController);
+  private readonly actionSheetCtrl = inject(ActionSheetController);
+
+  constructor() {
+    addIcons({ lockClosedOutline, trashOutline });
+  }
 
   protected readonly player = computed<Player | null>(() => {
     const user = this.authService.currentUser();
@@ -70,18 +86,37 @@ export class ProfiloPage {
     { icon: 'star', label: 'Val di Non', unlocked: false },
   ];
 
-  protected readonly settingsRows = [
+  protected settingsRows: SettingsRow[] = [
     { icon: 'bell', label: 'Notifiche', value: 'Tutti gli eventi' },
     { icon: 'layers', label: 'Mappa offline', value: '0 valli scaricate' },
     { icon: 'person', label: 'Account & privacy', value: null },
     { icon: 'compass', label: 'Lingua', value: 'Italiano' },
   ];
 
-  protected readonly showTheme = computed(() => false);
-
   ionViewWillEnter(): void {
     this.profileService.loadProgress();
     this.profileService.loadCollection();
+  }
+
+  async scrollToSettings(): Promise<void> {
+    await this.content.scrollToBottom(400);
+  }
+
+  async onSettingsRow(row: SettingsRow): Promise<void> {
+    switch (row.icon) {
+      case 'bell':
+        await this.openNotifiche(row);
+        break;
+      case 'layers':
+        await this.openMappaOffline();
+        break;
+      case 'person':
+        await this.openAccountPrivacy();
+        break;
+      case 'compass':
+        await this.openLingua(row);
+        break;
+    }
   }
 
   protected logout(): void {
@@ -89,7 +124,6 @@ export class ProfiloPage {
     void this.router.navigate(['/']);
   }
 
-  // Icone SVG inline per gli achievement (evita import dinamici)
   protected achievementIcon(name: string): string {
     const icons: Record<string, string> = {
       mountain: 'M3 20l5-9 3 5 2-3 8 7H3z',
@@ -99,5 +133,135 @@ export class ProfiloPage {
       star: 'M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3z',
     };
     return icons[name] ?? 'M12 12m-9 0a9 9 0 1018 0 9 9 0 00-18 0';
+  }
+
+  // ----------------------------------------------------------------
+  // Metodi privati per le azioni delle impostazioni
+  // ----------------------------------------------------------------
+
+  private async openNotifiche(row: SettingsRow): Promise<void> {
+    const opzioni = ['Tutti gli eventi', 'Solo scoperte', 'Disattivate'];
+    const alert = await this.alertCtrl.create({
+      header: 'Notifiche',
+      inputs: opzioni.map((opt) => ({
+        type: 'radio' as const,
+        label: opt,
+        value: opt,
+        checked: row.value === opt,
+      })),
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Salva',
+          handler: (v: string) => {
+            row.value = v;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async openMappaOffline(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Mappa offline',
+      message:
+        'Scarica le mappe delle valli del Trentino per esplorare anche senza connessione.\n\nNessuna valle disponibile al momento.',
+      buttons: ['Chiudi'],
+    });
+    await alert.present();
+  }
+
+  private async openAccountPrivacy(): Promise<void> {
+    const sheet = await this.actionSheetCtrl.create({
+      header: 'Account & privacy',
+      buttons: [
+        {
+          text: 'Cambia password',
+          icon: 'lock-closed-outline',
+          handler: () => {
+            void this.openCambiaPassword();
+          },
+        },
+        {
+          text: 'Elimina account',
+          icon: 'trash-outline',
+          role: 'destructive',
+          handler: () => {
+            void this.confirmEliminaAccount();
+          },
+        },
+        { text: 'Annulla', role: 'cancel' },
+      ],
+    });
+    await sheet.present();
+  }
+
+  private async openCambiaPassword(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Cambia password',
+      message:
+        "Ti invieremo un link per reimpostare la password all'indirizzo email associato al tuo account.",
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Invia email',
+          // TODO: chiamata API reset password quando l'endpoint sarà disponibile
+          handler: () => {},
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async confirmEliminaAccount(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Elimina account',
+      message:
+        'Questa azione è irreversibile. Tutti i tuoi progressi e collezionabili andranno persi.',
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Elimina',
+          role: 'destructive',
+          // TODO: chiamata API eliminazione account quando l'endpoint sarà disponibile
+          handler: () => {
+            this.logout();
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async openLingua(row: SettingsRow): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Lingua',
+      inputs: [
+        { type: 'radio', label: 'Italiano', value: 'Italiano', checked: true },
+        {
+          type: 'radio',
+          label: 'English (prossimamente)',
+          value: 'English',
+          disabled: true,
+        },
+        {
+          type: 'radio',
+          label: 'Deutsch (prossimamente)',
+          value: 'Deutsch',
+          disabled: true,
+        },
+      ],
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Salva',
+          handler: (v: string) => {
+            row.value = v;
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

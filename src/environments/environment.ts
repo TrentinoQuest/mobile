@@ -9,15 +9,16 @@ export const environment = {
    * Base URL delle API REST di Trentino Quest.
    * Tutti gli endpoint del backend sono sotto /api/v1 come da OpenAPI.
    */
-  apiUrl: 'http://localhost:3000/api/v1',
-
+  apiUrl: 'http://10.211.166.47:3000/api/v1',
+  
   /**
    * Endpoint di health check del backend.
    * Vive a livello di root del server, fuori dal namespace /api/v1.
    * Usato da AuthService all'avvio dell'app per verificare la
    * raggiungibilita del backend (Decisione bonus livello 3).
-   */
-  healthCheckUrl: 'http://localhost:3000/health',
+  */
+  healthCheckUrl: 'http://10.211.166.47:3000/health',
+  
 
   /**
    * Quale implementazione di QuestRepository iniettare.
@@ -35,7 +36,7 @@ export const environment = {
    * 'mock' = dati hardcoded (sviluppo offline)
    * 'http' = chiamate REST al backend
    */
-  playerProfileRepository: 'mock' as 'mock' | 'http',
+  playerProfileRepository: 'http' as 'mock' | 'http',
 };
 
 /*

@@ -1,9 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'it.trentoquest.mobile',
   appName: 'trentino-quest-mobile',
-  webDir: 'www'
+  webDir: 'www',
+  server: {
+    // In sviluppo la WebView gira su http per poter chiamare il backend
+    // locale via http senza blocco mixed-content.
+    // TODO: rimuovere prima del deploy prod (in prod il backend è https).
+    androidScheme: 'http',
+  },
 };
 
 export default config;
