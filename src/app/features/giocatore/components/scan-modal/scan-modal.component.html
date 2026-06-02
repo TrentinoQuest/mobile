@@ -1,6 +1,35 @@
 <ion-content [fullscreen]="true" class="scan-modal">
 
   <!-- ============================================================
+       STATO: NO-CONTEXT — aperto dalla navbar senza una quest attiva
+       ============================================================ -->
+  @if (state() === 'no-context') {
+    <div class="scan-modal__no-context">
+      <button class="scan-modal__icon-btn" (click)="dismiss()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="scan-modal__no-context-body">
+        <div class="scan-modal__no-context-icon">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none"
+               stroke="var(--tq-ocra)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <h2 class="scan-modal__no-context-title">Scegli prima una quest</h2>
+        <p class="scan-modal__no-context-sub">
+          Tocca una <em>quest principale</em> sulla mappa e usa il pulsante
+          <strong>Scansiona QR</strong> nel popup per avviare la scansione.
+        </p>
+        <button class="scan-modal__cta-primary" (click)="dismiss()">Vai alla mappa</button>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================
        STATO: IDLE — viewfinder con pulsante scansiona
        ============================================================ -->
   @if (state() === 'idle') {
@@ -110,22 +139,28 @@
 
         <!-- Carta collezionabile -->
         <div class="scan-modal__card">
-          <!-- Arte paesaggistica SVG -->
-          <svg class="scan-modal__card-art" viewBox="0 0 220 280" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="tq-reveal-sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" [attr.stop-color]="palette().skyTop"/>
-                <stop offset="100%" [attr.stop-color]="palette().skyBot"/>
-              </linearGradient>
-            </defs>
-            <rect width="220" height="280" fill="url(#tq-reveal-sky)"/>
-            <path d="M0 190 L45 170 L100 185 L150 160 L200 175 L220 168 L220 280 L0 280 Z"
-                  [attr.fill]="palette().mid" opacity="0.9"/>
-            <path d="M0 220 L55 205 L120 218 L175 200 L220 210 L220 280 L0 280 Z"
-                  [attr.fill]="palette().fg"/>
-            <circle cx="168" cy="70" r="28" [attr.fill]="palette().sun" opacity="0.4"/>
-            <circle cx="168" cy="70" r="12" [attr.fill]="palette().sun"/>
-          </svg>
+          <!-- Immagine reale se disponibile; SVG generativo come fallback -->
+          @if (scanResult()?.collectible?.imageUrl) {
+            <img class="scan-modal__card-art"
+                 [src]="scanResult()!.collectible.imageUrl"
+                 [alt]="scanResult()?.collectible?.name ?? ''" />
+          } @else {
+            <svg class="scan-modal__card-art" viewBox="0 0 220 280" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="tq-reveal-sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" [attr.stop-color]="palette().skyTop"/>
+                  <stop offset="100%" [attr.stop-color]="palette().skyBot"/>
+                </linearGradient>
+              </defs>
+              <rect width="220" height="280" fill="url(#tq-reveal-sky)"/>
+              <path d="M0 190 L45 170 L100 185 L150 160 L200 175 L220 168 L220 280 L0 280 Z"
+                    [attr.fill]="palette().mid" opacity="0.9"/>
+              <path d="M0 220 L55 205 L120 218 L175 200 L220 210 L220 280 L0 280 Z"
+                    [attr.fill]="palette().fg"/>
+              <circle cx="168" cy="70" r="28" [attr.fill]="palette().sun" opacity="0.4"/>
+              <circle cx="168" cy="70" r="12" [attr.fill]="palette().sun"/>
+            </svg>
+          }
 
           <!-- Info carta -->
           <div class="scan-modal__card-info">
@@ -167,21 +202,73 @@
   }
 
   <!-- ============================================================
-       STATO: ERROR — messaggio di errore con retry
+       STATO: ERROR — schermata differenziata per categoria di errore
        ============================================================ -->
   @if (state() === 'error') {
     <div class="scan-modal__error">
-      <div class="scan-modal__error-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
-             stroke="#C8930F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 8v4M12 16h.01"/>
-        </svg>
+
+      <!-- Icona variabile per categoria -->
+      <div class="scan-modal__error-icon"
+           [class.scan-modal__error-icon--done]="errorCategory() === 'already-done'"
+           [class.scan-modal__error-icon--gps]="errorCategory() === 'gps'">
+        @if (errorCategory() === 'already-done') {
+          <!-- Checkmark forest: quest già completata -->
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="var(--tq-forest)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        } @else if (errorCategory() === 'gps') {
+          <!-- Satellite: problema GPS -->
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="var(--tq-ocra)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            <path d="M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/>
+          </svg>
+        } @else if (errorCategory() === 'distance') {
+          <!-- Pin con freccia: troppo lontano -->
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="var(--tq-ocra)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        } @else {
+          <!-- QR / generico -->
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="var(--tq-ocra)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+        }
       </div>
-      <div class="scan-modal__error-title">Scansione non riuscita</div>
+
+      <!-- Titolo contestuale -->
+      <div class="scan-modal__error-title">
+        @if (errorCategory() === 'already-done') { Già scoperta }
+        @else if (errorCategory() === 'gps') { Problema GPS }
+        @else if (errorCategory() === 'distance') { Troppo lontano }
+        @else if (errorCategory() === 'qr') { QR non valido }
+        @else { Scansione non riuscita }
+      </div>
+
       <div class="scan-modal__error-msg">{{ errorMessage() }}</div>
-      <button class="scan-modal__cta-primary" (click)="retryFromError()">Riprova</button>
-      <button class="scan-modal__dismiss-link" (click)="dismiss()">Chiudi</button>
+
+      <!-- Hint aggiuntivo per GPS -->
+      @if (errorCategory() === 'gps') {
+        <div class="scan-modal__error-hint">
+          Spostati in uno spazio aperto lontano da edifici e attendi
+          che il GPS si agganci prima di riprovare.
+        </div>
+      }
+
+      <!-- CTA: "Riprova" solo se ha senso (non per "già completata") -->
+      @if (errorCategory() !== 'already-done') {
+        <button class="scan-modal__cta-primary" (click)="retryFromError()">Riprova</button>
+      }
+      <button class="scan-modal__dismiss-link" (click)="dismiss()">
+        @if (errorCategory() === 'already-done') { Chiudi } @else { Annulla }
+      </button>
     </div>
   }
 

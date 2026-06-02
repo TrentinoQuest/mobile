@@ -1,5 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
+import { CollectibleRarity } from '@trentino-quest/shared-types';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
 
 type AlbumFilter = 'tutti' | 'area' | 'crono' | 'da-scoprire';
@@ -9,6 +11,8 @@ interface AlbumCard {
   name: string;
   locked: boolean;
   paletteSeed: number;
+  imageUrl: string;
+  rarity: CollectibleRarity | null;
 }
 
 @Component({
@@ -16,9 +20,9 @@ interface AlbumCard {
   templateUrl: './album.page.html',
   styleUrls: ['./album.page.scss'],
   standalone: true,
-  imports: [IonContent],
+  imports: [IonContent, NgClass],
 })
-export class AlbumPage {
+export class AlbumPage implements OnInit {
   private readonly profileService = inject(PlayerProfileService);
 
   protected readonly loading = this.profileService.loading;
@@ -57,6 +61,8 @@ export class AlbumPage {
         name: '',
         locked: true,
         paletteSeed: i,
+        imageUrl: '',
+        rarity: null,
       }));
     }
 
@@ -72,9 +78,12 @@ export class AlbumPage {
       name: entry.collectible.name,
       locked: false,
       paletteSeed: i,
+      imageUrl: entry.collectible.imageUrl ?? '',
+      rarity: entry.collectible.rarity,
     }));
 
-    if (filter === 'crono') return unlocked;
+    // TODO: "Per area" richiede campo zone sul Collectible — per ora mostra tutto
+    if (filter === 'crono' || filter === 'area') return unlocked;
 
     const lockedCount = Math.max(0, total - col.length);
     const locked: AlbumCard[] = Array.from({ length: lockedCount }, (_, i) => ({
@@ -82,6 +91,8 @@ export class AlbumPage {
       name: '',
       locked: true,
       paletteSeed: col.length + i,
+      imageUrl: '',
+      rarity: null,
     }));
 
     return [...unlocked, ...locked];
@@ -103,11 +114,17 @@ export class AlbumPage {
     return this.PALETTES[seed % this.PALETTES.length];
   }
 
+  protected readonly CollectibleRarity = CollectibleRarity;
+
   protected cardNum(index: number): string {
     return `#${String(index * 7 + 12).padStart(3, '0')}`;
   }
 
-  ionViewWillEnter(): void {
+  protected rarityModifier(rarity: CollectibleRarity | null): string {
+    return rarity ? `album__card-rarity--${rarity}` : '';
+  }
+
+  ngOnInit(): void {
     this.profileService.loadCollection();
     this.profileService.loadProgress();
   }

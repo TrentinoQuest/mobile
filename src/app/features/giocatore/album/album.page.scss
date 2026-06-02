@@ -251,6 +251,53 @@
   height: 100%;
 }
 
+.album__card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// Sfumatura dal basso per leggibilità del nome sopra immagini reali
+.album__card-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+// Dot indicatore rarità (top-left della card)
+.album__card-rarity {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  z-index: 1;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+
+  &.album__card-rarity--common {
+    background: rgba(244, 235, 220, 0.45);
+  }
+
+  &.album__card-rarity--uncommon {
+    background: var(--tq-forest);
+    box-shadow: 0 0 6px rgba(107, 160, 70, 0.6);
+  }
+
+  &.album__card-rarity--rare {
+    background: var(--tq-ocra);
+    box-shadow: 0 0 6px rgba(200, 147, 15, 0.6);
+  }
+
+  &.album__card-rarity--legendary {
+    background: var(--tq-rust);
+    box-shadow: 0 0 8px rgba(196, 103, 58, 0.8);
+  }
+}
+
 .album__card-lock-icon {
   opacity: 0.5;
 }

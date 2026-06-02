@@ -368,6 +368,9 @@ ion-content.scan-modal {
   height: 280px;
   border-radius: 8px;
   display: block;
+
+  /* Per <img>: copre l'area senza deformarsi, come l'SVG */
+  object-fit: cover;
 }
 
 .scan-modal__card-info {
@@ -453,6 +456,72 @@ ion-content.scan-modal {
 }
 
 /* ============================================================
+   NO-CONTEXT — aperto dalla navbar senza una quest attiva
+   ============================================================ */
+
+.scan-modal__no-context {
+  position: absolute;
+  inset: 0;
+  background: var(--tq-bg);
+  display: flex;
+  flex-direction: column;
+  padding: 56px 20px 48px;
+
+  > .scan-modal__icon-btn {
+    align-self: flex-end;
+  }
+}
+
+.scan-modal__no-context-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.scan-modal__no-context-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(200, 147, 15, 0.07);
+  border: 1px solid rgba(200, 147, 15, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.scan-modal__no-context-title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 26px;
+  color: var(--tq-bone);
+  margin: 0 0 14px;
+}
+
+.scan-modal__no-context-sub {
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(244, 235, 220, 0.55);
+  margin: 0 0 36px;
+
+  em {
+    font-style: italic;
+    color: rgba(244, 235, 220, 0.8);
+  }
+
+  strong {
+    color: var(--tq-ocra);
+    font-weight: 600;
+  }
+}
+
+/* ============================================================
    ERROR
    ============================================================ */
 
@@ -479,6 +548,17 @@ ion-content.scan-modal {
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
+
+  /* Quest già completata: sfondo forest invece di ocra */
+  &.scan-modal__error-icon--done {
+    background: rgba(107, 160, 70, 0.1);
+    border-color: rgba(107, 160, 70, 0.25);
+  }
+
+  /* Problema GPS: stessa palette ocra, nessuna variazione */
+  &.scan-modal__error-icon--gps {
+    background: rgba(200, 147, 15, 0.06);
+  }
 }
 
 .scan-modal__error-title {
@@ -492,6 +572,14 @@ ion-content.scan-modal {
   font-size: 14px;
   color: rgba(244, 235, 220, 0.6);
   line-height: 1.5;
+}
+
+.scan-modal__error-hint {
+  font-size: 12px;
+  color: rgba(244, 235, 220, 0.38);
+  line-height: 1.5;
+  font-style: italic;
+  max-width: 280px;
 }
 
 .scan-modal__dismiss-link {

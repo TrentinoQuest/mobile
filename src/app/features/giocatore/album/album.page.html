@@ -77,17 +77,31 @@
           </div>
         } @else {
           <div class="album__card album__card--unlocked"
-               [style.background]="'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'">
-            <!-- Montagna stilizzata -->
-            <svg class="album__card-art" viewBox="0 0 100 146" preserveAspectRatio="xMidYMid slice">
-              <path [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
-                    [attr.fill]="palette(card.paletteSeed).mid" opacity="0.7"/>
-              <path [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
-                    [attr.fill]="palette(card.paletteSeed).fg" opacity="0.55"/>
-              <circle [attr.cx]="68 - (card.paletteSeed % 3) * 15"
-                      [attr.cy]="28 + (card.paletteSeed % 2) * 8"
-                      r="4" [attr.fill]="palette(card.paletteSeed).fg" opacity="0.9"/>
-            </svg>
+               [style.background]="card.imageUrl ? '#0d0d0d' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'">
+
+            <!-- Immagine reale se disponibile, altrimenti arte generativa SVG -->
+            @if (card.imageUrl) {
+              <img class="album__card-img" [src]="card.imageUrl" [alt]="card.name" loading="lazy" />
+            } @else {
+              <svg class="album__card-art" viewBox="0 0 100 146" preserveAspectRatio="xMidYMid slice">
+                <path [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
+                      [attr.fill]="palette(card.paletteSeed).mid" opacity="0.7"/>
+                <path [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
+                      [attr.fill]="palette(card.paletteSeed).fg" opacity="0.55"/>
+                <circle [attr.cx]="68 - (card.paletteSeed % 3) * 15"
+                        [attr.cy]="28 + (card.paletteSeed % 2) * 8"
+                        r="4" [attr.fill]="palette(card.paletteSeed).fg" opacity="0.9"/>
+              </svg>
+            }
+
+            <!-- Sfumatura in basso per leggibilità del nome -->
+            <div class="album__card-scrim"></div>
+
+            <!-- Dot rarity -->
+            @if (card.rarity) {
+              <span class="album__card-rarity" [ngClass]="rarityModifier(card.rarity)"></span>
+            }
+
             <span class="album__card-num">{{ cardNum(i) }}</span>
             <span class="album__card-name">{{ card.name }}</span>
           </div>

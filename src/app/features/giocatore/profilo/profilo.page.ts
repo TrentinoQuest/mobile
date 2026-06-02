@@ -1,4 +1,4 @@
-import { Component, ViewChild, computed, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ActionSheetController, AlertController, IonContent } from '@ionic/angular/standalone';
@@ -37,7 +37,7 @@ interface SettingsRow {
   standalone: true,
   imports: [IonContent, DecimalPipe, ThemeSelectorComponent],
 })
-export class ProfiloPage {
+export class ProfiloPage implements OnInit {
   @ViewChild(IonContent) private readonly content!: IonContent;
 
   private readonly authService = inject(AuthService);
@@ -93,7 +93,7 @@ export class ProfiloPage {
     { icon: 'compass', label: 'Lingua', value: 'Italiano' },
   ];
 
-  ionViewWillEnter(): void {
+  ngOnInit(): void {
     this.profileService.loadProgress();
     this.profileService.loadCollection();
   }

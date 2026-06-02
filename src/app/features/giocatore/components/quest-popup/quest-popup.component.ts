@@ -121,10 +121,13 @@ export class QuestPopupComponent {
   }
 
   async openScanModal(): Promise<void> {
+    const q = this.quest();
+    if (!q) return;
     const modal = await this.modalCtrl.create({
       component: ScanModalComponent,
       cssClass: 'tq-scan-modal',
       backdropDismiss: false,
+      componentProps: { questId: q.id },
     });
     await modal.present();
   }

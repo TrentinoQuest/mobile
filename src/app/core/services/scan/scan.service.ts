@@ -15,22 +15,17 @@ export interface ScanError {
   message: string;
 }
 
-interface QrPayload {
-  questId: string;
-  token: string;
-}
-
 /**
  * Service di scansione QR.
  *
  * Incapsula il flusso completo:
  *   1. Apertura scanner nativo Capacitor
- *   2. Parsing del payload JSON nel QR
+ *   2. Il contenuto del QR è il qrToken grezzo (stringa pura, non JSON)
  *   3. Lettura posizione GPS dal GeolocationService
- *   4. Chiamata POST /quests/{id}/scan con token + fix GPS
+ *   4. Chiamata POST /quests/{questId}/scan con token + fix GPS
  *
- * Formato atteso del contenuto QR:
- *   {"questId":"<mongoId>","token":"qr_<32hex>"}
+ * Il questId viene passato dal chiamante (popup della quest aperta),
+ * non è deducibile dal QR da solo.
  */
 @Injectable({ providedIn: 'root' })
 export class ScanService {
@@ -51,10 +46,12 @@ export class ScanService {
 
   /**
    * Avvia la scansione e invia il risultato al backend.
-   * Lancia ScanError in tutti i casi di fallimento.
-   * Lancia { code: 'CANCELLED' } se l'utente chiude lo scanner senza scansionare.
+   *
+   * @param questId ID della quest (da passare dal popup — non deducibile dal QR)
+   * @throws ScanError in tutti i casi di fallimento
+   * @throws { code: 'CANCELLED' } se l'utente chiude lo scanner senza scansionare
    */
-  async scanAndSubmit(): Promise<ScanQrResponse> {
+  async scanAndSubmit(questId: string): Promise<ScanQrResponse> {
     const result = await CapacitorBarcodeScanner.scanBarcode({
       hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
       cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
@@ -65,8 +62,9 @@ export class ScanService {
       throw { code: 'CANCELLED', message: '' } satisfies ScanError;
     }
 
-    const payload = this.parseQrPayload(result.ScanResult);
-    if (!payload) {
+    // Il QR contiene il token grezzo (non un JSON strutturato)
+    const qrToken = result.ScanResult.trim();
+    if (!qrToken) {
       throw {
         code: 'INVALID_QR_TOKEN',
         message: this.ERROR_MESSAGES['INVALID_QR_TOKEN'],
@@ -82,8 +80,8 @@ export class ScanService {
     }
 
     return firstValueFrom(
-      this.http.post<ScanQrResponse>(`${environment.apiUrl}/quests/${payload.questId}/scan`, {
-        qrToken: payload.token,
+      this.http.post<ScanQrResponse>(`${environment.apiUrl}/quests/${questId}/scan`, {
+        qrToken,
         position: { lat: position.lat, lng: position.lng },
         fix: { accuracy: position.accuracy, clientTimestamp: position.clientTimestamp },
       }),
@@ -93,25 +91,5 @@ export class ScanService {
         (code && this.ERROR_MESSAGES[code]) ?? 'Errore durante la scansione. Riprova.';
       throw { code: code ?? 'UNKNOWN', message } satisfies ScanError;
     });
-  }
-
-  private parseQrPayload(raw: string): QrPayload | null {
-    try {
-      const parsed = JSON.parse(raw) as unknown;
-      if (
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        typeof (parsed as Record<string, unknown>)['questId'] === 'string' &&
-        typeof (parsed as Record<string, unknown>)['token'] === 'string'
-      ) {
-        return {
-          questId: (parsed as Record<string, string>)['questId'],
-          token: (parsed as Record<string, string>)['token'],
-        };
-      }
-      return null;
-    } catch {
-      return null;
-    }
   }
 }

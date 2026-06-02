@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonContent, ModalController } from '@ionic/angular/standalone';
@@ -8,7 +8,10 @@ import { PlayerProfileService } from '../../../../core/services/player-profile/p
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 
-type ScanState = 'idle' | 'submitting' | 'success' | 'error';
+type ScanState = 'no-context' | 'idle' | 'submitting' | 'success' | 'error';
+
+/** Categoria di errore usata per differenziare l'UI della schermata errore. */
+type ErrorCategory = 'already-done' | 'distance' | 'gps' | 'qr' | 'generic';
 
 // Stesse palette dell'album — art exception, hex diretti
 const PALETTES = [
@@ -19,6 +22,15 @@ const PALETTES = [
   { skyTop: '#3A2014', skyBot: '#140A06', sun: '#C05828', mid: '#381A10', fg: '#22100A' },
   { skyTop: '#1A2830', skyBot: '#080E12', sun: '#3A8A7A', mid: '#183028', fg: '#0D1C1A' },
 ];
+
+const GPS_ERROR_CODES = new Set(['GPS_UNAVAILABLE', 'OUT_OF_RANGE_ACCURACY', 'STALE_FIX']);
+const QR_ERROR_CODES = new Set([
+  'INVALID_QR_TOKEN',
+  'QR_QUEST_MISMATCH',
+  'QR_EXPIRED',
+  'QUEST_NOT_PLACED',
+  'COLLECTIBLE_MISSING',
+]);
 
 @Component({
   selector: 'app-scan-modal',
@@ -35,30 +47,52 @@ export class ScanModalComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  /** ID della quest da completare. Null quando aperto dalla navbar senza contesto. */
+  @Input() questId: string | null = null;
+
   protected readonly state = signal<ScanState>('idle');
   protected readonly scanResult = signal<ScanQrResponse | null>(null);
   protected readonly errorMessage = signal('');
+  protected readonly errorCode = signal('');
 
-  // Palette basata sul nome del collezionabile sbloccato
   protected readonly palette = computed(() => {
     const name = this.scanResult()?.collectible?.name ?? '';
     return PALETTES[name.length % PALETTES.length];
   });
 
-  // Contatore progressi prima e dopo lo sblocco
+  // Contatori derivati da questService (sempre caricato) invece che da profileService
+  // (che viene azzerato con reset() subito dopo la scansione).
+  // Dopo addCompletion() il length è N+1, quindi N+1-1 = N = conta prima di questo unlock.
   protected readonly prevCount = computed(() =>
-    Math.max(0, this.profileService.unlockedCount() - 0),
+    Math.max(0, this.questService.completions().length - 1),
   );
-  protected readonly totalCount = computed(() => this.profileService.totalCount());
+  protected readonly totalCount = computed(() => this.questService.totalCount());
+
+  protected readonly errorCategory = computed<ErrorCategory>(() => {
+    const code = this.errorCode();
+    if (code === 'QUEST_ALREADY_COMPLETED') return 'already-done';
+    if (code === 'OUT_OF_VALIDATION_RADIUS') return 'distance';
+    if (GPS_ERROR_CODES.has(code)) return 'gps';
+    if (QR_ERROR_CODES.has(code)) return 'qr';
+    return 'generic';
+  });
 
   ngOnInit(): void {
-    this.startScan();
+    if (this.questId) {
+      this.startScan();
+    } else {
+      this.state.set('no-context');
+    }
   }
 
   async startScan(): Promise<void> {
+    if (!this.questId) {
+      this.state.set('no-context');
+      return;
+    }
     this.state.set('submitting');
     try {
-      const result = await this.scanService.scanAndSubmit();
+      const result = await this.scanService.scanAndSubmit(this.questId);
       // Aggiorna i signal reattivi: mappa → marker diventa 'discovered',
       // header → punti aggiornati, senza attendere il prossimo loadCompletions.
       this.questService.addCompletion(result.completion);
@@ -73,6 +107,7 @@ export class ScanModalComponent implements OnInit {
         await this.dismiss();
         return;
       }
+      this.errorCode.set(scanErr.code ?? '');
       this.errorMessage.set(scanErr.message || 'Errore sconosciuto. Riprova.');
       this.state.set('error');
     }
