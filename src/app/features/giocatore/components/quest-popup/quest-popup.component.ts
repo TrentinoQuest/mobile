@@ -13,6 +13,7 @@ import { GeolocationService } from '../../../../core/services/geolocation/geoloc
 import { AuthService } from '../../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../../core/services/player-profile/player-profile.service';
 import { CheckinSuccessModalComponent } from '../checkin-success-modal/checkin-success-modal.component';
+import { ScanModalComponent } from '../scan-modal/scan-modal.component';
 
 type CheckInState = 'idle' | 'loading' | 'error';
 
@@ -117,6 +118,15 @@ export class QuestPopupComponent {
   retryCheckIn(): void {
     this.checkInState.set('idle');
     this.checkInError.set('');
+  }
+
+  async openScanModal(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: ScanModalComponent,
+      cssClass: 'tq-scan-modal',
+      backdropDismiss: false,
+    });
+    await modal.present();
   }
 
   private async openSuccessModal(questName: string, response: CheckInResponse): Promise<void> {

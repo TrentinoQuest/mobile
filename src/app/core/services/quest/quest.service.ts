@@ -239,6 +239,16 @@ export class QuestService {
   }
 
   /**
+   * Aggiunge un completamento direttamente al signal senza rifare il fetch.
+   * Usato da ScanModalComponent dopo una scansione QR riuscita: il service
+   * HTTP è già stato chiamato da ScanService, qui aggiorniamo solo lo stato
+   * locale per non perdere reattività della mappa.
+   */
+  addCompletion(completion: Completion): void {
+    this._completions.update((current) => [...current, completion]);
+  }
+
+  /**
    * Reset completo dello stato. Utile in logout o cambio utente.
    * Resetta anche i flag di inizializzazione cosi' i prossimi load
    * partono da zero.

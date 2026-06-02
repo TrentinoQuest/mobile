@@ -80,6 +80,36 @@
   margin: 4px 0 0;
 }
 
+/* ---- Sezione scan QR (quest primarie) ---- */
+
+.quest-popup__scan {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(244, 235, 220, 0.1);
+}
+
+.quest-popup__scan-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--tq-ocra);
+  color: #0d0d0d;
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
 /* ---- Sezione check-in ---- */
 
 .quest-popup__checkin {

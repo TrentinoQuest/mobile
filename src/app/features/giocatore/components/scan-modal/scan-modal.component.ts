@@ -5,6 +5,8 @@ import { IonContent, ModalController } from '@ionic/angular/standalone';
 import type { ScanQrResponse } from '@trentino-quest/shared-types';
 import { ScanService, type ScanError } from '../../../../core/services/scan/scan.service';
 import { PlayerProfileService } from '../../../../core/services/player-profile/player-profile.service';
+import { QuestService } from '../../../../core/services/quest/quest.service';
+import { AuthService } from '../../../../core/services/auth/auth.service';
 
 type ScanState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -29,6 +31,8 @@ export class ScanModalComponent implements OnInit {
   private readonly modalCtrl = inject(ModalController);
   private readonly scanService = inject(ScanService);
   private readonly profileService = inject(PlayerProfileService);
+  private readonly questService = inject(QuestService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   protected readonly state = signal<ScanState>('idle');
@@ -55,6 +59,10 @@ export class ScanModalComponent implements OnInit {
     this.state.set('submitting');
     try {
       const result = await this.scanService.scanAndSubmit();
+      // Aggiorna i signal reattivi: mappa → marker diventa 'discovered',
+      // header → punti aggiornati, senza attendere il prossimo loadCompletions.
+      this.questService.addCompletion(result.completion);
+      this.authService.updateTotalPoints(result.totalPoints);
       this.scanResult.set(result);
       // Invalida cache per forzare reload alla prossima apertura album/profilo
       this.profileService.reset();
