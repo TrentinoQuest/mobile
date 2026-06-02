@@ -32,6 +32,16 @@ const QR_ERROR_CODES = new Set([
   'COLLECTIBLE_MISSING',
 ]);
 
+/** Angoli di dispersione delle 16 particelle (gradi) */
+const PARTICLE_ANGLES = [0, 22, 45, 68, 90, 112, 135, 158, 180, 202, 225, 248, 270, 292, 315, 338];
+/** Distanza percorsa da ogni particella (px) — alternanza per varietà */
+const PARTICLE_TRAVELS = [130, 110, 150, 95, 140, 115, 160, 100, 125, 145, 90, 135, 155, 105, 120, 165];
+/** Posizioni [x%, y%, delay_index] delle stelline decorative */
+const STAR_POSITIONS: [number, number, number][] = [
+  [18, 22, 0], [78, 18, 2], [12, 55, 4], [85, 48, 1],
+  [22, 78, 3], [75, 72, 5], [50, 15, 6], [48, 82, 7],
+];
+
 @Component({
   selector: 'app-scan-modal',
   templateUrl: './scan-modal.component.html',
@@ -46,6 +56,10 @@ export class ScanModalComponent implements OnInit {
   private readonly questService = inject(QuestService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  protected readonly particleAngles = PARTICLE_ANGLES;
+  protected readonly particleTravels = PARTICLE_TRAVELS;
+  protected readonly starPositions = STAR_POSITIONS;
 
   /** ID della quest da completare. Null quando aperto dalla navbar senza contesto. */
   @Input() questId: string | null = null;

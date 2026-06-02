@@ -10,9 +10,12 @@ import {
   createComponent,
   effect,
   inject,
+  signal,
+  untracked,
 } from '@angular/core';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, ModalController } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
+import { ScanModalComponent } from '../components/scan-modal/scan-modal.component';
 import { QuestService } from '../../../core/services/quest/quest.service';
 import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
 import { getQuestIcon } from '../../../core/services/quest/quest-icons';
@@ -67,6 +70,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true })
   private mapContainer!: ElementRef<HTMLDivElement>;
 
+  protected readonly QuestType = QuestType;
+
   // ----------------------------------------------------------------
   // Dependency injection
   // ----------------------------------------------------------------
@@ -74,6 +79,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly questService = inject(QuestService);
   private readonly geolocationService = inject(GeolocationService);
   private readonly appRef = inject(ApplicationRef);
+  private readonly modalCtrl = inject(ModalController);
   private readonly envInjector = inject(EnvironmentInjector);
 
   // ----------------------------------------------------------------
@@ -84,10 +90,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private userMarker: L.Marker | null = null;
   private uncertaintyCircle: L.Circle | null = null;
 
-  // Layer separati per primary (cerchi) e secondary (marker).
-  // Permettono filtri futuri "solo primary" / "solo secondary".
   private primaryLayer: L.LayerGroup | null = null;
   private secondaryLayer: L.LayerGroup | null = null;
+
+  /** Mappa questId → marker Leaflet per aprire popup da toast o da codice. */
+  private readonly questMarkers = new Map<string, L.Marker>();
 
   /**
    * Flag one-shot per l'auto-center al primo fix valido di sessione.
@@ -107,6 +114,24 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   /** Ogni 30s forza reload quests+completions per vedere nuove quest o completamenti. */
   private readonly REFRESH_INTERVAL_MS = 30_000;
+
+  // ----------------------------------------------------------------
+  // Proximity toast
+  // ----------------------------------------------------------------
+
+  /** Toast che appare quando il giocatore si avvicina a una quest disponibile. */
+  protected readonly proximityToast = signal<{
+    questId: string;
+    questName: string;
+    inRange: boolean;
+    type: QuestType;
+  } | null>(null);
+
+  /** Timer per l'auto-dismiss del toast (5s). */
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** ID dell'ultima quest per cui abbiamo mostrato il toast, evita spam. */
+  private lastToastQuestId: string | null = null;
 
   // ----------------------------------------------------------------
   // Costanti di configurazione mappa
@@ -140,29 +165,20 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   constructor() {
     // Effect: re-render dei marker quando quests() o completions() cambiano.
-    // Combinato in un solo effect perche' lo stato giocatore (discovered/
-    // available) dipende da entrambi.
     effect(() => {
-      // Tracciati: signal "quests" e "completions" via playerStatusOf
-      // letto dentro renderQuests().
       const quests = this.questService.quests();
-      this.questService.completions(); // forza dipendenza
+      this.questService.completions();
       this.renderQuests(quests);
     });
 
-    // Effect: sincronizza marker user e alone incertezza con la posizione GPS.
-    // Reagisce a ogni nuovo fix dal GeolocationService. Al primo fix valido
-    // della sessione, esegue il flyTo one-shot. Sui fix successivi aggiorna
-    // solo le coordinate (no animazione, no strappo della camera).
+    // Effect: sincronizza marker user, alone incertezza e proximity toast.
     effect(() => {
       const position = this.geolocationService.position();
       if (position) {
         this.syncUserGpsLayers(position.lat, position.lng, position.accuracy);
+        this.checkProximity(position.lat, position.lng);
       }
     });
-
-    // TODO 2D: aggiungere effect per loading() ed error() quando ci
-    //   sara' UI per stati di caricamento e di errore.
   }
 
   // ----------------------------------------------------------------
@@ -236,6 +252,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
       clearInterval(this.refreshInterval);
       this.refreshInterval = null;
     }
+    if (this.toastTimer !== null) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
 
     this.activePopupComponents.forEach((ref) => ref.destroy());
     this.activePopupComponents.clear();
@@ -248,11 +268,80 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.uncertaintyCircle = null;
     this.primaryLayer = null;
     this.secondaryLayer = null;
+  }
 
-    // Nota: NON fermiamo il watch GPS. Il GeolocationService e' singleton
-    // e il watch resta attivo per tutta la sessione (decisione di progetto:
-    // "watch always on dopo login"). Lo stop avviene solo al logout, gestito
-    // dall'AppComponent.
+  protected dismissToast(): void {
+    if (this.toastTimer !== null) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+    this.proximityToast.set(null);
+  }
+
+  /**
+   * Controlla se il giocatore si è avvicinato a una quest disponibile.
+   * Mostra un toast one-shot per quest (non ripete finché non cambia quest).
+   */
+  private checkProximity(lat: number, lng: number): void {
+    const quests = untracked(() => this.questService.quests());
+    for (const quest of quests) {
+      if (this.questService.playerStatusOf(quest.id) !== 'available') continue;
+
+      let questLat: number, questLng: number, triggerRange: number, inRangeRadius: number;
+      if (quest.type === QuestType.PRIMARY) {
+        const q = quest as PrimaryQuest;
+        questLat = q.searchArea.lat;
+        questLng = q.searchArea.lng;
+        inRangeRadius = q.searchRadiusMeters;
+        triggerRange = q.searchRadiusMeters * 2.5;
+      } else {
+        const q = quest as SecondaryQuest;
+        questLat = q.position.lat;
+        questLng = q.position.lng;
+        inRangeRadius = q.checkInRadiusMeters;
+        triggerRange = q.checkInRadiusMeters * 2.5;
+      }
+
+      const dist = haversineMeters(lat, lng, questLat, questLng);
+      if (dist <= triggerRange && quest.id !== this.lastToastQuestId) {
+        this.lastToastQuestId = quest.id;
+        this.proximityToast.set({
+          questId: quest.id,
+          questName: quest.name,
+          inRange: dist <= inRangeRadius,
+          type: quest.type,
+        });
+        if (this.toastTimer !== null) clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => this.proximityToast.set(null), 5500);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Azione del toast: apre la scan modal per quest primarie, o il popup
+   * sulla mappa per quest secondarie.
+   */
+  protected async openToastAction(): Promise<void> {
+    const toast = this.proximityToast();
+    if (!toast) return;
+    this.dismissToast();
+
+    if (toast.type === QuestType.PRIMARY) {
+      const modal = await this.modalCtrl.create({
+        component: ScanModalComponent,
+        cssClass: 'tq-scan-modal',
+        backdropDismiss: false,
+        componentProps: { questId: toast.questId },
+      });
+      await modal.present();
+    } else {
+      const marker = this.questMarkers.get(toast.questId);
+      if (marker && this.map) {
+        this.map.flyTo(marker.getLatLng(), Math.max(this.map.getZoom(), 16), { duration: 0.6 });
+        setTimeout(() => marker.openPopup(), 650);
+      }
+    }
   }
 
   // ----------------------------------------------------------------
@@ -294,16 +383,16 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private renderQuests(quests: AnyQuest[]): void {
     if (!this.map || !this.primaryLayer || !this.secondaryLayer) return;
 
-    // Pulisci entrambi i layer.
     this.primaryLayer.clearLayers();
     this.secondaryLayer.clearLayers();
+    this.questMarkers.clear();
 
-    // Distribuisci le quest nei layer per tipo.
+    let staggerIndex = 0;
     quests.forEach((quest) => {
       if (quest.type === QuestType.PRIMARY) {
         this.renderPrimaryQuest(quest);
       } else {
-        this.renderSecondaryQuest(quest);
+        this.renderSecondaryQuest(quest, staggerIndex++);
       }
     });
   }
@@ -323,14 +412,17 @@ export class HomePage implements AfterViewInit, OnDestroy {
     const fillColor =
       playerStatus === 'discovered' ? '#6BA046' : playerStatus === 'locked' ? '#666' : '#C8930F';
 
+    const isAvailable = playerStatus === 'available';
+    const isDiscovered = playerStatus === 'discovered';
+
     const circle = L.circle([quest.searchArea.lat, quest.searchArea.lng], {
       radius: quest.searchRadiusMeters,
       color: fillColor,
       fillColor: fillColor,
-      fillOpacity: playerStatus === 'discovered' ? 0.05 : 0.08,
-      opacity: playerStatus === 'discovered' ? 0.3 : 0.45,
-      weight: 1.5,
-      dashArray: '4 6',
+      fillOpacity: isAvailable ? 0.12 : isDiscovered ? 0.04 : 0.05,
+      opacity: isAvailable ? 0.85 : isDiscovered ? 0.3 : 0.25,
+      weight: isAvailable ? 2 : 1,
+      dashArray: isAvailable ? undefined : '6 8',
     });
 
     this.bindDynamicPopup(circle, 'primary-' + quest.id, () =>
@@ -343,7 +435,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   /**
    * Renderizza una secondary quest come marker puntuale.
    */
-  private renderSecondaryQuest(quest: SecondaryQuest): void {
+  private renderSecondaryQuest(quest: SecondaryQuest, staggerIndex = 0): void {
     if (!this.secondaryLayer) return;
 
     const playerStatus = this.questService.playerStatusOf(quest.id);
@@ -360,6 +452,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
     );
 
     marker.addTo(this.secondaryLayer);
+    this.questMarkers.set(quest.id, marker);
+
+    marker.once('add', () => {
+      const el = marker.getElement();
+      if (!el) return;
+      el.style.setProperty('--stagger-delay', `${staggerIndex * 65}ms`);
+      el.classList.add('quest-marker-wrapper--enter');
+    });
   }
 
   /**
@@ -519,4 +619,15 @@ export class HomePage implements AfterViewInit, OnDestroy {
       iconAnchor: [24, 24],
     });
   }
+}
+
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6_371_000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

@@ -119,15 +119,31 @@
   @if (state() === 'success') {
     <div class="scan-modal__success">
 
-      <!-- Glow di sfondo -->
+      <!-- Flash iniziale al reveal -->
+      <div class="scan-modal__flash"></div>
+
+      <!-- Glow di sfondo pulsante -->
       <div class="scan-modal__glow"></div>
 
-      <!-- Scintille decorative -->
-      <svg class="scan-modal__sparkles" viewBox="0 0 393 852" preserveAspectRatio="xMidYMid slice">
-        @for (spark of [[80,180,2],[320,220,1.5],[40,360,1.8],[350,400,2.2],[60,580,1.5],[330,600,2],[100,700,1.3],[300,720,1.6],[200,150,1.2]]; track $index) {
-          <circle [attr.cx]="spark[0]" [attr.cy]="spark[1]" [attr.r]="spark[2]" fill="#C8930F" opacity="0.6"/>
+      <!-- Particelle burst CSS -->
+      <div class="scan-modal__particles">
+        @for (i of particleAngles; track $index) {
+          <div class="scan-modal__particle"
+               [style.--angle]="i + 'deg'"
+               [style.--travel]="particleTravels[$index] + 'px'"
+               [style.--delay]="($index * 55) + 'ms'"></div>
         }
-      </svg>
+      </div>
+
+      <!-- Stelline decorative statiche -->
+      <div class="scan-modal__stars">
+        @for (star of starPositions; track $index) {
+          <div class="scan-modal__star"
+               [style.top]="star[1] + '%'"
+               [style.left]="star[0] + '%'"
+               [style.--star-delay]="(star[2] * 80) + 'ms'"></div>
+        }
+      </div>
 
       <!-- Pulsante chiudi -->
       <button class="scan-modal__close-btn" (click)="dismiss()">×</button>

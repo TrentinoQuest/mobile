@@ -146,7 +146,12 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s;
+
+  &:active:not(:disabled) {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
 
   &.quest-popup__checkin-btn--disabled {
     background: rgba(244, 235, 220, 0.12);

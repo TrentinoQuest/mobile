@@ -265,3 +265,200 @@
     transform: rotate(-1.5deg) scale(1) translateY(0);
   }
 }
+
+/* ============================================================================
+ * ANIMAZIONI MARKER QUEST
+ * ========================================================================== */
+
+/* Ring pulsante attorno ai marker "available" — indica interagibilità */
+@keyframes quest-marker-pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Entrata con stagger — usato quando i marker vengono caricati */
+@keyframes quest-marker-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.35) translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Shimmer oscillante sulle primary quest circles (available) */
+@keyframes primary-circle-shimmer {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.18; }
+}
+
+/* ============================================================================
+ * POPUP ENTRANCE
+ * ========================================================================== */
+
+@keyframes tq-popup-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================================================
+ * ANIMAZIONI SUCCESS SCAN / CHECK-IN
+ * ========================================================================== */
+
+/* Flash dello schermo al successo — ocra che si dissolve */
+@keyframes tq-flash {
+  0%   { opacity: 0; }
+  12%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Glow pulsante sulla card reveal */
+@keyframes tq-card-glow-pulse {
+  0%, 100% { box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 60px rgba(200,147,15,0.25), inset 0 1px 0 rgba(244,235,220,0.06); }
+  50%       { box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 100px rgba(200,147,15,0.45), inset 0 1px 0 rgba(244,235,220,0.06); }
+}
+
+/* Entrata staggerata degli elementi nella success screen */
+@keyframes tq-success-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Counter che sale — numero nuovo con scala */
+@keyframes tq-count-pop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Particelle burst — ogni particle ha --angle e --travel custom */
+@keyframes tq-particle-burst {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--angle, 0deg)) translateX(0) scale(1);
+  }
+  65% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle, 0deg)) translateX(var(--travel, 140px)) scale(0.2);
+  }
+}
+
+/* Rotazione icona stellina */
+@keyframes tq-star-spin {
+  from { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.3); }
+  to   { transform: rotate(360deg) scale(1); }
+}
+
+/* ============================================================================
+ * TOAST DI PROSSIMITÀ
+ * ========================================================================== */
+
+@keyframes tq-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes tq-toast-exit {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.96);
+  }
+}
+
+/* ============================================================================
+ * PAGE TRANSITIONS — fade-up al montaggio componente
+ * ========================================================================== */
+
+@keyframes tq-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+ * QUEST MARKER CSS — regole aggiuntive
+ * ========================================================================== */
+
+/* Ring pulsante: visibile solo sui marker "available" */
+.quest-marker__pin {
+  position: relative;
+  overflow: visible;
+}
+
+.quest-marker--available .quest-marker__pin::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid #c8930f;
+  animation: quest-marker-pulse-ring 2.2s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Secondo ring con delay per un effetto sonar */
+.quest-marker--available .quest-marker__pin::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(200, 147, 15, 0.5);
+  animation: quest-marker-pulse-ring 2.2s ease-out 1.1s infinite;
+  pointer-events: none;
+}
+
+/* Entrata staggerata — classe aggiunta via JS dopo addTo() */
+.quest-marker-wrapper--enter .quest-marker {
+  animation: quest-marker-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+/* Popup content-wrapper entrance.
+   NON animare .tq-quest-popup root: Leaflet usa transform su quell'elemento
+   per il posizionamento — l'animation CSS sovrascrive il suo translate3d. */
+.tq-quest-popup .leaflet-popup-content-wrapper {
+  animation: tq-popup-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) 30ms both;
+}

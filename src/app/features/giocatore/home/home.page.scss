@@ -292,3 +292,130 @@
     color: var(--tq-ocra);
   }
 }
+
+/* ============================================================================
+ * Toast di prossimità
+ * ============================================================================
+ * Appare dal basso sopra la tab bar quando il giocatore entra nel raggio
+ * di una quest disponibile. Auto-dismiss dopo 5.5s.
+ * ========================================================================== */
+
+.home__proximity-toast {
+  position: fixed;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 12px;
+  border-radius: 16px;
+  min-width: 220px;
+  max-width: calc(100vw - 40px);
+  white-space: nowrap;
+
+  background: rgba(26, 24, 21, 0.92);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(200, 147, 15, 0.25);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(200, 147, 15, 0.08);
+
+  animation: tq-toast-enter 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  /* Variante "sei in zona" — bordo e testo verde */
+  &--inrange {
+    border-color: rgba(107, 160, 70, 0.4);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(107, 160, 70, 0.1),
+      0 0 20px -6px rgba(107, 160, 70, 0.3);
+
+    .home__proximity-toast__icon {
+      background: rgba(107, 160, 70, 0.15);
+      border-color: rgba(107, 160, 70, 0.3);
+      color: var(--tq-forest);
+    }
+
+    .home__proximity-toast__label {
+      color: var(--tq-forest);
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(200, 147, 15, 0.12);
+    border: 1px solid rgba(200, 147, 15, 0.25);
+    color: var(--tq-ocra);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    font-family: var(--tq-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--tq-ocra);
+    text-transform: uppercase;
+  }
+
+  &__name {
+    font-family: var(--tq-font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tq-bone);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__action {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--tq-ocra);
+    border: none;
+    color: #0d0d0d;
+    font-family: var(--tq-font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.12s;
+    white-space: nowrap;
+
+    &:active { opacity: 0.8; }
+  }
+
+  &__dismiss {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(244, 235, 220, 0.06);
+    border: none;
+    color: rgba(244, 235, 220, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+
+    &:active { color: var(--tq-bone); }
+  }
+}
