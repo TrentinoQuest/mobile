@@ -102,6 +102,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
    */
   private readonly activePopupComponents = new Map<string, ComponentRef<QuestPopupComponent>>();
 
+  /** Intervallo per il refresh periodico della mappa. */
+  private refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+  /** Ogni 30s forza reload quests+completions per vedere nuove quest o completamenti. */
+  private readonly REFRESH_INTERVAL_MS = 30_000;
+
   // ----------------------------------------------------------------
   // Costanti di configurazione mappa
   // ----------------------------------------------------------------
@@ -196,6 +202,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // il container risulta 0×0 e i tile non vengono caricati.
     // invalidateSize() sul microtask successivo forza il recalcolo.
     setTimeout(() => this.map?.invalidateSize(), 0);
+
+    // Refresh periodico: ionViewWillEnter non scatta con <router-outlet> standard,
+    // quindi aggiorniamo quests e completions ogni 30s per vedere nuovi dati
+    // senza chiedere all'utente di uscire e rientrare dall'app.
+    this.refreshInterval = setInterval(() => {
+      this.questService.loadQuests(undefined, true);
+      this.questService.loadCompletions(undefined, undefined, true);
+    }, this.REFRESH_INTERVAL_MS);
   }
 
   ionViewWillEnter(): void {
@@ -212,6 +226,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.refreshInterval !== null) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
+    }
+
     this.activePopupComponents.forEach((ref) => ref.destroy());
     this.activePopupComponents.clear();
 

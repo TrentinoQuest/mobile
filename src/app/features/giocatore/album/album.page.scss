@@ -58,7 +58,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(var(--tq-bg-rgb), 0.06);
+  background: rgba(244, 235, 220, 0.04);
   border: 1px solid var(--tq-hairline);
   display: flex;
   align-items: center;
@@ -66,6 +66,61 @@
   cursor: pointer;
   color: var(--tq-bone);
   flex-shrink: 0;
+  transition: background var(--tq-duration-fast), border-color var(--tq-duration-fast);
+
+  &--active {
+    background: rgba(200, 147, 15, 0.12);
+    border-color: rgba(200, 147, 15, 0.35);
+    color: var(--tq-ocra);
+  }
+}
+
+// ── Campo ricerca ─────────────────────────────────────────────────────────────
+
+.album__search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 16px 4px;
+  padding: 10px 14px;
+  background: rgba(244, 235, 220, 0.05);
+  border: 1px solid var(--tq-hairline);
+  border-radius: var(--tq-radius-md);
+}
+
+.album__search-icon {
+  color: rgba(244, 235, 220, 0.4);
+  flex-shrink: 0;
+}
+
+.album__search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  color: var(--tq-bone);
+
+  &::placeholder {
+    color: rgba(244, 235, 220, 0.35);
+  }
+
+  // Rimuove icona nativa del browser per il tipo "search"
+  &::-webkit-search-cancel-button { display: none; }
+}
+
+// ── Nessun risultato ricerca ──────────────────────────────────────────────────
+
+.album__empty-search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: rgba(244, 235, 220, 0.4);
+  font-size: 13px;
+  text-align: center;
 }
 
 // ── Body scrollabile ─────────────────────────────────────────────────────────
@@ -76,6 +131,11 @@
   padding-top: 110px;
   padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
+
+  // Quando la barra di ricerca è aperta l'header cresce di ~60px
+  &--search-open {
+    padding-top: 172px;
+  }
 }
 
 // ── Loading ──────────────────────────────────────────────────────────────────
@@ -241,6 +301,13 @@
   &--unlocked {
     border: 1px solid rgba(244, 235, 220, 0.1);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+
+    &:active {
+      transform: scale(0.94);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
   }
 }
 
