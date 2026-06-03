@@ -139,6 +139,22 @@ export class AuthService {
   }
 
   /**
+   * Aggiorna i punti totali dell'utente nel signal e in Preferences.
+   * Chiamato dopo check-in o scan QR andati a buon fine, usando il
+   * totalPoints restituito dalla response del backend.
+   */
+  updateTotalPoints(newTotal: number): void {
+    const user = this._currentUser();
+    if (!user) return;
+    const updated = { ...user, totalPoints: newTotal };
+    this._currentUser.set(updated);
+    void Preferences.set({
+      key: AuthService.KEY_USER,
+      value: JSON.stringify(updated),
+    });
+  }
+
+  /**
    * Avvia il flusso di recupero password.
    * Il backend risponde sempre con 202 per non rivelare quali email sono
    * registrate.

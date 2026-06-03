@@ -25,4 +25,58 @@
 
   <!-- Header overlay: greeting + collection chip. -->
   <app-home-header></app-home-header>
+
+  <!-- Bottone centra sulla posizione utente -->
+  <button class="home__locate-btn" type="button" aria-label="Centra sulla mia posizione"
+          (click)="centerOnUser()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" opacity="0"/>
+    </svg>
+  </button>
+
+  <!-- Toast di prossimità: appare quando il giocatore si avvicina a una quest -->
+  @if (proximityToast(); as toast) {
+    <div class="home__proximity-toast"
+         [class.home__proximity-toast--inrange]="toast.inRange">
+      <div class="home__proximity-toast__icon">
+        @if (toast.inRange) {
+          <!-- Checkmark: sei già nel raggio -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+        } @else {
+          <!-- Radar: ti stai avvicinando -->
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/>
+            <circle cx="12" cy="12" r="4"/>
+          </svg>
+        }
+      </div>
+      <div class="home__proximity-toast__text">
+        <span class="home__proximity-toast__label">
+          {{ toast.inRange ? 'Sei nell\'area!' : 'Quest vicina' }}
+        </span>
+        <span class="home__proximity-toast__name">{{ toast.questName }}</span>
+      </div>
+      <!-- CTA diretta quando sei nel raggio -->
+      @if (toast.inRange) {
+        <button class="home__proximity-toast__action" (click)="openToastAction()">
+          {{ toast.type === QuestType.PRIMARY ? 'Scansiona' : 'Check-in' }}
+        </button>
+      }
+      <button class="home__proximity-toast__dismiss" (click)="dismissToast()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  }
 </ion-content>

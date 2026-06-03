@@ -1,33 +1,22 @@
-import { Component, Input, computed, signal } from '@angular/core';
+import { Component, Input, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ModalController } from '@ionic/angular/standalone';
 import {
   AnyQuest,
+  CheckInResponse,
   PlayerQuestStatus,
   QuestType,
+  SecondaryQuest,
 } from '../../../../core/services/quest/quest.types';
+import { QuestService } from '../../../../core/services/quest/quest.service';
+import { GeolocationService } from '../../../../core/services/geolocation/geolocation.service';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { PlayerProfileService } from '../../../../core/services/player-profile/player-profile.service';
+import { CheckinSuccessModalComponent } from '../checkin-success-modal/checkin-success-modal.component';
+import { ScanModalComponent } from '../scan-modal/scan-modal.component';
 
-/**
- * Contenuto visualizzato dentro un popup Leaflet quando l'utente clicca
- * su un marker quest.
- *
- * Pattern di montaggio:
- * Non si usa via template (<app-quest-popup>). Viene istanziato
- * programmaticamente in home.page.ts con createComponent() e il suo
- * elemento root e' passato a Leaflet via L.Popup.setContent(element).
- *
- * Stato:
- * Usa signal interni; l'@Input setter li sincronizza. Permette al
- * template di usare la new control flow syntax (@if, @for).
- *
- * Allineamento OpenAPI v0.2.0:
- * Il popup mostra una AnyQuest (primary o secondary). Lo stato della quest
- * per il giocatore (discovered/available/locked) NON e' un campo dei DTO
- * ma una vista client-side: viene passato come @Input separato.
- *
- * Stile:
- * Tutto in SCSS scoped. Il frame esterno del popup (cornice, freccia)
- * e' stilizzato in global.scss perche' .leaflet-popup-* sono iniettati
- * da Leaflet.
- */
+type CheckInState = 'idle' | 'loading' | 'error';
+
 @Component({
   selector: 'app-quest-popup',
   templateUrl: './quest-popup.component.html',
@@ -35,58 +24,135 @@ import {
   standalone: true,
 })
 export class QuestPopupComponent {
-  // Signal interni: aggiornati dai setter @Input qui sotto.
+  private readonly questService = inject(QuestService);
+  private readonly geoService = inject(GeolocationService);
+  private readonly authService = inject(AuthService);
+  private readonly profileService = inject(PlayerProfileService);
+  private readonly modalCtrl = inject(ModalController);
+
   protected readonly quest = signal<AnyQuest | null>(null);
   protected readonly playerStatus = signal<PlayerQuestStatus>('available');
+  protected readonly checkInState = signal<CheckInState>('idle');
+  protected readonly checkInError = signal('');
 
-  /** Esposto al template per il branching primary/secondary. */
   protected readonly QuestType = QuestType;
 
-  /**
-   * Label leggibile dello stato giocatore (kicker del popup).
-   * Computed: si aggiorna quando playerStatus() cambia.
-   */
-  protected readonly statusLabel = computed<string>(() => {
-    return PLAYER_STATUS_LABELS[this.playerStatus()];
-  });
+  protected readonly statusLabel = computed<string>(
+    () => PLAYER_STATUS_LABELS[this.playerStatus()],
+  );
+  protected readonly statusModifier = computed<string>(
+    () => `quest-popup__kicker--${this.playerStatus()}`,
+  );
 
-  /**
-   * Classe modificatrice BEM per colorare il kicker.
-   * Usata dal template per applicare il modificatore corretto.
-   */
-  protected readonly statusModifier = computed<string>(() => {
-    return `quest-popup__kicker--${this.playerStatus()}`;
-  });
-
-  /**
-   * Etichetta del tipo di quest (mostrata sotto il titolo).
-   */
   protected readonly typeLabel = computed<string>(() => {
     const q = this.quest();
     if (!q) return '';
     return q.type === QuestType.PRIMARY ? 'Quest principale · QR' : 'Quest secondaria · Check-in';
   });
 
-  /**
-   * @Input: la quest da mostrare nel popup.
-   * Esempio in home.page.ts:
-   *   componentRef.setInput('questData', quest);
-   */
+  /** Distanza in metri tra posizione utente e quest secondaria. */
+  protected readonly distanceMeters = computed<number | null>(() => {
+    const q = this.quest();
+    if (!q || q.type !== QuestType.SECONDARY) return null;
+    const pos = this.geoService.position();
+    if (!pos) return null;
+    const sec = q as SecondaryQuest;
+    return haversineMeters(pos.lat, pos.lng, sec.position.lat, sec.position.lng);
+  });
+
+  /** True se l'utente è entro il raggio di check-in. */
+  protected readonly isInRange = computed<boolean>(() => {
+    const q = this.quest();
+    if (!q || q.type !== QuestType.SECONDARY) return false;
+    const dist = this.distanceMeters();
+    if (dist === null) return false;
+    return dist <= (q as SecondaryQuest).checkInRadiusMeters;
+  });
+
+  /** Etichetta distanza formattata per il template. */
+  protected readonly distanceLabel = computed<string>(() => {
+    const dist = this.distanceMeters();
+    if (dist === null) return 'GPS non disponibile';
+    if (dist < 1000) return `${Math.round(dist)} m`;
+    return `${(dist / 1000).toFixed(1)} km`;
+  });
+
   @Input() set questData(value: AnyQuest | null) {
     this.quest.set(value);
   }
 
-  /**
-   * @Input: lo stato giocatore corrente per questa quest.
-   * Determina colore del kicker e label visualizzata.
-   */
   @Input() set status(value: PlayerQuestStatus) {
     this.playerStatus.set(value);
+  }
+
+  checkIn(): void {
+    const q = this.quest();
+    if (!q || q.type !== QuestType.SECONDARY) return;
+
+    const pos = this.geoService.position();
+    if (!pos) {
+      this.checkInError.set(
+        'Posizione GPS non disponibile. Verifica che la localizzazione sia attiva.',
+      );
+      this.checkInState.set('error');
+      return;
+    }
+
+    this.checkInState.set('loading');
+
+    // Nessun takeUntilDestroyed: la request HTTP deve completarsi anche se il
+    // popup viene chiuso nel frattempo (l'Observable completa da solo dopo una
+    // sola emissione, quindi non c'è memory leak).
+    this.questService.checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } }).subscribe({
+      next: (response: CheckInResponse) => {
+        // Aggiorna punti in auth (profilo) e invalida cache progressi
+        this.authService.updateTotalPoints(response.totalPoints);
+        this.profileService.reset();
+        // Apri il modal visivo — avviene prima che il re-render della mappa
+        // distrugga il popup, così l'utente vede il feedback
+        void this.openSuccessModal(q.name, response);
+      },
+      error: (err: unknown) => {
+        this.checkInError.set(formatCheckInError(err));
+        this.checkInState.set('error');
+      },
+    });
+  }
+
+  retryCheckIn(): void {
+    this.checkInState.set('idle');
+    this.checkInError.set('');
+  }
+
+  async openScanModal(): Promise<void> {
+    const q = this.quest();
+    if (!q) return;
+    const modal = await this.modalCtrl.create({
+      component: ScanModalComponent,
+      cssClass: 'tq-scan-modal',
+      backdropDismiss: false,
+      componentProps: { questId: q.id },
+    });
+    await modal.present();
+  }
+
+  private async openSuccessModal(questName: string, response: CheckInResponse): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: CheckinSuccessModalComponent,
+      cssClass: 'tq-scan-modal',
+      backdropDismiss: true,
+      componentProps: {
+        questName,
+        pointsAwarded: response.pointsAwarded,
+        newTotalPoints: response.totalPoints,
+      },
+    });
+    await modal.present();
   }
 }
 
 // ----------------------------------------------------------------
-// Costanti private del modulo (non esposte)
+// Utility private al modulo
 // ----------------------------------------------------------------
 
 const PLAYER_STATUS_LABELS: Record<PlayerQuestStatus, string> = {
@@ -94,3 +160,35 @@ const PLAYER_STATUS_LABELS: Record<PlayerQuestStatus, string> = {
   available: '— DA SCOPRIRE —',
   locked: '— BLOCCATA —',
 };
+
+/** Formula Haversine: distanza in metri tra due coordinate WGS84. */
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6_371_000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const CHECK_IN_ERROR_MESSAGES: Record<string, string> = {
+  OUT_OF_CHECK_IN_RADIUS: "Sei troppo lontano. Avvicinati ancora un po'.",
+  OUT_OF_RANGE: 'Sei fuori dal raggio. Avvicinati alla quest.',
+  QUEST_ALREADY_COMPLETED: 'Hai già completato questa quest.',
+  QUEST_INACTIVE: 'Questa quest non è attualmente disponibile.',
+  OUT_OF_RANGE_ACCURACY: "GPS troppo impreciso. Spostati all'aperto e riprova.",
+  STALE_FIX: 'Fix GPS scaduto. Attendi un aggiornamento della posizione.',
+  GPS_REQUIRED: 'Posizione GPS obbligatoria per il check-in.',
+};
+
+function formatCheckInError(err: unknown): string {
+  if (err instanceof HttpErrorResponse) {
+    const code = (err.error as { error?: { code?: string } })?.error?.code;
+    if (code && CHECK_IN_ERROR_MESSAGES[code]) return CHECK_IN_ERROR_MESSAGES[code];
+    if (err.status === 0) return 'Connessione assente. Verifica la rete.';
+    if (err.status === 422) return 'Posizione non accettata dal server.';
+  }
+  return 'Errore durante il check-in. Riprova.';
+}

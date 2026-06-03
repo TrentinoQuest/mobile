@@ -1,0 +1,88 @@
+<ion-content [fullscreen]="true" class="collectible-detail">
+
+  <!-- Sheet principale -->
+  <div class="collectible-detail__sheet">
+
+    <!-- Maniglia drag -->
+    <div class="collectible-detail__handle"></div>
+
+    <!-- Chiudi -->
+    <button class="collectible-detail__close" (click)="dismiss()" type="button">×</button>
+
+    <!-- ── Area carta 3D ── -->
+    <div class="collectible-detail__card-wrap"
+         (pointermove)="onPointerMove($event)"
+         (pointerleave)="onPointerLeave()"
+         (pointercancel)="onPointerLeave()">
+
+      <div class="collectible-detail__card" [style]="cardStyle()">
+
+        <!-- Arte: immagine reale o paesaggio SVG generativo -->
+        @if (entry.collectible.imageUrl) {
+          <img class="collectible-detail__card-media"
+               [src]="entry.collectible.imageUrl"
+               [alt]="entry.collectible.name" />
+        } @else {
+          <svg class="collectible-detail__card-media" viewBox="0 0 240 300"
+               preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="cd-sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" [attr.stop-color]="palette.skyTop"/>
+                <stop offset="100%" [attr.stop-color]="palette.skyBot"/>
+              </linearGradient>
+            </defs>
+            <rect width="240" height="300" fill="url(#cd-sky)"/>
+            <path d="M0 200 L50 178 L110 194 L160 168 L210 184 L240 176 L240 300 L0 300 Z"
+                  [attr.fill]="palette.mid" opacity="0.9"/>
+            <path d="M0 235 L60 218 L130 230 L185 212 L240 222 L240 300 L0 300 Z"
+                  [attr.fill]="palette.fg"/>
+            <circle cx="182" cy="72" r="32" [attr.fill]="palette.sun" opacity="0.35"/>
+            <circle cx="182" cy="72" r="14" [attr.fill]="palette.sun"/>
+          </svg>
+        }
+
+        <!-- Riflesso olografico che segue il puntatore -->
+        <div class="collectible-detail__card-shine" [style]="shineStyle()"></div>
+
+        <!-- Sfumatura bassa per leggibilità -->
+        <div class="collectible-detail__card-scrim"></div>
+
+        <!-- Rarity badge -->
+        <span class="collectible-detail__card-rarity collectible-detail__card-rarity--{{ entry.collectible.rarity }}">
+          {{ entry.collectible.rarity | uppercase }}
+        </span>
+
+      </div>
+    </div>
+
+    <!-- ── Info ── -->
+    <div class="collectible-detail__info">
+
+      <h2 class="collectible-detail__name">{{ entry.collectible.name }}</h2>
+
+      @if (questName) {
+        <div class="collectible-detail__quest-tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4l3 3"/>
+          </svg>
+          {{ questName }}
+        </div>
+      }
+
+      <p class="collectible-detail__desc">{{ entry.collectible.description }}</p>
+
+      <div class="collectible-detail__meta">
+        <span class="collectible-detail__meta-label">Sbloccato il</span>
+        <span class="collectible-detail__meta-value">
+          {{ entry.unlockedAt | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-content>

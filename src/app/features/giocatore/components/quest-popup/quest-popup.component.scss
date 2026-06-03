@@ -79,3 +79,133 @@
   color: var(--tq-ocra);
   margin: 4px 0 0;
 }
+
+/* ---- Sezione scan QR (quest primarie) ---- */
+
+.quest-popup__scan {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(244, 235, 220, 0.1);
+}
+
+.quest-popup__scan-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--tq-ocra);
+  color: #0d0d0d;
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+/* ---- Sezione check-in ---- */
+
+.quest-popup__checkin {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(244, 235, 220, 0.1);
+}
+
+.quest-popup__distance {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--tq-text-muted);
+
+  &.quest-popup__distance--inrange {
+    color: var(--tq-forest);
+  }
+}
+
+.quest-popup__checkin-btn {
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--tq-ocra);
+  color: #0d0d0d;
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+
+  &:active:not(:disabled) {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+
+  &.quest-popup__checkin-btn--disabled {
+    background: rgba(244, 235, 220, 0.12);
+    color: var(--tq-text-muted);
+    cursor: not-allowed;
+  }
+}
+
+.quest-popup__checkin-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  color: var(--tq-text-secondary);
+}
+
+.quest-popup__spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(200, 147, 15, 0.3);
+  border-top-color: var(--tq-ocra);
+  border-radius: 50%;
+  animation: tq-popup-spin 0.7s linear infinite;
+}
+
+.quest-popup__checkin-success {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tq-forest);
+  letter-spacing: 0.04em;
+}
+
+.quest-popup__checkin-error {
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  color: var(--tq-rust);
+  line-height: 1.4;
+}
+
+.quest-popup__checkin-retry {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid var(--tq-rust);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tq-rust);
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -1,0 +1,61 @@
+<ion-content [fullscreen]="true" class="checkin-success">
+
+  <!-- Glow di sfondo -->
+  <div class="checkin-success__glow"></div>
+
+  <!-- Scintille decorative -->
+  <svg class="checkin-success__sparkles" viewBox="0 0 393 852" preserveAspectRatio="xMidYMid slice">
+    @for (spark of [[70,160,1.8],[310,200,1.4],[50,340,2],[345,380,1.6],[80,560,1.4],[320,580,2],[110,680,1.2],[290,710,1.5],[195,130,1.1],[150,420,1.7],[240,300,1.3]]; track $index) {
+      <circle [attr.cx]="spark[0]" [attr.cy]="spark[1]" [attr.r]="spark[2]" fill="#6BA046" opacity="0.55"/>
+    }
+  </svg>
+
+  <!-- Pulsante chiudi -->
+  <button class="checkin-success__close-btn" (click)="dismiss()">×</button>
+
+  <!-- Corpo centrale -->
+  <div class="checkin-success__body">
+
+    <!-- Icona checkmark con alone -->
+    <div class="checkin-success__check-wrap">
+      <svg class="checkin-success__check-svg" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" stroke="#6BA046" stroke-width="2" opacity="0.3"/>
+        <circle cx="32" cy="32" r="22" fill="rgba(107,160,70,0.15)" stroke="#6BA046" stroke-width="1.5"/>
+        <path d="M20 32l9 9 15-15" stroke="#6BA046" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Eyebrow -->
+    <div class="checkin-success__eyebrow">✦ LUOGO VISITATO</div>
+
+    <!-- Nome quest -->
+    <h2 class="checkin-success__quest-name">{{ questName }}</h2>
+
+    <!-- Punti guadagnati -->
+    <div class="checkin-success__points-wrap">
+      <span class="checkin-success__points-prefix">+</span>
+      <span class="checkin-success__points">{{ pointsAwarded }}</span>
+      <span class="checkin-success__points-unit">pt</span>
+    </div>
+
+    <!-- Totale aggiornato -->
+    <div class="checkin-success__total">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="rgba(244,235,220,0.45)" stroke-width="1.7" stroke-linecap="round">
+        <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
+        <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4"/>
+      </svg>
+      totale {{ newTotalPoints }} punti
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="checkin-success__cta">
+    <button class="checkin-success__cta-btn" (click)="dismiss()">
+      Continua a esplorare
+    </button>
+  </div>
+
+</ion-content>

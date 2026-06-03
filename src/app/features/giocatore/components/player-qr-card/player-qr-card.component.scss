@@ -1,0 +1,97 @@
+.qr-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 22px 22px;
+  background: var(--tq-panel);
+  border: 1px solid var(--tq-hairline);
+  border-radius: 20px;
+  overflow: hidden;
+
+  // Trama di sfondo sottile — puntini
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(244, 235, 220, 0.04) 1px, transparent 1px);
+    background-size: 12px 12px;
+    pointer-events: none;
+  }
+}
+
+// ── Angoli viewfinder ─────────────────────────────────────────────────────────
+
+.qr-card__corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--tq-ocra);
+  border-style: solid;
+
+  &--tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+  &--tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+  &--bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+  &--br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+}
+
+// ── Label superiore ───────────────────────────────────────────────────────────
+
+.qr-card__label-top {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--tq-ocra);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+// ── Canvas e glow ─────────────────────────────────────────────────────────────
+
+.qr-card__canvas-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.qr-card__canvas {
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(244, 235, 220, 0.1);
+}
+
+.qr-card__glow {
+  position: absolute;
+  inset: -24px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(200, 147, 15, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+// ── ID mono ───────────────────────────────────────────────────────────────────
+
+.qr-card__id {
+  font-family: var(--tq-font-mono);
+  font-size: 9.5px;
+  color: var(--tq-text-muted);
+  letter-spacing: 0.5px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+// ── Label inferiore ───────────────────────────────────────────────────────────
+
+.qr-card__label-bottom {
+  font-family: var(--tq-font-mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: rgba(244, 235, 220, 0.2);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}

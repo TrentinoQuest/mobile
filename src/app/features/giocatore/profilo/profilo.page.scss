@@ -1,66 +1,326 @@
-/* ============================================================================
- * ProfiloPage (stub)
- * ============================================================================
- * Stesso pattern strutturale degli altri stub, con due sezioni funzionali
- * (theme selector e logout) per consentire test end-to-end durante lo sviluppo.
- * ========================================================================== */
-
-.profilo-stub {
+.profilo {
   --background: var(--tq-bg);
 }
 
-.profilo-stub__inner {
+// ── Body ─────────────────────────────────────────────────────────────────────
+
+.profilo__body {
+  position: absolute;
+  inset: 0;
+  padding-top: 50px;
+  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// ── Topbar ────────────────────────────────────────────────────────────────────
+
+.profilo__topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 22px;
+}
+
+.profilo__gear-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--tq-panel);
+  border: 1px solid var(--tq-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--tq-bone);
+}
+
+// ── Identità ─────────────────────────────────────────────────────────────────
+
+.profilo__identity {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 22px 24px;
   text-align: center;
-  min-height: calc(100% - 64px - env(safe-area-inset-bottom, 0));
-  padding: 32px 24px calc(24px + 64px + env(safe-area-inset-bottom, 0));
-  gap: 16px;
 }
 
-.profilo-stub__kicker {
-  font-family: var(--tq-font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  color: var(--tq-ocra);
-  margin: 0;
-}
-
-.profilo-stub__title {
+.profilo__avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c8930f, #5c3e0a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1815;
   font-family: var(--tq-font-serif);
   font-style: italic;
-  font-weight: 400;
-  font-size: 44px;
-  line-height: 1.1;
+  font-size: 40px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  box-shadow: 0 12px 32px rgba(200, 147, 15, 0.35), inset 0 1px 0 rgba(255, 235, 180, 0.5);
+  border: 2px solid var(--tq-ocra);
+}
+
+.profilo__username {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 26px;
   color: var(--tq-bone);
-  margin: 0;
 }
 
-.profilo-stub__note {
-  font-family: var(--tq-font-sans);
-  font-size: 14px;
+.profilo__since {
+  font-size: 12px;
   color: var(--tq-text-muted);
-  margin: 0 0 16px;
+  margin-top: 4px;
 }
 
-.profilo-stub__section {
+.profilo__level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  background: rgba(var(--tq-ocra-rgb), 0.15);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.35);
+  padding: 5px 12px;
+  border-radius: var(--tq-radius-pill);
+  color: var(--tq-ocra);
+  font-family: var(--tq-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+// ── QR identità ───────────────────────────────────────────────────────────────
+
+.profilo__qr-wrap {
+  padding: 0 22px 16px;
+}
+
+// ── Statistiche ───────────────────────────────────────────────────────────────
+
+.profilo__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 22px 16px;
+}
+
+.profilo__stat-card {
+  background: var(--tq-panel);
+  border: 1px solid var(--tq-hairline);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.profilo__stat-big {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 24px;
+  color: var(--tq-bone);
+  line-height: 1;
+  letter-spacing: -0.4px;
+
+  &--accent {
+    color: var(--tq-forest);
+  }
+
+  &--serif {
+    font-size: 19px;
+  }
+}
+
+.profilo__stat-label {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  color: var(--tq-text-muted);
+  letter-spacing: 1px;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.profilo__stat-hint {
+  font-size: 10.5px;
+  color: var(--tq-text-muted);
+  margin-top: 6px;
+
+  &--accent {
+    color: var(--tq-forest);
+  }
+}
+
+// ── Sezioni ───────────────────────────────────────────────────────────────────
+
+.profilo__section {
+  padding: 14px 22px 0;
+}
+
+.profilo__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.profilo__section-title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--tq-bone);
+}
+
+.profilo__section-count {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  color: var(--tq-text-muted);
+  letter-spacing: 0.6px;
+}
+
+// ── Riconoscimenti ────────────────────────────────────────────────────────────
+
+.profilo__achievements {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.profilo__achievement {
+  flex-shrink: 0;
+  width: 84px;
+  padding: 12px 8px;
+  text-align: center;
+  background: var(--tq-panel);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.3);
+  border-radius: 14px;
+
+  &--locked {
+    background: rgba(244, 235, 220, 0.03);
+    border-color: var(--tq-hairline);
+  }
+}
+
+.profilo__achievement-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  margin: 0 auto 6px;
+  background: rgba(244, 235, 220, 0.04);
+  border: 1px solid var(--tq-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--active {
+    background: rgba(var(--tq-ocra-rgb), 0.15);
+    border-color: var(--tq-ocra);
+  }
+}
+
+.profilo__achievement-label {
+  font-size: 10px;
+  color: var(--tq-text-muted);
+  line-height: 1.2;
+  font-weight: 500;
+
+  .profilo__achievement:not(.profilo__achievement--locked) & {
+    color: var(--tq-bone);
+  }
+}
+
+// ── Tema ─────────────────────────────────────────────────────────────────────
+
+.profilo__theme-wrap {
+  padding: 4px 0;
+}
+
+// ── Impostazioni menu ─────────────────────────────────────────────────────────
+
+.profilo__settings-list {
+  background: var(--tq-panel);
+  border-radius: 16px;
+  border: 1px solid var(--tq-hairline);
+  overflow: hidden;
+}
+
+.profilo__settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--tq-hairline);
+  cursor: pointer;
+  background: transparent;
+  color: var(--tq-bone);
   width: 100%;
-  max-width: 360px;
-  margin-top: 16px;
+  text-align: left;
+
+  &--last {
+    border-bottom: none;
+  }
+}
+
+.profilo__settings-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(244, 235, 220, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profilo__settings-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.profilo__settings-value {
+  font-family: var(--tq-font-mono);
+  font-size: 10.5px;
+  color: var(--tq-text-muted);
+  letter-spacing: 0.4px;
+}
+
+.profilo__settings-chevron {
+  color: var(--tq-text-muted);
+  flex-shrink: 0;
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+
+.profilo__logout-wrap {
+  padding: 14px 22px 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 18px;
 }
 
-.profilo-stub__section-title {
+.profilo__logout-btn {
+  width: 100%;
+  background: transparent;
+  color: var(--tq-text-muted);
+  border: 1px solid var(--tq-hairline);
+  padding: 12px;
+  border-radius: 14px;
   font-family: var(--tq-font-sans);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--tq-text-secondary);
-  text-align: left;
-  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.profilo__version {
+  font-family: var(--tq-font-mono);
+  font-size: 9.5px;
+  color: var(--tq-text-disabled);
+  letter-spacing: 0.8px;
+  padding-bottom: 8px;
 }

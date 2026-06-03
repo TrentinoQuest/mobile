@@ -1,12 +1,5 @@
 <!--
   Popup quest montato dentro Leaflet via createComponent().
-
-  Mostra:
-  - kicker stato giocatore (discovered/available/locked) in colore
-  - titolo della quest
-  - tipo (primary/secondary)
-  - descrizione
-  - punti base assegnati al completamento
 -->
 <div class="quest-popup">
   @if (quest(); as q) {
@@ -17,8 +10,65 @@
     <p class="quest-popup__type">{{ typeLabel() }}</p>
     <p class="quest-popup__desc">{{ q.description }}</p>
     <p class="quest-popup__meta">{{ q.basePoints }} pt</p>
+
+    <!-- Scan QR: solo per quest primarie non ancora completate -->
+    @if (q.type === QuestType.PRIMARY && playerStatus() === 'available') {
+      <div class="quest-popup__scan">
+        <button class="quest-popup__scan-btn" (click)="openScanModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 4h6l1.5 3H20a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h3.5L9 4z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Scansiona QR
+        </button>
+      </div>
+    }
+
+    <!-- Check-in: solo per quest secondarie non ancora completate -->
+    @if (q.type === QuestType.SECONDARY && playerStatus() === 'available') {
+      <div class="quest-popup__checkin">
+
+        @if (checkInState() === 'idle') {
+          <div class="quest-popup__distance"
+               [class.quest-popup__distance--inrange]="isInRange()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            </svg>
+            {{ distanceLabel() }}
+          </div>
+          <button class="quest-popup__checkin-btn"
+                  [class.quest-popup__checkin-btn--disabled]="!isInRange()"
+                  [disabled]="!isInRange()"
+                  (click)="checkIn()">
+            @if (isInRange()) {
+              Check-in
+            } @else {
+              Avvicinati al luogo
+            }
+          </button>
+        }
+
+        @if (checkInState() === 'loading') {
+          <div class="quest-popup__checkin-loading">
+            <span class="quest-popup__spinner"></span>
+            Verifica in corso…
+          </div>
+        }
+
+        @if (checkInState() === 'error') {
+          <div class="quest-popup__checkin-error">{{ checkInError() }}</div>
+          <button class="quest-popup__checkin-retry" (click)="retryCheckIn()">
+            Riprova
+          </button>
+        }
+
+      </div>
+    }
+
   } @else {
-    <!-- Stato vuoto: in produzione non dovrebbe mai accadere. -->
     <p class="quest-popup__desc">Nessun dato disponibile.</p>
   }
 </div>

@@ -15,4 +15,5 @@ export const environment = {
 
   // In produzione usiamo sempre il backend reale.
   questRepository: 'http' as 'mock' | 'http',
+  playerProfileRepository: 'http' as 'mock' | 'http',
 };
