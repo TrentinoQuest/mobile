@@ -9,7 +9,8 @@ import QRCode from 'qrcode';
   imports: [],
 })
 export class PlayerQrCardComponent implements OnChanges {
-  @ViewChild('qrCanvas', { static: true }) private readonly canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('qrCanvas', { static: true })
+  private readonly canvasRef!: ElementRef<HTMLCanvasElement>;
 
   readonly playerId = input.required<string>();
 

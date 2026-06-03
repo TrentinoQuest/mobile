@@ -37,8 +37,12 @@ export class QuestPopupComponent {
 
   protected readonly QuestType = QuestType;
 
-  protected readonly statusLabel = computed<string>(() => PLAYER_STATUS_LABELS[this.playerStatus()]);
-  protected readonly statusModifier = computed<string>(() => `quest-popup__kicker--${this.playerStatus()}`);
+  protected readonly statusLabel = computed<string>(
+    () => PLAYER_STATUS_LABELS[this.playerStatus()],
+  );
+  protected readonly statusModifier = computed<string>(
+    () => `quest-popup__kicker--${this.playerStatus()}`,
+  );
 
   protected readonly typeLabel = computed<string>(() => {
     const q = this.quest();
@@ -87,7 +91,9 @@ export class QuestPopupComponent {
 
     const pos = this.geoService.position();
     if (!pos) {
-      this.checkInError.set('Posizione GPS non disponibile. Verifica che la localizzazione sia attiva.');
+      this.checkInError.set(
+        'Posizione GPS non disponibile. Verifica che la localizzazione sia attiva.',
+      );
       this.checkInState.set('error');
       return;
     }
@@ -97,22 +103,20 @@ export class QuestPopupComponent {
     // Nessun takeUntilDestroyed: la request HTTP deve completarsi anche se il
     // popup viene chiuso nel frattempo (l'Observable completa da solo dopo una
     // sola emissione, quindi non c'è memory leak).
-    this.questService
-      .checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } })
-      .subscribe({
-        next: (response: CheckInResponse) => {
-          // Aggiorna punti in auth (profilo) e invalida cache progressi
-          this.authService.updateTotalPoints(response.totalPoints);
-          this.profileService.reset();
-          // Apri il modal visivo — avviene prima che il re-render della mappa
-          // distrugga il popup, così l'utente vede il feedback
-          void this.openSuccessModal(q.name, response);
-        },
-        error: (err: unknown) => {
-          this.checkInError.set(formatCheckInError(err));
-          this.checkInState.set('error');
-        },
-      });
+    this.questService.checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } }).subscribe({
+      next: (response: CheckInResponse) => {
+        // Aggiorna punti in auth (profilo) e invalida cache progressi
+        this.authService.updateTotalPoints(response.totalPoints);
+        this.profileService.reset();
+        // Apri il modal visivo — avviene prima che il re-render della mappa
+        // distrugga il popup, così l'utente vede il feedback
+        void this.openSuccessModal(q.name, response);
+      },
+      error: (err: unknown) => {
+        this.checkInError.set(formatCheckInError(err));
+        this.checkInState.set('error');
+      },
+    });
   }
 
   retryCheckIn(): void {

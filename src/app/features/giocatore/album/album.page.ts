@@ -37,11 +37,12 @@ export class AlbumPage implements OnInit {
   protected readonly unlockedCount = this.profileService.unlockedCount;
 
   // Totale collezionabili = quest primarie con collectibleId assegnato
-  protected readonly collectibleTotal = computed(() =>
-    this.questService
-      .quests()
-      .filter((q): q is PrimaryQuest => q.type === QuestType.PRIMARY && q.collectibleId !== null)
-      .length,
+  protected readonly collectibleTotal = computed(
+    () =>
+      this.questService
+        .quests()
+        .filter((q): q is PrimaryQuest => q.type === QuestType.PRIMARY && q.collectibleId !== null)
+        .length,
   );
 
   protected readonly activeFilter = signal<AlbumFilter>('tutti');
@@ -74,9 +75,12 @@ export class AlbumPage implements OnInit {
     // Lookup nome quest per ogni collezionabile
     const quests = this.questService.quests();
     const questNameFor = (collectibleId: string): string =>
-      (quests.find(
-        (q): q is PrimaryQuest => q.type === QuestType.PRIMARY && q.collectibleId === collectibleId,
-      ) as PrimaryQuest | undefined)?.name ?? '';
+      (
+        quests.find(
+          (q): q is PrimaryQuest =>
+            q.type === QuestType.PRIMARY && q.collectibleId === collectibleId,
+        ) as PrimaryQuest | undefined
+      )?.name ?? '';
 
     if (filter === 'da-scoprire') {
       const lockedCount = Math.max(0, total - col.length);

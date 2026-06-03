@@ -10,15 +10,14 @@ export const environment = {
    * Tutti gli endpoint del backend sono sotto /api/v1 come da OpenAPI.
    */
   apiUrl: 'http://10.102.161.47:3000/api/v1',
-  
+
   /**
    * Endpoint di health check del backend.
    * Vive a livello di root del server, fuori dal namespace /api/v1.
    * Usato da AuthService all'avvio dell'app per verificare la
    * raggiungibilita del backend (Decisione bonus livello 3).
-  */
+   */
   healthCheckUrl: 'http://10.102.161.47:3000/health',
-  
 
   /**
    * Quale implementazione di QuestRepository iniettare.

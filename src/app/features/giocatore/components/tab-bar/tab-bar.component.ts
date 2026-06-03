@@ -51,8 +51,7 @@ export class TabBarComponent {
       .primaryQuests()
       .filter(
         (q: PrimaryQuest) =>
-          q.collectibleId !== null &&
-          this.questService.playerStatusOf(q.id) === 'available',
+          q.collectibleId !== null && this.questService.playerStatusOf(q.id) === 'available',
       )
       .map((q: PrimaryQuest) => ({
         id: q.id,
