@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
   AbstractControl,
@@ -10,24 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  IonBackButton,
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonSpinner,
-  IonTitle,
-  IonToolbar,
-  ToastController,
-} from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
+import { IonContent, IonSpinner, ToastController } from '@ionic/angular/standalone';
 import { RegisterPlayerRequest } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 
@@ -49,24 +31,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
   templateUrl: './register-player.page.html',
   styleUrls: ['./register-player.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButtons,
-    IonBackButton,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonNote,
-    IonButton,
-    IonIcon,
-    IonSpinner,
-  ],
+  imports: [ReactiveFormsModule, RouterLink, IonContent, IonSpinner],
 })
 export class RegisterPlayerPage {
   // ===========================================================================
@@ -123,8 +88,6 @@ export class RegisterPlayerPage {
   // ===========================================================================
 
   constructor() {
-    addIcons({ 'eye-outline': eyeOutline, 'eye-off-outline': eyeOffOutline });
-
     // Quando l'utente modifica un campo che aveva errore inline dal backend,
     // resettiamo l'errore: ha potenzialmente sistemato il problema.
     this.form.get('email')?.valueChanges.subscribe(() => {
@@ -138,6 +101,10 @@ export class RegisterPlayerPage {
   // ===========================================================================
   // Azioni
   // ===========================================================================
+
+  goBack(): void {
+    void this.router.navigate(['/']);
+  }
 
   togglePasswordVisibility(): void {
     this.passwordVisible.update((v) => !v);
