@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { UserRole } from '@trentino-quest/shared-types';
 import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
+import { businessStatusGuard } from './core/guards/business-status.guard';
 
 /**
  * Mappa di navigazione di Trentino Quest Mobile.
@@ -116,7 +117,7 @@ export const routes: Routes = [
   },
 
   // ============================================================
-  // Attivita Locale
+  // Attivita Locale — registrazione (pubblica)
   // ============================================================
   {
     path: 'attivita/register',
@@ -126,12 +127,73 @@ export const routes: Routes = [
       ),
     canActivate: [guestGuard],
   },
+
+  // ============================================================
+  // Attivita Locale — sezione autenticata
+  // Il padre protegge tutti i figli con authGuard + role-check.
+  // businessStatusGuard è applicato singolarmente ai figli che
+  // richiedono approvalStatus === 'approved'.
+  // ============================================================
   {
-    path: 'attivita/home',
+    path: 'attivita',
     loadComponent: () =>
-      import('./features/attivita/home/home.page').then((m) => m.AttivitaHomePage),
+      import('./features/attivita/layout/layout.component').then((m) => m.AttivitaLayoutComponent),
     canActivate: [authGuard],
     data: { allowedRoles: [UserRole.BUSINESS] },
+    children: [
+      // Redirect del padre alla home di default
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+
+      // Pagine di stato (nessun businessStatusGuard: sono la destinazione del redirect)
+      {
+        path: 'pending',
+        loadComponent: () =>
+          import('./features/attivita/pending-approval/pending-approval.page').then(
+            (m) => m.PendingApprovalPage,
+          ),
+      },
+      {
+        path: 'rejected',
+        loadComponent: () =>
+          import('./features/attivita/rejected/rejected.page').then((m) => m.RejectedPage),
+      },
+
+      // Pagine protette da businessStatusGuard (solo approved)
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./features/attivita/home/home.page').then((m) => m.AttivitaHomePage),
+        canActivate: [businessStatusGuard],
+      },
+      {
+        path: 'profilo',
+        loadComponent: () =>
+          import('./features/attivita/profilo/profilo.page').then((m) => m.AttivitaProfiloPage),
+        canActivate: [businessStatusGuard],
+      },
+      {
+        path: 'offerte',
+        loadComponent: () =>
+          import('./features/attivita/offerte/offerte.page').then((m) => m.OffertePage),
+        canActivate: [businessStatusGuard],
+      },
+      {
+        path: 'offerte/new',
+        loadComponent: () =>
+          import('./features/attivita/offerte/form/offer-form.page').then(
+            (m) => m.OfferFormPage,
+          ),
+        canActivate: [businessStatusGuard],
+      },
+      {
+        path: 'offerte/:id',
+        loadComponent: () =>
+          import('./features/attivita/offerte/form/offer-form.page').then(
+            (m) => m.OfferFormPage,
+          ),
+        canActivate: [businessStatusGuard],
+      },
+    ],
   },
 
   // ============================================================

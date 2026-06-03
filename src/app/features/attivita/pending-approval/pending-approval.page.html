@@ -1,0 +1,29 @@
+<ion-content class="pending-page" fullscreen>
+  <div class="pending-page__container">
+    <div class="pending-page__icon-wrap">
+      <ion-icon name="time-outline" class="pending-page__icon"></ion-icon>
+    </div>
+
+    <h1 class="pending-page__title">In attesa di approvazione</h1>
+
+    <p class="pending-page__body">
+      La tua registrazione è stata ricevuta e sarà revisionata dal team di
+      Trentino Quest. Riceverai una notifica via email non appena la tua
+      attività sarà approvata.
+    </p>
+
+    <p class="pending-page__hint">
+      Di solito il processo richiede 1–2 giorni lavorativi.
+    </p>
+
+    <ion-button
+      class="pending-page__logout-btn"
+      fill="outline"
+      expand="block"
+      (click)="logout()"
+    >
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Esci dall'account
+    </ion-button>
+  </div>
+</ion-content>

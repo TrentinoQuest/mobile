@@ -1,0 +1,29 @@
+<ion-content class="rejected-page" fullscreen>
+  <div class="rejected-page__container">
+    <div class="rejected-page__icon-wrap">
+      <ion-icon name="close-circle-outline" class="rejected-page__icon"></ion-icon>
+    </div>
+
+    <h1 class="rejected-page__title">Registrazione non approvata</h1>
+
+    <p class="rejected-page__body">
+      La tua richiesta di registrazione è stata esaminata e non ha superato
+      la verifica. Se ritieni ci sia stato un errore, contatta il supporto
+      di Trentino Quest.
+    </p>
+
+    <p class="rejected-page__contact">
+      support&#64;trentinoquest.it
+    </p>
+
+    <ion-button
+      class="rejected-page__logout-btn"
+      fill="outline"
+      expand="block"
+      (click)="logout()"
+    >
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Esci dall'account
+    </ion-button>
+  </div>
+</ion-content>

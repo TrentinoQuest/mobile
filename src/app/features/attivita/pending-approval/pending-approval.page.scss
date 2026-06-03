@@ -1,0 +1,62 @@
+.pending-page {
+  --background: var(--tq-bg);
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  &__icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(var(--tq-ocra-rgb, 196, 152, 84), 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  &__icon {
+    font-size: 40px;
+    color: var(--tq-ocra);
+  }
+
+  &__title {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 26px;
+    color: var(--tq-bone);
+    margin: 0 0 16px;
+    line-height: 1.2;
+  }
+
+  &__body {
+    font-family: 'Geist', sans-serif;
+    font-size: 15px;
+    color: var(--tq-bone);
+    opacity: 0.75;
+    line-height: 1.6;
+    margin: 0 0 12px;
+  }
+
+  &__hint {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    color: var(--tq-ocra);
+    margin: 0 0 40px;
+    opacity: 0.8;
+  }
+
+  &__logout-btn {
+    width: 100%;
+    max-width: 320px;
+    --color: var(--tq-bone);
+    --border-color: rgba(255, 255, 255, 0.2);
+  }
+}

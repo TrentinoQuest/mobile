@@ -31,6 +31,10 @@ import { PlayerProfileRepository } from './app/core/services/player-profile/repo
 import { MockPlayerProfileRepository } from './app/core/services/player-profile/repository/player-profile.repository.mock';
 import { HttpPlayerProfileRepository } from './app/core/services/player-profile/repository/player-profile.repository.http';
 
+import { BusinessRepository } from './app/core/services/business/repository/business.repository';
+import { MockBusinessRepository } from './app/core/services/business/repository/business.repository.mock';
+import { HttpBusinessRepository } from './app/core/services/business/repository/business.repository.http';
+
 /**
  * Primo initializer: applica il tema salvato prima che qualsiasi
  * componente venga renderizzato, eliminando il flash of unstyled content.
@@ -123,6 +127,17 @@ bootstrapApplication(AppComponent, {
         environment.playerProfileRepository === 'http'
           ? HttpPlayerProfileRepository
           : MockPlayerProfileRepository,
+    },
+
+    // ============================================================
+    // Business data layer
+    // ============================================================
+    {
+      provide: BusinessRepository,
+      useClass:
+        environment.businessRepository === 'http'
+          ? HttpBusinessRepository
+          : MockBusinessRepository,
     },
   ],
 });

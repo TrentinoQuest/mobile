@@ -1,0 +1,72 @@
+<ion-content class="offer-form-page" fullscreen>
+  <div class="offer-form-page__container">
+
+    <header class="offer-form-page__header">
+      <button class="offer-form-page__back" (click)="goBack()" type="button">
+        ← Offerte
+      </button>
+      <h1 class="offer-form-page__title">
+        {{ isEditMode() ? 'Modifica offerta' : 'Nuova offerta' }}
+      </h1>
+    </header>
+
+    <form class="offer-form-page__form" (ngSubmit)="submit()">
+
+      <div class="offer-form-page__field">
+        <label class="offer-form-page__label" for="title">Titolo</label>
+        <ion-input
+          id="title"
+          class="offer-form-page__input"
+          [value]="title()"
+          (ionInput)="title.set($any($event.target).value)"
+          placeholder="Es. Trota alla trentina"
+          type="text"
+          fill="outline"
+          maxlength="100"
+        ></ion-input>
+      </div>
+
+      <div class="offer-form-page__field">
+        <label class="offer-form-page__label" for="description">Descrizione</label>
+        <ion-textarea
+          id="description"
+          class="offer-form-page__textarea"
+          [value]="description()"
+          (ionInput)="description.set($any($event.target).value)"
+          placeholder="Descrivi cosa include l'offerta..."
+          fill="outline"
+          [autoGrow]="true"
+          maxlength="500"
+          rows="4"
+        ></ion-textarea>
+      </div>
+
+      <div class="offer-form-page__field">
+        <label class="offer-form-page__label" for="pointsCost">
+          Costo in punti
+        </label>
+        <ion-input
+          id="pointsCost"
+          class="offer-form-page__input"
+          [value]="pointsCost()"
+          (ionInput)="pointsCost.set($any($event.target).valueAsNumber)"
+          type="number"
+          min="1"
+          fill="outline"
+          placeholder="Es. 100"
+        ></ion-input>
+      </div>
+
+      <ion-button
+        class="offer-form-page__submit-btn"
+        expand="block"
+        type="submit"
+        [disabled]="saving()"
+      >
+        {{ saving() ? 'Salvataggio...' : (isEditMode() ? 'Aggiorna offerta' : 'Crea offerta') }}
+      </ion-button>
+
+    </form>
+
+  </div>
+</ion-content>
