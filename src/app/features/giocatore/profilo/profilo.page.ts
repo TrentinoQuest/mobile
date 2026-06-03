@@ -8,6 +8,7 @@ import { Player, UserRole } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
 import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
+import { PlayerQrCardComponent } from '../components/player-qr-card/player-qr-card.component';
 
 const ITALIAN_MONTHS = [
   'gennaio',
@@ -35,7 +36,7 @@ interface SettingsRow {
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [IonContent, DecimalPipe, ThemeSelectorComponent],
+  imports: [IonContent, DecimalPipe, ThemeSelectorComponent, PlayerQrCardComponent],
 })
 export class ProfiloPage implements OnInit {
   @ViewChild(IonContent) private readonly content!: IonContent;
@@ -57,6 +58,7 @@ export class ProfiloPage implements OnInit {
   });
 
   protected readonly username = computed(() => this.player()?.username ?? 'Esploratore');
+  protected readonly playerId = computed(() => this.player()?.id ?? '');
   protected readonly totalPoints = computed(() => this.player()?.totalPoints ?? 0);
 
   protected readonly registrationSince = computed(() => {

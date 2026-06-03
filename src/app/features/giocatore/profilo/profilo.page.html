@@ -30,6 +30,13 @@
       </div>
     </div>
 
+    <!-- QR code identità giocatore -->
+    @if (playerId()) {
+      <div class="profilo__qr-wrap">
+        <app-player-qr-card [playerId]="playerId()" />
+      </div>
+    }
+
     <!-- Griglia statistiche -->
     <div class="profilo__stats">
       <div class="profilo__stat-card">
