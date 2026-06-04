@@ -1,177 +1,14 @@
 /* ============================================================================
- * HomePage — Sotto-step 2B
+ * HomePage — mappa full-bleed + overlay UI
  * ============================================================================
- * Mappa full-bleed + marker posizione utente con pulse animato.
+ * Gli stili relativi a elementi iniettati da MapLibre (marker HTML, popup)
+ * vivono in global.scss perché MapLibre li inietta fuori dall'albero Angular.
  *
- * In 2D arriveranno gli overlay UI (header, collection chip, ecc.) che
- * si posizioneranno in absolute sopra il container mappa.
- * ========================================================================== */
-
-.home {
-  /* ion-content background warm-dark, niente padding (mappa edge-to-edge). */
-  --background: var(--tq-bg);
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-}
-
-.home__map {
-  /* La mappa riempie tutto il container ion-content. */
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-
-  /* Background di sicurezza durante il caricamento dei tile. */
-  background: var(--tq-bg);
-
-  /* z-index esplicito: sotto la tab bar (token --tq-z-tab-bar = 30). */
-  z-index: var(--tq-z-map);
-}
-
-/* ============================================================================
- * Override stili Leaflet interni
- * ============================================================================
- * Le classi .leaflet-* sono globali. Le sovrascriviamo qui scoped a .home
- * tramite ::ng-deep per evitare collisioni con altre mappe future.
- *
- * Pattern: tutti gli stili che riguardano elementi iniettati da Leaflet
- * (controlli, marker, popup) richiedono ::ng-deep perche' sono fuori
- * dall'albero del template Angular.
- * ========================================================================== */
-
-.home {
-  /* ----------------------------------------------------------------
-   * Container mappa: bg warm-dark + font coerente.
-   * ---------------------------------------------------------------- */
-  ::ng-deep .leaflet-container {
-    background: var(--tq-bg) !important;
-    outline: none;
-    font-family: var(--tq-font-sans);
-  }
-
-  /* ----------------------------------------------------------------
- * Z-index dei controlli Leaflet "ammorbiditi" per non superare
- * la tab bar. NON tocchiamo gli z-index dei pane interni della
- * mappa (tile/marker/popup): sono regolati da Leaflet stesso
- * e ogni override rompe l'ordine di rendering.
- * ---------------------------------------------------------------- */
-  ::ng-deep .leaflet-top,
-  ::ng-deep .leaflet-bottom,
-  ::ng-deep .leaflet-control {
-    z-index: 1 !important;
-  }
-
-  /* ----------------------------------------------------------------
-   * Attribution control: posizionata in basso a sinistra, discreta,
-   * sopra la tab bar (margin-bottom dinamico con safe area).
-   * ---------------------------------------------------------------- */
-  ::ng-deep .leaflet-control-attribution {
-    background: rgba(var(--tq-bg-rgb), 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--tq-text-muted);
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: var(--tq-radius-sm) var(--tq-radius-sm) 0 0;
-    margin-bottom: calc(64px + env(safe-area-inset-bottom, 0)) !important;
-
-    a {
-      color: var(--tq-text-secondary);
-      text-decoration: none;
-
-      &:hover {
-        color: var(--tq-ocra);
-      }
-    }
-  }
-
-  /* ============================================================
-   * USER MARKER — Sotto-step 2B
-   * ============================================================
-   * Marker posizione utente con pulse animato.
-   * Struttura HTML iniettata da L.divIcon (vedi home.page.ts):
-   *
-   *   .leaflet-marker-icon.user-marker-wrapper   <- wrapper Leaflet
-   *     .user-marker                              <- contenitore custom
-   *       .user-marker__pulse                     <- ring animato
-   *       .user-marker__dot                       <- punto centrale
-   *
-   * Il wrapper esterno e' 48x48 (iconSize). Il dot e' centrato.
-   * ============================================================ */
-
-  /* Disabilita transizioni Leaflet sul wrapper marker (le abbiamo noi
-     sul dot/pulse). Senza, il wrapper "scorre" durante zoom rovinando
-     la posizione percepita del marker. */
-  ::ng-deep .user-marker-wrapper {
-    background: transparent;
-    border: none;
-  }
-
-  ::ng-deep .user-marker {
-    /* Contenitore centrato dentro il wrapper 48x48 di Leaflet. */
-    position: relative;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none; /* non-interactive: vedi options del marker */
-  }
-
-  /* Punto centrale solido — la "tu sei qui" vera e propria. */
-  ::ng-deep .user-marker__dot {
-    position: relative;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--tq-ocra);
-    /* Bordo bone sottile per definire il dot sui tile dark. */
-    border: 2px solid var(--tq-bone);
-    /* Glow ocra esterno per il vibe gamificato. */
-    box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.4),
-      0 0 12px rgba(var(--tq-ocra-rgb), 0.55);
-    /* z-index relativo per stare sopra il pulse. */
-    z-index: 2;
-  }
-
-  /* Ring animato che si espande e svanisce. */
-  ::ng-deep .user-marker__pulse {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: rgba(var(--tq-ocra-rgb), 0.35);
-    /* Centratura: il transform sul pulse interferisce con animation,
-       quindi usiamo margin negativi calcolati. */
-    margin-top: -7px;
-    margin-left: -7px;
-    z-index: 1;
-
-    /* Animazione: cresce da 14px a 42px (3x), opacita' da 0.6 a 0, loop. */
-    animation: user-marker-pulse 2s var(--tq-ease-out) infinite;
-  }
-}
-
-/* ============================================================================
- * HomePage — Sotto-step 2C
- * ============================================================================
- * Stili scoped al componente HomePage.
- *
- * Tutti gli stili che riguardano elementi iniettati da Leaflet (marker,
- * popup, animazioni) vivono in global.scss perche' Leaflet li inietta
- * fuori dall'albero del template Angular e ViewEncapsulation li rende
- * irraggiungibili da regole scopate (specialmente per @keyframes).
- *
- * Qui rimangono solo:
- * - configurazione di ion-content per la mappa full-bleed
- * - regole sul container .home__map
- * - override scopati dei controlli Leaflet (attribution) — niente
- *   animazioni, quindi non soffrono del bug di hashing
+ * Qui vivono:
+ * - Configurazione ion-content (niente padding, background mappa)
+ * - Container .home__map
+ * - Override attribution MapLibre (posizionata sopra la tab bar)
+ * - Posizionamento overlay flottanti (permission banner, locate button, toast)
  * ========================================================================== */
 
 .home {
@@ -192,57 +29,49 @@
 }
 
 /* ============================================================================
- * Override stili Leaflet interni (scoped, no animazioni)
+ * Override MapLibre controls
+ * ============================================================================
+ * I controlli sono iniettati da MapLibre nel container .home__map fuori
+ * dall'albero Angular → ::ng-deep per raggiungerli.
  * ========================================================================== */
 
 .home {
-  ::ng-deep .leaflet-container {
-    background: var(--tq-bg) !important;
-    outline: none;
-    font-family: var(--tq-font-sans);
-  }
-
-  ::ng-deep .leaflet-top,
-  ::ng-deep .leaflet-bottom,
-  ::ng-deep .leaflet-control {
-    z-index: 1 !important;
-  }
-
-  ::ng-deep .leaflet-control-attribution {
-    background: rgba(var(--tq-bg-rgb), 0.7);
+  /* Attribution compatta posizionata sopra la tab bar. */
+  ::ng-deep .maplibregl-ctrl-attrib {
+    background: rgba(var(--tq-bg-rgb), 0.7) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    color: var(--tq-text-muted);
+    color: var(--tq-text-muted) !important;
     font-size: 10px;
     padding: 2px 6px;
     border-radius: var(--tq-radius-sm) var(--tq-radius-sm) 0 0;
     margin-bottom: calc(64px + env(safe-area-inset-bottom, 0)) !important;
 
     a {
-      color: var(--tq-text-secondary);
+      color: var(--tq-text-secondary) !important;
       text-decoration: none;
 
       &:hover {
-        color: var(--tq-ocra);
+        color: var(--tq-ocra) !important;
       }
+    }
+  }
+
+  /* Cursore default sul canvas della mappa (override del default text). */
+  ::ng-deep .maplibregl-canvas-container canvas {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
     }
   }
 }
 
 /* ============================================================================
- * HomePage — Sotto-step 2B-bis
+ * Permission banner GPS
  * ============================================================================
- * Posizionamento del permission banner GPS sopra la mappa.
- *
- * Il banner e' un overlay flottante: vive dentro ion-content ma posizionato
- * in absolute per non spingere giu' la mappa. Si auto-mostra/nasconde
- * via @if interno al componente (vedi permission-banner.component.html).
- *
- * Sopra Leaflet (z-index --tq-z-map-overlay = 1000), sotto la tab bar
- * (--tq-z-tab-bar = 1020). I margini interni del banner sono gia' gestiti
- * dal componente stesso (margin: 8px nel suo .scss).
- *
- * Safe area top per iOS notch / Android display cutout.
+ * Overlay flottante: si auto-mostra/nasconde via @if interno al componente.
+ * Sopra la mappa (z-map-overlay), sotto la tab bar (z-tab-bar).
  * ========================================================================== */
 
 .home {
@@ -252,7 +81,6 @@
     left: 0;
     right: 0;
     z-index: var(--tq-z-map-overlay);
-    /* Spazio per notch / status bar su mobile. */
     padding-top: env(safe-area-inset-top, 0);
   }
 }
@@ -260,8 +88,7 @@
 /* ============================================================================
  * Bottone centra-su-di-me
  * ============================================================================
- * FAB flottante bottom-right, sopra la mappa (z-map-overlay) e sotto la
- * tab bar (z-tab-bar). Si allontana dal bordo inferiore della tab bar.
+ * FAB flottante bottom-right, sopra la mappa, sotto la tab bar.
  * ========================================================================== */
 
 .home__locate-btn {
@@ -283,7 +110,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
 
   &:active {
     transform: scale(0.92);
@@ -326,7 +155,6 @@
 
   animation: tq-toast-enter 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
 
-  /* Variante "sei in zona" — bordo e testo verde */
   &--inrange {
     border-color: rgba(107, 160, 70, 0.4);
     box-shadow:
@@ -398,7 +226,9 @@
     transition: opacity 0.12s;
     white-space: nowrap;
 
-    &:active { opacity: 0.8; }
+    &:active {
+      opacity: 0.8;
+    }
   }
 
   &__dismiss {
@@ -416,6 +246,8 @@
     padding: 0;
     transition: color 0.15s;
 
-    &:active { color: var(--tq-bone); }
+    &:active {
+      color: var(--tq-bone);
+    }
   }
 }

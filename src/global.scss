@@ -38,56 +38,34 @@
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
 /* ===========================================================
- * Leaflet base styles.
+ * MapLibre GL base styles.
  * Obbligatorio per rendering corretto di tile, marker e controlli mappa.
- * Lo carichiamo globalmente perch the CSS interno di Leaflet usa
- * selettori .leaflet-* non scoped; isolarli nel singolo componente
- * darebbe problemi di rendering quando creiamo marker dinamici.
+ * Carichiamo globalmente perché MapLibre inietta elementi fuori
+ * dall'albero Angular (controlli, popup, canvas).
  * ===========================================================
  */
-@import 'leaflet/dist/leaflet.css';
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
 /* ============================================================
- * TILE LAYER — adattamento dark/light (OpenStreetMap standard)
+ * TILE CANVAS — adattamento dark/light (stile liberty unico)
  * ============================================================
- * Il tile URL è unico (OSM): colori naturali vivaci (laghi
- * azzurri, vegetazione verde/gialla, terreno beige).
+ * Il canvas MapLibre è isolato in .maplibregl-canvas-container:
+ * applicare il filter qui NON impatta marker HTML, popup o controlli.
  *
- * OSM è più luminoso e saturo di CARTO Voyager, quindi i
- * filtri usano valori più aggressivi per entrambi i temi.
- *
- * LIGHT MODE
- * - saturate(0.78): riduce la vivacità OSM (verde fluo → verde
- *   naturale) così i marker ocra/forest emergono visivamente
- * - brightness(0.96): micro-dimmer che stacca il bianco da sfondo
- *
- * DARK MODE
- * - brightness(0.48): porta il bianco OSM a ~#797979, coerente
- *   con lo sfondo --tq-bg #121212 del tema
- * - saturate(1.15): lieve boost per non appiattire i colori
- *   dopo la riduzione di luminosità
- * - contrast(1.12): recupera la leggibilità delle strade
- *
- * La transition crea un fade morbido al cambio tema.
+ * Light: desaturazione lieve per far emergere i marker ocra/forest.
+ * Dark:  inversione colori + recupero hue per sfondo scuro coerente
+ *        con --tq-bg #121212.
  * ============================================================ */
-.leaflet-tile-pane {
+.maplibregl-canvas-container {
   transition: filter 0.4s ease;
 }
 
-[data-theme='light'] .leaflet-tile-pane {
-  filter: saturate(0.78) brightness(0.96);
+[data-theme='light'] .maplibregl-canvas-container {
+  filter: saturate(0.82) brightness(0.97);
 }
 
-[data-theme='dark'] .leaflet-tile-pane {
-  /* invert(1) + hue-rotate(180deg): inverte la luminosità (bianco→nero,
-     nero→bianco) e poi riruota le tonalità di 180° per annullare lo shift
-     cromatico dell'inversione. Risultato netto: palette dark con hue
-     originali preservati — acqua rimane blu, parchi verdi, strade chiare
-     su sfondo scuro.
-     - brightness(0.85): ammorbidisce le strade bianche dopo l'inversione
-     - contrast(0.88): riduce il contrasto harsh bianco-su-nero
-     - saturate(1.15): recupera vivacità persa dopo inversione+brightness */
-  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.88) saturate(1.15);
+[data-theme='dark'] .maplibregl-canvas-container {
+  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.9) saturate(1.1);
 }
 
 /* ============================================================================
@@ -99,18 +77,67 @@
  * fuori dall'albero Angular) li teniamo globali qui.
  * ========================================================================== */
 
-/* Wrapper esterno aggiunto da Leaflet (className di L.divIcon): rimuove
-   il background bianco di default che Leaflet applicherebbe. */
+/* ============================================================================
+ * USER MARKER — posizione utente con pulse animato
+ * ============================================================================
+ * Struttura HTML (iniettata da syncUserGpsLayers() in home.page.ts):
+ *
+ *   .maplibregl-marker.user-marker-wrapper
+ *     .user-marker
+ *       .user-marker__pulse     <- ring che si espande e svanisce
+ *       .user-marker__dot       <- punto centrale solido
+ *
+ * Questi stili devono essere globali perché i Marker MapLibre sono
+ * iniettati nel DOM fuori dall'albero Angular (ViewEncapsulation non li raggiunge).
+ * ========================================================================== */
+
 .user-marker-wrapper {
   background: transparent !important;
   border: none !important;
 }
 
-/* Animazione del ring che pulsa attorno al marker utente. */
+.user-marker {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.user-marker__dot {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--tq-ocra);
+  border: 2px solid var(--tq-bone);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(var(--tq-ocra-rgb), 0.55);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.user-marker__pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(var(--tq-ocra-rgb), 0.35);
+  margin-top: -7px;
+  margin-left: -7px;
+  z-index: 1;
+  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
 @keyframes user-marker-pulse {
   0% {
     transform: scale(1);
-    opacity: 1;
+    opacity: 0.7;
   }
   70% {
     opacity: 0;
@@ -121,26 +148,11 @@
   }
 }
 
-/* Forziamo l'animation sul pulse anche se la regola scopata nel
-   home.page.scss non venisse applicata per encapsulation. */
-.user-marker__pulse {
-  /* Auto-sufficiente: definisce tutto quello che serve all'animazione visibile. */
-  background: rgba(200, 147, 15, 0.6) !important;
-  width: 14px !important;
-  height: 14px !important;
-  border-radius: 50% !important;
-  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
-}
-
 /* ============================================================================
- * AGGIUNTE A src/global.scss
+ * MARKER QUEST — HTML markers iniettati da MapLibre
  * ============================================================================
- * Aggiungi questo blocco IN FONDO al tuo src/global.scss esistente,
- * dopo la sezione "Stili globali per marker Leaflet" del user marker.
- *
- * I quest marker e i popup vivono qui (non nel componente) perche'
- * Leaflet li inietta nel DOM fuori dall'albero Angular, e le regole
- * scopate non li raggiungono.
+ * I quest marker e i popup vivono qui perché MapLibre li inietta nel DOM
+ * fuori dall'albero Angular, e le regole scopate non li raggiungono.
  * ========================================================================== */
 
 /* ============================================================================
@@ -148,7 +160,7 @@
  * ============================================================================
  * Struttura HTML iniettata da L.divIcon (vedi home.page.ts):
  *
- *   .leaflet-marker-icon.quest-marker-wrapper
+ *   .maplibregl-marker.quest-marker-wrapper
  *     .quest-marker.quest-marker--{status}        <- discovered / available / locked
  *       .quest-marker__pin                         <- contenitore circolare
  *         <svg>                                    <- icona categoria o lucchetto
@@ -223,48 +235,78 @@
 }
 
 /* ============================================================================
- * LEAFLET POPUP — frame esterno warm-dark
+ * MAPLIBRE POPUP — frame esterno warm-dark
  * ============================================================================
  * Il contenuto interno del popup e' renderizzato da QuestPopupComponent
  * (gli stili sono scoped al componente).
  *
- * Qui stiliziamo SOLO il wrapper esterno iniettato da Leaflet.
+ * Struttura MapLibre:
+ *   .maplibregl-popup.tq-quest-popup
+ *     .maplibregl-popup-tip
+ *     .maplibregl-popup-content
+ *       button.maplibregl-popup-close-button
+ *       <!-- QuestPopupComponent -->
+ *
+ * Qui stiliziamo SOLO il wrapper esterno iniettato da MapLibre.
  * ========================================================================== */
 
-.leaflet-popup-content-wrapper {
+/* ============================================================================
+ * POPUP FRAME — wrapper esterno warm-panel
+ * ============================================================================
+ * Struttura MapLibre:
+ *   .maplibregl-popup.tq-quest-popup
+ *     .maplibregl-popup-tip
+ *     .maplibregl-popup-content
+ *       button.maplibregl-popup-close-button  ← position:absolute top-right
+ *       <!-- QuestPopupComponent host -->
+ *
+ * Padding: top/right extra per non sovrapporre il pulsante close (≈ 22px wide).
+ * Width fissa su .tq-quest-popup per coerenza tra popup ricchi e poveri.
+ * ========================================================================== */
+
+.maplibregl-popup-content {
   background: var(--tq-panel) !important;
   color: var(--tq-text-primary) !important;
   border-radius: 12px !important;
   box-shadow:
     0 8px 24px -8px rgba(0, 0, 0, 0.4),
     0 0 0 1px var(--tq-hairline-strong) !important;
-  padding: 4px !important;
+  /* top: 10px lascia spazio al close btn (h≈22px); right: 26px copre la sua larghezza */
+  padding: 10px 26px 14px 14px !important;
+  font-family: var(--tq-font-sans) !important;
+  line-height: 1.45 !important;
 }
 
-/* Shadow più leggera in light mode: lo sfondo bianco non ha bisogno del drop forte */
-[data-theme='light'] .leaflet-popup-content-wrapper {
+/* Shadow più leggera in light mode */
+[data-theme='light'] .maplibregl-popup-content {
   box-shadow:
     0 4px 20px -6px rgba(0, 0, 0, 0.14),
     0 0 0 1px var(--tq-hairline-strong) !important;
 }
 
-.leaflet-popup-content {
-  margin: 12px 16px !important;
-  font-family: var(--tq-font-sans) !important;
-  line-height: 1.45 !important;
+/* Larghezza fissa per tutti i popup quest: rende ogni popup identico in larghezza
+   indipendentemente dalla lunghezza del titolo o della descrizione. */
+.tq-quest-popup .maplibregl-popup-content {
+  width: 272px;
 }
 
-.leaflet-popup-tip {
-  background: var(--tq-panel) !important;
-}
+/* Tip (freccia): colore uguale al pannello per qualsiasi direzione di ancoraggio */
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--tq-panel) !important; }
 
-.leaflet-popup-close-button {
+.maplibregl-popup-close-button {
   color: var(--tq-text-muted) !important;
   font-size: 20px !important;
   padding: 6px 8px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 12px 0 0 !important;
 
   &:hover {
     color: var(--tq-ocra) !important;
+    background: transparent !important;
   }
 }
 
@@ -503,9 +545,9 @@
 }
 
 /* Popup content-wrapper entrance.
-   NON animare .tq-quest-popup root: Leaflet usa transform su quell'elemento
+   NON animare .tq-quest-popup root: MapLibre usa transform su quell'elemento
    per il posizionamento — l'animation CSS sovrascrive il suo translate3d. */
-.tq-quest-popup .leaflet-popup-content-wrapper {
+.tq-quest-popup .maplibregl-popup-content {
   animation: tq-popup-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) 30ms both;
 }
 
@@ -514,7 +556,7 @@
  * ============================================================================
  * Struttura HTML iniettata da renderClusterMarker() in home.page.ts:
  *
- *   .leaflet-marker-icon.quest-cluster-wrapper
+ *   .maplibregl-marker.quest-cluster-wrapper
  *     .quest-cluster
  *       .quest-cluster__count
  * ========================================================================== */
