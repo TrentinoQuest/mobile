@@ -4,6 +4,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
 import { EMPTY, Observable } from 'rxjs';
 import { QuestRepository, QuestSearchFilter } from './repository/quest.repository';
 import { GeolocationService } from '../geolocation/geolocation.service';
+import { AuthService } from '../auth/auth.service';
 import {
   AnyQuest,
   CheckInRequest,
@@ -57,6 +58,10 @@ import {
 export class QuestService {
   private readonly repository = inject(QuestRepository);
   private readonly geolocationService = inject(GeolocationService);
+
+  constructor() {
+    inject(AuthService).logout$.subscribe(() => this.reset());
+  }
 
   // ----------------------------------------------------------------
   // Stato interno (signal privati)

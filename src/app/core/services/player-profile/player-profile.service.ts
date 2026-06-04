@@ -4,10 +4,15 @@ import { catchError, finalize, tap } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { PlayerProfileRepository } from './repository/player-profile.repository';
 import type { CollectibleEntry, ProgressSummary } from './player-profile.types';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class PlayerProfileService {
   private readonly repository = inject(PlayerProfileRepository);
+
+  constructor() {
+    inject(AuthService).logout$.subscribe(() => this.reset());
+  }
 
   private readonly _collection = signal<CollectibleEntry[]>([]);
   private readonly _progress = signal<ProgressSummary | null>(null);

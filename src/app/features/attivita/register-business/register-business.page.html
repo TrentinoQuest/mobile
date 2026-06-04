@@ -1,13 +1,206 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>register-business</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="auth-page">
+  <div class="auth-page__body">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">register-business</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <!-- Back button -->
+    <div class="auth-page__topbar">
+      <button class="auth-page__back-btn" type="button" (click)="goBack()" aria-label="Indietro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="auth-page__hero">
+      <div class="auth-page__eyebrow">TRENTINO QUEST</div>
+      <h1 class="auth-page__title">Affilia la tua attività.</h1>
+      <p class="auth-page__subtitle">Registrati e raggiungi gli esploratori del Trentino.</p>
+    </div>
+
+    <!-- Form -->
+    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Email -->
+      <div class="auth-field" [class.auth-field--error]="(email.touched && email.invalid) || emailAlreadyExists()">
+        <label class="auth-field__label" for="biz-email">EMAIL</label>
+        <input
+          class="auth-field__input"
+          id="biz-email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="info@tuaattivita.it"
+        />
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. }
+          @else if (email.touched && email.errors?.['email']) { Inserisci un'email valida. }
+          @else if (emailAlreadyExists()) { Questa email è già registrata. }
+        </div>
+      </div>
+
+      <!-- Nome attività -->
+      <div class="auth-field" [class.auth-field--error]="businessName.touched && businessName.invalid">
+        <label class="auth-field__label" for="biz-name">NOME ATTIVITÀ</label>
+        <input
+          class="auth-field__input"
+          id="biz-name"
+          type="text"
+          autocomplete="organization"
+          formControlName="businessName"
+          placeholder="Es. Alla Trota"
+        />
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (businessName.touched && businessName.errors?.['required']) { Il nome è obbligatorio. }
+          @else if (businessName.touched && businessName.errors?.['minlength']) { Almeno 2 caratteri. }
+          @else if (businessName.touched && businessName.errors?.['maxlength']) { Massimo 120 caratteri. }
+        </div>
+      </div>
+
+      <!-- Tipo attività -->
+      <div class="auth-field" [class.auth-field--error]="businessType.touched && businessType.invalid">
+        <label class="auth-field__label" for="biz-type">TIPO DI ATTIVITÀ</label>
+        <select class="auth-field__input auth-field__select" id="biz-type" formControlName="businessType">
+          @for (type of businessTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (businessType.touched && businessType.errors?.['required']) { Seleziona un tipo. }
+        </div>
+      </div>
+
+      <!-- Indirizzo -->
+      <div class="auth-field" [class.auth-field--error]="address.touched && address.invalid">
+        <label class="auth-field__label" for="biz-address">INDIRIZZO</label>
+        <input
+          class="auth-field__input"
+          id="biz-address"
+          type="text"
+          autocomplete="street-address"
+          formControlName="address"
+          placeholder="Es. Via Roma 1, Trento"
+        />
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (address.touched && address.errors?.['required']) { L'indirizzo è obbligatorio. }
+        </div>
+      </div>
+
+      <!-- Posizione GPS -->
+      <div class="auth-field">
+        <label class="auth-field__label">POSIZIONE</label>
+        <button
+          type="button"
+          class="auth-field__location-btn"
+          [class.auth-field__location-btn--done]="locationDetected()"
+          [disabled]="detectingLocation()"
+          (click)="detectLocation()"
+        >
+          @if (detectingLocation()) {
+            <ion-spinner name="crescent" class="auth-field__location-spinner"></ion-spinner>
+            Rilevamento in corso…
+          } @else if (locationDetected()) {
+            ✓ Posizione rilevata
+          } @else {
+            Rileva posizione attuale
+          }
+        </button>
+      </div>
+
+      <!-- Password -->
+      <div class="auth-field" [class.auth-field--error]="password.touched && password.invalid">
+        <label class="auth-field__label" for="biz-password">PASSWORD</label>
+        <div class="auth-field__input-row">
+          <input
+            class="auth-field__input auth-field__input--with-action"
+            id="biz-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            autocomplete="new-password"
+            formControlName="password"
+            placeholder="Almeno 8 caratteri"
+          />
+          <button
+            type="button"
+            class="auth-field__eye-btn"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'"
+          >
+            @if (passwordVisible()) {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            } @else {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+          </button>
+        </div>
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (password.touched && password.errors?.['required']) { La password è obbligatoria. }
+          @else if (password.touched && password.errors?.['minlength']) { Almeno 8 caratteri. }
+        </div>
+      </div>
+
+      <!-- Conferma password -->
+      <div class="auth-field" [class.auth-field--error]="(confirmPassword.touched && confirmPassword.invalid) || passwordsMismatch">
+        <label class="auth-field__label" for="biz-confirm">CONFERMA PASSWORD</label>
+        <div class="auth-field__input-row">
+          <input
+            class="auth-field__input auth-field__input--with-action"
+            id="biz-confirm"
+            [type]="confirmPasswordVisible() ? 'text' : 'password'"
+            autocomplete="new-password"
+            formControlName="confirmPassword"
+            placeholder="Ripeti la password"
+          />
+          <button
+            type="button"
+            class="auth-field__eye-btn"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="confirmPasswordVisible() ? 'Nascondi password' : 'Mostra password'"
+          >
+            @if (confirmPasswordVisible()) {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            } @else {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+          </button>
+        </div>
+        <div class="auth-field__error-msg" role="alert" aria-live="polite">
+          @if (confirmPassword.touched && confirmPassword.errors?.['required']) { Conferma la password. }
+          @else if (passwordsMismatch) { Le password non coincidono. }
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="auth-btn"
+        [disabled]="submitting()"
+      >
+        @if (submitting()) {
+          <ion-spinner name="crescent" class="auth-btn__spinner"></ion-spinner>
+          <span>Registrazione in corso…</span>
+        } @else {
+          Registra la tua attività
+        }
+      </button>
+
+    </form>
+
+    <p class="auth-page__switch">
+      Hai già un account?
+      <a routerLink="/auth/login" class="auth-page__switch-link">Accedi</a>
+    </p>
+
+  </div>
 </ion-content>

@@ -1,0 +1,68 @@
+.offer-form-page {
+  --background: var(--tq-bg);
+
+  &__container {
+    padding: 56px 24px calc(80px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  &__back {
+    background: none;
+    border: none;
+    font-family: 'Geist', sans-serif;
+    font-size: 14px;
+    color: var(--tq-ocra);
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  &__title {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 28px;
+    color: var(--tq-bone);
+    margin: 0;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__label {
+    font-family: 'Geist', sans-serif;
+    font-size: 13px;
+    color: var(--tq-bone);
+    opacity: 0.7;
+    padding-left: 2px;
+  }
+
+  &__input,
+  &__textarea {
+    --background: var(--tq-panel);
+    --color: var(--tq-bone);
+    --placeholder-color: rgba(var(--tq-bone-rgb, 240, 230, 210), 0.4);
+    --border-color: rgba(255, 255, 255, 0.12);
+    --border-radius: 12px;
+    --padding-start: 16px;
+    border-radius: 12px;
+  }
+
+  &__submit-btn {
+    --background: var(--tq-ocra);
+    --color: var(--tq-bg);
+    --border-radius: 12px;
+    margin-top: 8px;
+  }
+}

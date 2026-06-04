@@ -12,8 +12,4 @@ export const environment = {
    * TODO: aggiornare con il dominio definitivo prima del primo deploy prod.
    */
   healthCheckUrl: 'https://api.trentinoquest.example/health',
-
-  // In produzione usiamo sempre il backend reale.
-  questRepository: 'http' as 'mock' | 'http',
-  playerProfileRepository: 'http' as 'mock' | 'http',
 };

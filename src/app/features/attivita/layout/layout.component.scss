@@ -1,0 +1,49 @@
+.attivita-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tq-bg);
+}
+
+.attivita-shell__outlet {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+// Tab bar inferiore
+.attivita-tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--tq-panel);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--tq-z-tab-bar);
+  flex-shrink: 0;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 20px;
+    color: var(--tq-bone);
+    opacity: 0.5;
+    text-decoration: none;
+    font-family: 'Geist', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s ease;
+
+    ion-icon {
+      font-size: 22px;
+    }
+
+    &--active {
+      opacity: 1;
+      color: var(--tq-ocra);
+    }
+  }
+}

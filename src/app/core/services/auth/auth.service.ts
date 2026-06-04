@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { Preferences } from '@capacitor/preferences';
 import {
   AuthenticatedUser,
@@ -14,6 +14,7 @@ import {
   UserRole,
 } from '@trentino-quest/shared-types';
 import { environment } from '../../../../environments/environment';
+import { RegisterBusinessRequest } from '../business/business.types';
 
 /**
  * AuthService — Gestione autenticazione e sessione utente.
@@ -75,12 +76,26 @@ export class AuthService {
    */
   private refreshTokenCache: string | null = null;
 
+  /**
+   * Subject che emette un valore ogni volta che avviene un logout (volontario
+   * o forzato dal refreshInterceptor). I service che mantengono stato utente
+   * (QuestService, PlayerProfileService, BusinessService) lo ascoltano e
+   * chiamano reset() automaticamente.
+   */
+  private readonly _logout$ = new Subject<void>();
+
   // ===========================================================================
   // 4. API PUBBLICA REATTIVA (Signal)
   // ===========================================================================
 
   /** Utente correntemente autenticato, oppure null se non autenticato. */
   readonly currentUser = this._currentUser.asReadonly();
+
+  /**
+   * Observable che emette ogni volta che avviene un logout.
+   * I service singleton lo ascoltano per resettare il proprio stato.
+   */
+  readonly logout$: Observable<void> = this._logout$.asObservable();
 
   /** True se c'e un utente autenticato, false altrimenti. */
   readonly isAuthenticated = computed(() => this._currentUser() !== null);
@@ -99,6 +114,18 @@ export class AuthService {
   registerPlayer(req: RegisterPlayerRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${environment.apiUrl}/auth/register`, req)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
+  }
+
+  /**
+   * Registra una nuova Attività Locale.
+   * Endpoint: POST /business/register (tag business-self-mgt).
+   * Restituisce AuthResponse: salva token e user in Preferences automaticamente.
+   * Il nuovo business parte con approvalStatus 'pending'.
+   */
+  registerBusiness(req: RegisterBusinessRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/business/register`, req)
       .pipe(tap((response) => this.handleAuthSuccess(response)));
   }
 
@@ -342,12 +369,13 @@ export class AuthService {
 
   /**
    * Gestisce il logout (sia volontario che forzato da 401): cancella tutto
-   * lo stato locale.
+   * lo stato locale e notifica i service che dipendono dalla sessione.
    */
   private handleLogoutSuccess(): void {
     this.accessTokenCache = null;
     this.refreshTokenCache = null;
     this._currentUser.set(null);
+    this._logout$.next();
     void this.clearStorage();
   }
 
