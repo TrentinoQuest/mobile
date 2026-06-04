@@ -46,6 +46,10 @@ export {
   Collectible,
   CollectibleEntry,
   CollectibleRarity,
+  CollectibleStatus,
+
+  // Placement QR
+  PlacementStatus,
 } from '@trentino-quest/shared-types';
 
 // NOTA: GeoPoint e Links vivono in @trentino-quest/shared-types/common.

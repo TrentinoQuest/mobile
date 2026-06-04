@@ -22,7 +22,10 @@ import { BusinessApprovalStatus } from '../services/business/business.types';
  * In caso di errore HTTP (es. token scaduto): redirect a /attivita/pending
  * come fallback difensivo (l'authGuard a monte gestisce già il 401).
  */
-export const businessStatusGuard: CanActivateFn = (): Observable<boolean | UrlTree> | boolean | UrlTree => {
+export const businessStatusGuard: CanActivateFn = ():
+  | Observable<boolean | UrlTree>
+  | boolean
+  | UrlTree => {
   const businessService = inject(BusinessService);
   const router = inject(Router);
 
@@ -41,7 +44,7 @@ export const businessStatusGuard: CanActivateFn = (): Observable<boolean | UrlTr
 };
 
 function redirectByStatus(status: BusinessApprovalStatus, router: Router): boolean | UrlTree {
-  if (status === 'pending') return router.parseUrl('/attivita/pending');
-  if (status === 'rejected') return router.parseUrl('/attivita/rejected');
+  if (status === BusinessApprovalStatus.PENDING) return router.parseUrl('/attivita/pending');
+  if (status === BusinessApprovalStatus.REJECTED) return router.parseUrl('/attivita/rejected');
   return true;
 }

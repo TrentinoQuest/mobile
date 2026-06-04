@@ -24,14 +24,7 @@ import { BusinessType, BUSINESS_TYPE_LABEL } from '../../../core/services/busine
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [
-    FormsModule,
-    IonContent,
-    IonButton,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-  ],
+  imports: [FormsModule, IonContent, IonButton, IonInput, IonSelect, IonSelectOption],
 })
 export class AttivitaProfiloPage implements OnInit {
   protected readonly businessService = inject(BusinessService);
@@ -41,7 +34,7 @@ export class AttivitaProfiloPage implements OnInit {
 
   // Campi form legati via ngModel
   protected businessName = signal('');
-  protected businessType = signal<BusinessType>('restaurant');
+  protected businessType = signal<BusinessType>(BusinessType.RESTAURANT);
   protected address = signal('');
   protected saving = signal(false);
 
@@ -81,8 +74,7 @@ export class AttivitaProfiloPage implements OnInit {
         },
         error: async (err) => {
           this.saving.set(false);
-          const msg =
-            err?.error?.message ?? 'Errore durante il salvataggio. Riprova.';
+          const msg = err?.error?.message ?? 'Errore durante il salvataggio. Riprova.';
           await this.showToast(msg, 'danger');
         },
       });

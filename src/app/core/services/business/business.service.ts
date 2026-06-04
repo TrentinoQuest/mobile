@@ -8,6 +8,7 @@ import {
   Business,
   CreateOfferRequest,
   Offer,
+  OfferStatus,
   UpdateBusinessProfileRequest,
   UpdateOfferRequest,
 } from './business.types';
@@ -61,7 +62,10 @@ export class BusinessService {
   ensureProfile(): Observable<Business> {
     const current = this._profile();
     if (current) {
-      return new Observable((sub) => { sub.next(current); sub.complete(); });
+      return new Observable((sub) => {
+        sub.next(current);
+        sub.complete();
+      });
     }
     // Carica dal repository e aggiorna i signal interni
     return this.repository.getProfile().pipe(
@@ -103,9 +107,7 @@ export class BusinessService {
    * Restituisce Observable per gestire toast di conferma nel componente.
    */
   updateProfile(body: UpdateBusinessProfileRequest): Observable<Business> {
-    return this.repository.updateProfile(body).pipe(
-      tap((updated) => this._profile.set(updated)),
-    );
+    return this.repository.updateProfile(body).pipe(tap((updated) => this._profile.set(updated)));
   }
 
   /**
@@ -136,18 +138,20 @@ export class BusinessService {
 
   /** Crea una nuova offerta (POST /business/offers). */
   createOffer(body: CreateOfferRequest): Observable<Offer> {
-    return this.repository.createOffer(body).pipe(
-      tap((offer) => this._offers.update((list) => [offer, ...list])),
-    );
+    return this.repository
+      .createOffer(body)
+      .pipe(tap((offer) => this._offers.update((list) => [offer, ...list])));
   }
 
   /** Modifica un'offerta esistente (PATCH /business/offers/{id}). */
   updateOffer(id: string, body: UpdateOfferRequest): Observable<Offer> {
-    return this.repository.updateOffer(id, body).pipe(
-      tap((updated) =>
-        this._offers.update((list) => list.map((o) => (o.id === id ? updated : o))),
-      ),
-    );
+    return this.repository
+      .updateOffer(id, body)
+      .pipe(
+        tap((updated) =>
+          this._offers.update((list) => list.map((o) => (o.id === id ? updated : o))),
+        ),
+      );
   }
 
   /**
@@ -155,13 +159,15 @@ export class BusinessService {
    * Il backend fa soft delete: aggiorniamo localmente status a 'archived'.
    */
   deleteOffer(id: string): Observable<void> {
-    return this.repository.deleteOffer(id).pipe(
-      tap(() =>
-        this._offers.update((list) =>
-          list.map((o) => (o.id === id ? { ...o, status: 'archived' as const } : o)),
+    return this.repository
+      .deleteOffer(id)
+      .pipe(
+        tap(() =>
+          this._offers.update((list) =>
+            list.map((o) => (o.id === id ? { ...o, status: OfferStatus.ARCHIVED } : o)),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   /** Reset completo dello stato. Chiamato su logout. */
@@ -193,14 +199,20 @@ export class BusinessService {
 
   private messageForHttpStatus(status: number, context: string): string {
     switch (status) {
-      case 0: return 'Connessione assente. Verifica la tua rete.';
-      case 401: return "Sessione scaduta. Effettua di nuovo l'accesso.";
-      case 403: return 'Non hai i permessi per questa operazione.';
-      case 404: return 'Risorsa non trovata.';
+      case 0:
+        return 'Connessione assente. Verifica la tua rete.';
+      case 401:
+        return "Sessione scaduta. Effettua di nuovo l'accesso.";
+      case 403:
+        return 'Non hai i permessi per questa operazione.';
+      case 404:
+        return 'Risorsa non trovata.';
       case 500:
       case 502:
-      case 503: return 'Il server non risponde. Riprova tra qualche istante.';
-      default: return `Errore di rete (${status}) in ${context}`;
+      case 503:
+        return 'Il server non risponde. Riprova tra qualche istante.';
+      default:
+        return `Errore di rete (${status}) in ${context}`;
     }
   }
 }

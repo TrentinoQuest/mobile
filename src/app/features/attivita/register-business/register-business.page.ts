@@ -114,10 +114,7 @@ export class RegisterBusinessPage {
     if (this.form.invalid || this.submitting()) return;
 
     if (!this.detectedPosition) {
-      await this.showToast(
-        'Rileva la tua posizione prima di procedere.',
-        'warning',
-      );
+      await this.showToast('Rileva la tua posizione prima di procedere.', 'warning');
       return;
     }
 
@@ -162,21 +159,38 @@ export class RegisterBusinessPage {
       return;
     }
 
-    await this.showToast("Si è verificato un errore. Riprova più tardi.", 'danger');
+    await this.showToast('Si è verificato un errore. Riprova più tardi.', 'danger');
   }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {
-    const toast = await this.toastCtrl.create({ message, duration: 3500, position: 'bottom', color });
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3500,
+      position: 'bottom',
+      color,
+    });
     await toast.present();
   }
 
   // Accessori per il template
-  get email(): AbstractControl { return this.form.get('email')!; }
-  get businessName(): AbstractControl { return this.form.get('businessName')!; }
-  get businessType(): AbstractControl { return this.form.get('businessType')!; }
-  get address(): AbstractControl { return this.form.get('address')!; }
-  get password(): AbstractControl { return this.form.get('password')!; }
-  get confirmPassword(): AbstractControl { return this.form.get('confirmPassword')!; }
+  get email(): AbstractControl {
+    return this.form.get('email')!;
+  }
+  get businessName(): AbstractControl {
+    return this.form.get('businessName')!;
+  }
+  get businessType(): AbstractControl {
+    return this.form.get('businessType')!;
+  }
+  get address(): AbstractControl {
+    return this.form.get('address')!;
+  }
+  get password(): AbstractControl {
+    return this.form.get('password')!;
+  }
+  get confirmPassword(): AbstractControl {
+    return this.form.get('confirmPassword')!;
+  }
   get passwordsMismatch(): boolean {
     return this.form.errors?.['passwordsMismatch'] === true && this.confirmPassword.touched;
   }

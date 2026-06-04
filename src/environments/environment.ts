@@ -7,49 +7,16 @@ export const environment = {
 
   /**
    * Base URL delle API REST di Trentino Quest.
-   * Tutti gli endpoint del backend sono sotto /api/v1 come da OpenAPI.
+   * In sviluppo locale punta al backend in esecuzione sul PC.
+   * Cambia l'IP se la macchina cambia indirizzo sulla LAN.
    */
-  apiUrl: 'http://10.218.163.76:3000/api/v1',
+  apiUrl: 'https://backend-utj0.onrender.com/api/v1',
 
   /**
    * Endpoint di health check del backend.
    * Vive a livello di root del server, fuori dal namespace /api/v1.
-   * Usato da AuthService all'avvio dell'app per verificare la
-   * raggiungibilita del backend (Decisione bonus livello 3).
    */
-  healthCheckUrl: 'http://10.218.163.76:3000/health',
-
-  /**
-   * Quale implementazione di QuestRepository iniettare.
-   * 'mock' = dati hardcoded in memoria (sviluppo offline)
-   * 'http' = chiamate REST al backend (richiede backend running)
-   *
-   * In dev manteniamo 'mock' di default finche' il backend quest non
-   * e' implementato. Per testare l'integrazione, cambia a 'http' e
-   * verifica che il backend risponda.
-   */
-  questRepository: 'http' as 'mock' | 'http',
-
-  /**
-   * Quale implementazione di PlayerProfileRepository iniettare.
-   * 'mock' = dati hardcoded (sviluppo offline)
-   * 'http' = chiamate REST al backend
-   */
-  playerProfileRepository: 'http' as 'mock' | 'http',
-
-  /**
-   * Quale implementazione di BusinessRepository iniettare.
-   * 'mock' = dati hardcoded (sviluppo offline)
-   * 'http' = chiamate REST al backend (richiede backend running)
-   */
-  businessRepository: 'mock' as 'mock' | 'http',
+  healthCheckUrl: 'https://backend-utj0.onrender.com/health',
 };
 
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
 // import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

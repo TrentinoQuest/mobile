@@ -94,11 +94,13 @@ export class OfferFormPage implements OnInit {
     this.router.navigate(['/attivita/offerte']);
   }
 
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger' | 'warning',
-  ): Promise<void> {
-    const toast = await this.toastCtrl.create({ message, color, duration: 2500, position: 'bottom' });
+  private async showToast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      color,
+      duration: 2500,
+      position: 'bottom',
+    });
     await toast.present();
   }
 }

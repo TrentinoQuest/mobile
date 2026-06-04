@@ -180,17 +180,13 @@ export const routes: Routes = [
       {
         path: 'offerte/new',
         loadComponent: () =>
-          import('./features/attivita/offerte/form/offer-form.page').then(
-            (m) => m.OfferFormPage,
-          ),
+          import('./features/attivita/offerte/form/offer-form.page').then((m) => m.OfferFormPage),
         canActivate: [businessStatusGuard],
       },
       {
         path: 'offerte/:id',
         loadComponent: () =>
-          import('./features/attivita/offerte/form/offer-form.page').then(
-            (m) => m.OfferFormPage,
-          ),
+          import('./features/attivita/offerte/form/offer-form.page').then((m) => m.OfferFormPage),
         canActivate: [businessStatusGuard],
       },
     ],

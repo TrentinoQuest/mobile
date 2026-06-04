@@ -4,7 +4,7 @@ import { IonContent, IonButton, IonIcon, IonSkeletonText } from '@ionic/angular/
 import { addIcons } from 'ionicons';
 import { pricetagsOutline, arrowForwardOutline } from 'ionicons/icons';
 import { BusinessService } from '../../../core/services/business/business.service';
-import { BUSINESS_TYPE_LABEL } from '../../../core/services/business/business.types';
+import { BUSINESS_TYPE_LABEL, OfferStatus } from '../../../core/services/business/business.types';
 
 /**
  * HomePage — dashboard principale dell'attività locale approvata.
@@ -28,8 +28,8 @@ export class AttivitaHomePage implements OnInit {
     return type ? BUSINESS_TYPE_LABEL[type] : '';
   });
 
-  protected readonly activeOffersCount = computed(() =>
-    this.businessService.offers().filter((o) => o.status === 'active').length,
+  protected readonly activeOffersCount = computed(
+    () => this.businessService.offers().filter((o) => o.status === OfferStatus.ACTIVE).length,
   );
 
   constructor() {

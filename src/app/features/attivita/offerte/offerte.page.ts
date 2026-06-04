@@ -72,7 +72,12 @@ export class OffertePage implements OnInit {
   }
 
   private async showToast(message: string, color: 'success' | 'danger'): Promise<void> {
-    const toast = await this.toastCtrl.create({ message, color, duration: 2000, position: 'bottom' });
+    const toast = await this.toastCtrl.create({
+      message,
+      color,
+      duration: 2000,
+      position: 'bottom',
+    });
     await toast.present();
   }
 }
