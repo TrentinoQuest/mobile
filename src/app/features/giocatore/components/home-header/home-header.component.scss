@@ -1,195 +1,166 @@
 /* ============================================================================
- * HomeHeaderComponent
+ * HomeHeaderComponent — HUD superiore compatto
  * ============================================================================
- * Header overlay in glass blur sopra la mappa Leaflet.
- *
- * Posizionamento:
- * Il componente si auto-posiziona via :host con position absolute top.
- * La HomePage non deve aggiungere padding o wrapper extra.
- *
- * Effetto visivo:
- * - Background gradient verticale (opaco in alto, semi-trasparente verso
- *   il basso) per ancorare il testo senza coprire la mappa
- * - backdrop-filter blur per fondersi visivamente con la mappa
- * - Niente bordi netti: il bordo inferiore e' sfumato dal gradient
+ * Striscia in alto sopra la mappa: due chip in vetro (collezione | livello).
+ * Si auto-posiziona in absolute, rispetta la safe area, e lascia trasparire
+ * la mappa. Niente blocco gigante: la mappa resta il protagonista.
  * ========================================================================== */
 
 :host {
-  /* Posizionamento overlay sulla home. */
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--tq-z-map-overlay);
-
-  /* Display block per riempire la width allocata. */
   display: block;
 
-  /* Padding: rispetta safe area inset (notch iPhone). */
-  padding-top: env(safe-area-inset-top, 0);
-
-  /* Non intercettare gli eventi pointer sulle aree vuote dell'header:
-     l'utente deve poter pannare la mappa anche se tocca lo spazio
-     vuoto sotto il testo. Riabilitato sugli elementi interattivi. */
-  pointer-events: none;
-
-  /* Background "glass": gradient opaco in alto, trasparente in basso. */
+  /* Scrim brevissimo in cima per leggibilita' dei chip sopra mappe chiare. */
   background: linear-gradient(
     to bottom,
-    rgba(var(--tq-bg-rgb), 0.92) 0%,
-    rgba(var(--tq-bg-rgb), 0.85) 50%,
-    rgba(var(--tq-bg-rgb), 0.55) 80%,
+    rgba(var(--tq-bg-rgb), 0.55) 0%,
     rgba(var(--tq-bg-rgb), 0) 100%
   );
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+
+  /* Le aree vuote non bloccano il pan della mappa. */
+  pointer-events: none;
 }
 
-.home-header {
+.home-hud {
   display: flex;
-  flex-direction: column;
-  gap: var(--tq-space-5);
-  /* Padding aumentato sui lati. Verticale resta come prima. */
-  padding: var(--tq-space-6) var(--tq-space-6) var(--tq-space-8);
+  align-items: stretch;
+  gap: var(--tq-space-2);
+  /* Safe area in alto (notch/Dynamic Island) + respiro laterale. */
+  padding: calc(var(--tq-safe-top) + var(--tq-space-2)) var(--tq-space-4) var(--tq-space-3)
+    calc(var(--tq-safe-left) + var(--tq-space-4));
+  padding-right: calc(var(--tq-safe-right) + var(--tq-space-4));
+}
+
+/* ------------------------------------------------------------------ Chip glass */
+%home-hud-glass {
+  background: rgba(var(--tq-bg-rgb), 0.82);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--tq-hairline-strong);
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
 }
 
-/* ============================================================
- * SALUTO NARRATIVO
- * ============================================================ */
-
-.home-header__greeting {
+.home-hud__chip {
+  @extend %home-hud-glass;
   display: flex;
-  flex-direction: column;
-  gap: var(--tq-space-1);
-}
-
-.home-header__kicker {
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  color: var(--tq-ocra);
-  margin: 0;
-}
-
-.home-header__title {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 32px;
-  line-height: 1.1;
-  color: var(--tq-bone);
-  margin: 0;
-
-  /* em annidato: il username e' enfasi visiva nello stesso italic. */
-  em {
-    /* Già italic dal parent — non ribadire. Solo enfasi di colore. */
-    font-style: italic;
-    color: var(--tq-bone);
-    /* Sottile decorazione ocra per dare carattere al nome. */
-    background: linear-gradient(to bottom, transparent 60%, rgba(var(--tq-ocra-rgb), 0.18) 60%);
-  }
-}
-
-/* ============================================================
- * COLLECTION CHIP
- * ============================================================ */
-
-.home-header__chip {
-  display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--tq-space-2);
+  border-radius: var(--tq-radius-lg);
+  padding: 8px 12px;
 }
 
-.home-header__chip-header {
+/* Collezione: occupa lo spazio flessibile a sinistra. */
+.home-hud__chip--collection {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-hud__icon {
+  flex-shrink: 0;
+  color: var(--tq-ocra);
+  display: flex;
+}
+
+.home-hud__col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.home-hud__line {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  gap: 6px;
 }
 
-.home-header__chip-label {
-  font-family: var(--tq-font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--tq-text-secondary);
-  text-transform: uppercase;
-}
-
-.home-header__chip-counter {
+.home-hud__count {
   font-family: var(--tq-font-mono);
-  font-size: 14px;
-  color: var(--tq-text-muted);
+  font-size: 13px;
+  color: var(--tq-text-secondary);
+  line-height: 1;
 
   strong {
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 14px;
     color: var(--tq-bone);
-    /* Numero "discovered" in evidenza, contatore totale dimmed. */
   }
 }
 
-.home-header__chip-skeleton {
-  /* Placeholder durante il primo caricamento. */
+.home-hud__skeleton {
   color: var(--tq-text-disabled);
-  /* Lieve animation di "respiro" per indicare attesa. */
   animation: home-header-skeleton 1.5s ease-in-out infinite;
 }
 
-/* ============================================================
- * PROGRESS BAR CONTINUA
- * ============================================================ */
+.home-hud__tag {
+  font-family: var(--tq-font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tq-text-muted);
+  white-space: nowrap;
+}
 
-.home-header__chip-bar {
+.home-hud__bar {
   position: relative;
   width: 100%;
-  height: 6px;
+  height: 4px;
   background: var(--tq-hairline-strong);
   border-radius: var(--tq-radius-pill);
   overflow: hidden;
 }
 
-.home-header__chip-bar-fill {
-  /* Fill ocra che si espande con transition al cambio di width. */
+.home-hud__bar-fill {
   height: 100%;
-  background: linear-gradient(to right, var(--tq-ocra) 0%, var(--tq-ocra-tint) 100%);
   border-radius: var(--tq-radius-pill);
-
-  /* Transition lenta e fluida quando il valore cambia (es. dopo scan). */
+  background: linear-gradient(to right, var(--tq-ocra) 0%, var(--tq-ocra-tint) 100%);
+  box-shadow: 0 0 8px rgba(var(--tq-ocra-rgb), 0.45);
   transition: width var(--tq-duration-slow) var(--tq-ease-out);
-
-  /* Lieve glow caldo per il vibe gamificato. */
-  box-shadow: 0 0 8px rgba(var(--tq-ocra-rgb), 0.4);
-
-  /* Min-width 0 per non sporgere quando il valore e' 0%. */
   min-width: 0;
 }
 
-/* ============================================================
- * PUNTI TOTALI
- * ============================================================ */
+/* Livello + punti: chip compatta a destra. */
+.home-hud__chip--level {
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 7px 12px;
+}
 
-.home-header__chip-points {
+.home-hud__lvl {
   font-family: var(--tq-font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--tq-ocra);
-  margin: 0;
-  /* Allineato a destra per coerenza col contatore. */
-  align-self: flex-end;
+  line-height: 1.2;
 }
 
-.home-header__chip-points-unit {
-  /* "pt" leggermente dimmed per gerarchia visiva. */
-  color: var(--tq-text-muted);
+.home-hud__pts {
+  font-family: var(--tq-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-bone);
+  line-height: 1.1;
+}
+
+.home-hud__pts-unit {
+  font-size: 10px;
   font-weight: 400;
+  color: var(--tq-text-muted);
+  margin-left: 2px;
 }
 
-/* ============================================================
- * ANIMAZIONE SKELETON
- * ============================================================ */
-
+/* Keyframe skeleton (riusa il nome gia' definito globalmente se presente). */
 @keyframes home-header-skeleton {
   0%,
   100% {

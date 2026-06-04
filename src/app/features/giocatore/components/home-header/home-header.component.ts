@@ -1,107 +1,63 @@
 import { Component, computed, inject } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
 
 /**
- * Header overlay sopra la mappa nella Home Giocatore.
+ * HUD superiore della Home Giocatore.
  *
- * Mostra:
- * 1. Saluto narrativo variabile con ora del giorno + username
- * 2. Collection chip: progress bar continua (collezione totale)
- * 3. Punti totali (secondario, sotto la barra)
+ * Barra compatta sopra la mappa con le sole informazioni che servono al
+ * giocatore a colpo d'occhio:
+ * 1. Collezione: quanti collezionabili scoperti su totale + mini progress bar
+ * 2. Livello + punti totali
  *
- * Posizionamento:
- * Si posiziona in absolute top sopra il container mappa della HomePage.
- * Background "glass" (gradient + blur) per coerenza con la tab bar.
- * La mappa traspare delicatamente sotto.
+ * Scelta di design: niente saluto narrativo ingombrante ("Buonasera...").
+ * La mappa e' il campo da gioco e deve restare libera; questa barra occupa
+ * solo una striscia in alto, rispettando la safe area (notch/Dynamic Island).
  *
- * Reattivita':
- * Consuma signal di QuestService (discoveredCount, totalCount,
- * playerPoints, loading). Niente input, niente output: si auto-sincronizza
- * via DI. Quando un signal cambia, il template si rerendera.
- *
- * Auth:
- * Username letto da AuthService.currentUser(). Se l'utente non e' un
- * Player (raro: la home e' protetta da authGuard con role check), usa
- * fallback "esploratore".
- *
- * TODO 2E: quando ci sara' il pulsante "centra su di me", potrebbe vivere
- * qui in alto a destra invece che come FAB separato. Da valutare in 2E.
+ * Reattivita': consuma signal di QuestService e AuthService; si auto-aggiorna
+ * dopo ogni scan/check-in senza input/output.
  */
 @Component({
   selector: 'app-home-header',
   templateUrl: './home-header.component.html',
   styleUrls: ['./home-header.component.scss'],
   standalone: true,
+  imports: [DecimalPipe],
 })
 export class HomeHeaderComponent {
   private readonly questService = inject(QuestService);
   private readonly authService = inject(AuthService);
 
-  // ----------------------------------------------------------------
-  // Dati esposti al template (computed dai signal upstream)
-  // ----------------------------------------------------------------
-
-  /**
-   * Saluto narrativo: "Buongiorno" / "Buon pomeriggio" / "Buonasera" /
-   * "Buonanotte" in base all'ora del giorno.
-   *
-   * NOTE sul calcolo:
-   * - Computed Angular: si ricalcola SOLO quando un signal letto cambia.
-   *   Qui non legge alcun signal, quindi viene valutato UNA VOLTA al
-   *   primo render del componente.
-   * - Se l'utente tiene l'app aperta per ore attraverso il cambio di
-   *   fascia oraria (es. da pomeriggio a sera), il saluto NON si aggiorna
-   *   automaticamente. Edge case accettabile per ora (la home tipicamente
-   *   non resta aperta cosi' a lungo).
-   * - Per fix futuro: trasformare in signal aggiornato da setInterval
-   *   ogni 30min, oppure ricalcolare a ogni ngOnInit.
-   */
-  protected readonly greeting = computed<string>(() => {
-    const hour = new Date().getHours();
-    if (hour < 6) return 'Buonanotte';
-    if (hour < 13) return 'Buongiorno';
-    if (hour < 18) return 'Buon pomeriggio';
-    if (hour < 22) return 'Buonasera';
-    return 'Buonanotte';
-  });
-
-  /**
-   * Username del giocatore corrente, con fallback se non disponibile.
-   * Legge il signal currentUser() di AuthService — reattivo a login/logout.
-   */
-  protected readonly username = computed<string>(() => {
-    const user = this.authService.currentUser();
-    // Type guard: il currentUser potrebbe essere Admin o Player.
-    // Solo Player ha username; per gli altri ruoli mostriamo fallback.
-    if (user && 'username' in user && typeof user.username === 'string') {
-      return user.username;
-    }
-    return 'esploratore';
-  });
-
-  /** Quante quest il giocatore ha scoperto. */
+  /** Quanti collezionabili/quest il giocatore ha scoperto. */
   protected readonly discovered = this.questService.discoveredCount;
 
-  /** Quante quest totali ci sono in lista. */
+  /** Totale collezionabili/quest in lista. */
   protected readonly total = this.questService.totalCount;
 
-  /** Punti totali del giocatore, letti dal profilo auth (aggiornati dopo ogni check-in/scan). */
+  /** Loading: skeleton mentre arrivano i primi dati. */
+  protected readonly loading = this.questService.loading;
+
+  /** Punti totali del giocatore (aggiornati dopo ogni scan/check-in). */
   protected readonly points = computed<number>(() => {
     const user = this.authService.currentUser();
     if (user && 'totalPoints' in user) return (user as { totalPoints: number }).totalPoints;
     return 0;
   });
 
-  /** Loading: usato per mostrare skeleton mentre i dati arrivano. */
-  protected readonly loading = this.questService.loading;
+  /** Livello derivato dai punti (stesse soglie del profilo). */
+  protected readonly level = computed<number>(() => {
+    const pts = this.points();
+    if (pts >= 5000) return 5;
+    if (pts >= 2000) return 4;
+    if (pts >= 1000) return 3;
+    if (pts >= 500) return 2;
+    return 1;
+  });
 
   /**
-   * Percentuale di completamento per la progress bar.
-   * Computed: si aggiorna automaticamente quando discovered o total cambiano.
-   *
-   * Guard contro divisione per zero: se total === 0 (dati non caricati),
-   * restituisce 0 invece di NaN.
+   * Percentuale di completamento per la mini progress bar.
+   * Guard contro divisione per zero quando i dati non sono ancora arrivati.
    */
   protected readonly progressPercent = computed<number>(() => {
     const t = this.total();
