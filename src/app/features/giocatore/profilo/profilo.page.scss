@@ -7,8 +7,9 @@
 .profilo__body {
   position: absolute;
   inset: 0;
-  padding-top: 50px;
-  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  /* Safe area parametrica in alto, spazio tab bar in basso. */
+  padding-top: calc(var(--tq-safe-top) + var(--tq-space-3));
+  padding-bottom: calc(var(--tq-tab-bar-total) + var(--tq-space-6));
   overflow-y: auto;
   display: flex;
   flex-direction: column;

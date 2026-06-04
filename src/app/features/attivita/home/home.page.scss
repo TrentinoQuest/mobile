@@ -2,7 +2,8 @@
   --background: var(--tq-bg);
 
   &__container {
-    padding: 56px 24px calc(80px + env(safe-area-inset-bottom, 0px));
+    /* Top con safe area (notch) invece di 56px fissi. */
+    padding: calc(var(--tq-safe-top) + 24px) 24px calc(80px + var(--tq-safe-bottom));
     display: flex;
     flex-direction: column;
     gap: 20px;
