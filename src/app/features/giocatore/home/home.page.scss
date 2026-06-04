@@ -133,6 +133,85 @@
   border-color: rgba(var(--tq-ocra-rgb), 0.35);
 }
 
+/* Quest log: badge col numero di quest ancora da fare. */
+.home__ctrl--log {
+  position: relative;
+  overflow: visible;
+}
+
+.home__ctrl-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--tq-radius-pill);
+  background: var(--tq-ocra);
+  color: #0d0d0d;
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  border: 1.5px solid var(--tq-bg);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================================
+ * FILTRI QUEST — chip riga sotto l'HUD superiore
+ * ============================================================================ */
+.home__filters {
+  position: fixed;
+  top: calc(var(--tq-safe-top) + 62px);
+  left: calc(var(--tq-safe-left) + var(--tq-space-4));
+  right: calc(var(--tq-safe-right) + var(--tq-space-4));
+  z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  gap: var(--tq-space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.home__filter {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--tq-radius-pill);
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  background: rgba(var(--tq-bg-rgb), 0.78);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--tq-hairline-strong);
+  color: var(--tq-text-secondary);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.5);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &--active {
+    background: var(--tq-ocra);
+    border-color: var(--tq-ocra);
+    color: #0d0d0d;
+  }
+}
+
 /* ============================================================================
  * HUD OBIETTIVO — guida persistente "cosa fare ora"
  * ============================================================================ */
@@ -404,4 +483,176 @@
       color: var(--tq-bone);
     }
   }
+}
+
+/* ============================================================================
+ * BOTTOM SHEET "QUEST VICINE"
+ * ============================================================================
+ * ion-modal in modalità sheet. I CSS custom props configurano lo shadow DOM
+ * del modal; .nearby (contenuto proiettato dall'ng-template) eredita
+ * l'encapsulation del componente, quindi gli stili scoped lo raggiungono.
+ * ========================================================================== */
+.nearby-sheet {
+  --background: var(--tq-panel);
+  --border-radius: 22px;
+  --handle-background: var(--tq-hairline-strong);
+  --backdrop-opacity: 0.5;
+}
+
+.nearby {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--tq-space-2) var(--tq-space-5) 0;
+  background: var(--tq-panel);
+}
+
+.nearby__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--tq-space-3);
+  padding: var(--tq-space-3) 0 var(--tq-space-4);
+}
+
+.nearby__title {
+  margin: 0;
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--tq-bone);
+}
+
+.nearby__sub {
+  margin: 5px 0 0;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--tq-ocra);
+  text-transform: uppercase;
+}
+
+.nearby__close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--tq-bg-rgb), 0.6);
+  border: 1px solid var(--tq-hairline);
+  color: var(--tq-text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    color: var(--tq-bone);
+  }
+}
+
+.nearby__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tq-space-2);
+  padding-bottom: calc(var(--tq-safe-bottom) + var(--tq-space-6));
+}
+
+.nearby__row {
+  display: flex;
+  align-items: center;
+  gap: var(--tq-space-3);
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--tq-radius-lg);
+  background: rgba(var(--tq-bg-rgb), 0.5);
+  border: 1px solid var(--tq-hairline);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.1s ease,
+    border-color 0.15s ease;
+
+  &:active {
+    transform: scale(0.985);
+  }
+
+  /* Quest da fare: accento ocra. */
+  &--available {
+    border-color: rgba(var(--tq-ocra-rgb), 0.28);
+
+    .nearby__row-icon {
+      background: rgba(var(--tq-ocra-rgb), 0.16);
+      border-color: rgba(var(--tq-ocra-rgb), 0.3);
+      color: var(--tq-ocra);
+    }
+  }
+
+  /* Quest già scoperte: dimmed, accento forest. */
+  &--discovered {
+    opacity: 0.72;
+
+    .nearby__row-icon {
+      background: rgba(var(--tq-forest-rgb), 0.16);
+      border-color: rgba(var(--tq-forest-rgb), 0.3);
+      color: var(--tq-forest);
+    }
+  }
+}
+
+.nearby__row-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(244, 235, 220, 0.05);
+  border: 1px solid var(--tq-hairline);
+  color: var(--tq-text-secondary);
+}
+
+.nearby__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nearby__row-name {
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-bone);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby__row-meta {
+  font-family: var(--tq-font-sans);
+  font-size: 11.5px;
+  color: var(--tq-text-muted);
+}
+
+.nearby__row-dist {
+  flex-shrink: 0;
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  color: var(--tq-text-secondary);
+}
+
+.nearby__empty {
+  padding: var(--tq-space-8) var(--tq-space-4);
+  text-align: center;
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  color: var(--tq-text-muted);
 }

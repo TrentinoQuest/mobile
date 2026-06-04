@@ -14,7 +14,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { IonContent, ModalController } from '@ionic/angular/standalone';
+import { IonContent, IonModal, ModalController } from '@ionic/angular/standalone';
 import maplibregl from 'maplibre-gl';
 import { ScanModalComponent } from '../components/scan-modal/scan-modal.component';
 import { QuestService } from '../../../core/services/quest/quest.service';
@@ -36,6 +36,22 @@ import { HeadingService } from '../../../core/services/heading/heading.service';
 import { MapSettingsService } from '../../../core/services/map/map-settings.service';
 
 type PlayerStatus = ReturnType<QuestService['playerStatusOf']>;
+
+/** Filtro dei marker sulla mappa. */
+type QuestFilter = 'all' | 'todo' | 'done';
+
+/** Voce della lista "quest vicine" del bottom sheet. */
+interface NearbyQuestItem {
+  id: string;
+  name: string;
+  type: QuestType;
+  status: PlayerStatus;
+  /** Distanza in metri dall'utente, null se il GPS non e' disponibile. */
+  distance: number | null;
+  inRange: boolean;
+  lat: number;
+  lng: number;
+}
 
 /**
  * Struttura GeoJSON minima per FeatureCollection di poligoni.
@@ -78,7 +94,7 @@ interface CircleFeature {
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent, HomeHeaderComponent, PermissionBannerComponent],
+  imports: [IonContent, IonModal, HomeHeaderComponent, PermissionBannerComponent],
 })
 export class HomePage implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true })
@@ -153,6 +169,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
   /** Timestamp dell'ultima rotazione mappa guidata dalla bussola (throttle). */
   private lastHeadingRotateTs = 0;
 
+  /** Filtro marker mappa: tutte | da fare (available) | scoperte (discovered). */
+  protected readonly questFilter = signal<QuestFilter>('all');
+
+  /** Apertura del bottom sheet "quest vicine". */
+  protected readonly nearbySheetOpen = signal(false);
+
   /**
    * Obiettivo corrente — la quest disponibile piu' vicina al giocatore.
    * E' il cuore del "cosa fare ora": l'HUD lo mostra sempre, cosi' chi apre
@@ -213,6 +235,54 @@ export class HomePage implements AfterViewInit, OnDestroy {
       lng: best.lng,
     };
   });
+
+  /**
+   * Lista completa "quest vicine" per il bottom sheet, ordinata: prima quelle
+   * da fare, poi per distanza crescente, infine scoperte e bloccate.
+   */
+  protected readonly nearbyItems = computed<NearbyQuestItem[]>(() => {
+    this.questService.completions();
+    const quests = this.questService.quests();
+    const pos = this.geolocationService.position();
+
+    const items: NearbyQuestItem[] = quests.map((q) => {
+      const isPrimary = q.type === QuestType.PRIMARY;
+      const lat = isPrimary
+        ? (q as PrimaryQuest).searchArea.lat
+        : (q as SecondaryQuest).position.lat;
+      const lng = isPrimary
+        ? (q as PrimaryQuest).searchArea.lng
+        : (q as SecondaryQuest).position.lng;
+      const radius = isPrimary
+        ? (q as PrimaryQuest).searchRadiusMeters
+        : (q as SecondaryQuest).checkInRadiusMeters;
+      const status = this.questService.playerStatusOf(q.id);
+      const distance = pos ? Math.round(haversineMeters(pos.lat, pos.lng, lat, lng)) : null;
+      return {
+        id: q.id,
+        name: q.name,
+        type: q.type,
+        status,
+        distance,
+        inRange: distance != null && distance <= radius,
+        lat,
+        lng,
+      };
+    });
+
+    const rank = (s: PlayerStatus): number => (s === 'available' ? 0 : s === 'discovered' ? 1 : 2);
+    return items.sort((a, b) => {
+      if (rank(a.status) !== rank(b.status)) return rank(a.status) - rank(b.status);
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    });
+  });
+
+  /** Quante quest sono ancora da fare (badge del bottone "quest log"). */
+  protected readonly availableCount = computed<number>(
+    () => this.nearbyItems().filter((i) => i.status === 'available').length,
+  );
 
   // ----------------------------------------------------------------
   // Costanti di configurazione mappa
@@ -375,6 +445,37 @@ export class HomePage implements AfterViewInit, OnDestroy {
   protected resetNorth(): void {
     this.haptics.light();
     this.map?.easeTo({ bearing: 0, pitch: this.INITIAL_PITCH, duration: 500 });
+  }
+
+  /** Apre il bottom sheet con l'elenco delle quest vicine. */
+  protected openNearby(): void {
+    this.haptics.light();
+    this.nearbySheetOpen.set(true);
+  }
+
+  /**
+   * Da una voce della lista "quest vicine": chiude il sheet, vola sulla quest
+   * e ne apre il popup. Punto d'ingresso unico dal quest log alla mappa.
+   */
+  protected goToQuestFromList(item: NearbyQuestItem): void {
+    this.nearbySheetOpen.set(false);
+    if (!this.map) return;
+    this.haptics.medium();
+    this.map.flyTo({
+      center: [item.lng, item.lat],
+      zoom: Math.max(this.map.getZoom(), this.USER_FOCUS_ZOOM),
+      pitch: this.INITIAL_PITCH,
+      duration: 800,
+    });
+    const quest = untracked(() => this.questService.quests()).find((q) => q.id === item.id);
+    if (quest) {
+      setTimeout(() => {
+        this.openQuestPopup(quest, this.questService.playerStatusOf(quest.id), [
+          item.lng,
+          item.lat,
+        ]);
+      }, 850);
+    }
   }
 
   /** Formatta una distanza in metri per l'HUD: "320 m" / "1.4 km". */
@@ -614,14 +715,34 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private renderQuests(quests: AnyQuest[]): void {
     if (!this.map || !this.map.getSource(this.SOURCE_PRIMARY)) return;
 
+    const filtered = this.applyFilter(quests);
+
     this.clearQuestMarkers();
-    this.updatePrimaryCirclesSource(quests);
+    this.updatePrimaryCirclesSource(filtered);
 
     if (this.map.getZoom() < this.CLUSTER_ZOOM_THRESHOLD) {
-      this.renderWithClustering(quests);
+      this.renderWithClustering(filtered);
     } else {
-      this.renderFlat(quests);
+      this.renderFlat(filtered);
     }
+  }
+
+  /** Applica il filtro corrente (tutte / da fare / scoperte) alle quest. */
+  private applyFilter(quests: AnyQuest[]): AnyQuest[] {
+    const f = this.questFilter();
+    if (f === 'all') return quests;
+    return quests.filter((q) => {
+      const status = this.questService.playerStatusOf(q.id);
+      return f === 'todo' ? status === 'available' : status === 'discovered';
+    });
+  }
+
+  /** Cambia il filtro mappa e ridisegna i marker (con tap aptico). */
+  protected setQuestFilter(filter: QuestFilter): void {
+    if (this.questFilter() === filter) return;
+    this.haptics.light();
+    this.questFilter.set(filter);
+    this.renderQuests(untracked(() => this.questService.quests()));
   }
 
   private clearQuestMarkers(): void {
