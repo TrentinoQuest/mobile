@@ -93,6 +93,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private primaryLayer: L.LayerGroup | null = null;
   private secondaryLayer: L.LayerGroup | null = null;
 
+
   /** Mappa questId → marker Leaflet per aprire popup da toast o da codice. */
   private readonly questMarkers = new Map<string, L.Marker>();
 
@@ -146,10 +147,16 @@ export class HomePage implements AfterViewInit, OnDestroy {
     [45.6, 10.4],
     [46.6, 12.0],
   ];
-  private readonly TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  /** OpenStreetMap standard — tile con colori naturali (laghi, montagne, terreno).
+   *  Il tema dark/light è gestito via CSS filter in global.scss, non cambiando URL. */
+  private readonly TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   private readonly TILE_ATTRIBUTION =
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
-    '&copy; <a href="https://carto.com/attributions">CARTO</a>';
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  /** Zoom sotto il quale i marker vengono aggregati in cluster bubble. */
+  private readonly CLUSTER_ZOOM_THRESHOLD = 13;
+  /** Dimensione cella griglia (pixel) per il calcolo del clustering. */
+  private readonly CLUSTER_GRID_PX = 70;
 
   /**
    * Soglia accuracy oltre la quale disegniamo l'alone di incertezza
@@ -179,6 +186,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
         this.checkProximity(position.lat, position.lng);
       }
     });
+
   }
 
   // ----------------------------------------------------------------
@@ -364,12 +372,17 @@ export class HomePage implements AfterViewInit, OnDestroy {
     L.tileLayer(this.TILE_URL, {
       attribution: this.TILE_ATTRIBUTION,
       maxZoom: this.MAX_ZOOM,
-      subdomains: 'abcd',
+      subdomains: 'abc',
     }).addTo(this.map);
 
     // Layer group vuoti, popolati dagli effect.
     this.primaryLayer = L.layerGroup().addTo(this.map);
     this.secondaryLayer = L.layerGroup().addTo(this.map);
+
+    // Re-render dei marker al cambio di zoom per aggiornare il clustering.
+    this.map.on('zoomend', () => {
+      this.renderQuests(untracked(() => this.questService.quests()));
+    });
   }
 
   // ----------------------------------------------------------------
@@ -378,7 +391,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   /**
    * Ridisegna primary e secondary quest dai signal.
-   * Chiamato dall'effect quando quests() o completions() cambiano.
+   * Chiamato dall'effect quando quests() o completions() cambiano,
+   * o dal listener zoomend per aggiornare il clustering.
+   *
+   * Architettura rendering:
+   * - Cerchi area (primary): sempre nel primaryLayer, indipendenti dallo zoom.
+   * - Pin marker (primary + secondary + cluster): nel secondaryLayer.
+   *   Se zoom < CLUSTER_ZOOM_THRESHOLD → clustering grid-based.
+   *   Se zoom ≥ CLUSTER_ZOOM_THRESHOLD → marker individuali.
    */
   private renderQuests(quests: AnyQuest[]): void {
     if (!this.map || !this.primaryLayer || !this.secondaryLayer) return;
@@ -387,28 +407,85 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.secondaryLayer.clearLayers();
     this.questMarkers.clear();
 
+    // I cerchi area sono sempre visibili (comunicano il raggio di ricerca QR).
+    quests
+      .filter((q) => q.type === QuestType.PRIMARY)
+      .forEach((q) => this.renderPrimaryCircle(q as PrimaryQuest));
+
+    // Pin marker: individuali o raggruppati in base allo zoom corrente.
+    if (this.map.getZoom() < this.CLUSTER_ZOOM_THRESHOLD) {
+      this.renderWithClustering(quests);
+    } else {
+      this.renderFlat(quests);
+    }
+  }
+
+  /** Render non-clustered: un marker per ogni quest. */
+  private renderFlat(quests: AnyQuest[]): void {
     let staggerIndex = 0;
     quests.forEach((quest) => {
       if (quest.type === QuestType.PRIMARY) {
-        this.renderPrimaryQuest(quest);
+        this.renderPrimaryMarker(quest as PrimaryQuest, staggerIndex++);
       } else {
-        this.renderSecondaryQuest(quest, staggerIndex++);
+        this.renderSecondaryMarker(quest as SecondaryQuest, staggerIndex++);
       }
     });
   }
 
   /**
-   * Renderizza una primary quest come cerchio (area di ricerca del QR).
-   * Il cerchio NON e' il marker della quest: e' la zona entro cui il QR
-   * e' nascosto.
+   * Render con clustering grid-based.
+   * Raggruppa i marker per cella di una griglia pixel (CLUSTER_GRID_PX):
+   * celle con >1 quest → bolla cluster; celle con 1 quest → marker individuale.
    */
-  private renderPrimaryQuest(quest: PrimaryQuest): void {
+  private renderWithClustering(quests: AnyQuest[]): void {
+    const gridSize = this.CLUSTER_GRID_PX;
+
+    const items = quests.map((quest) => {
+      const lat =
+        quest.type === QuestType.PRIMARY
+          ? (quest as PrimaryQuest).searchArea.lat
+          : (quest as SecondaryQuest).position.lat;
+      const lng =
+        quest.type === QuestType.PRIMARY
+          ? (quest as PrimaryQuest).searchArea.lng
+          : (quest as SecondaryQuest).position.lng;
+      return { quest, lat, lng };
+    });
+
+    const cells = new Map<string, { quest: AnyQuest; lat: number; lng: number }[]>();
+    for (const item of items) {
+      const pixel = this.map!.latLngToContainerPoint([item.lat, item.lng]);
+      const key = `${Math.floor(pixel.x / gridSize)},${Math.floor(pixel.y / gridSize)}`;
+      if (!cells.has(key)) cells.set(key, []);
+      cells.get(key)!.push(item);
+    }
+
+    let staggerIndex = 0;
+    for (const [, group] of cells) {
+      if (group.length === 1) {
+        const { quest } = group[0];
+        if (quest.type === QuestType.PRIMARY) {
+          this.renderPrimaryMarker(quest as PrimaryQuest, staggerIndex++);
+        } else {
+          this.renderSecondaryMarker(quest as SecondaryQuest, staggerIndex++);
+        }
+      } else {
+        const avgLat = group.reduce((s, i) => s + i.lat, 0) / group.length;
+        const avgLng = group.reduce((s, i) => s + i.lng, 0) / group.length;
+        this.renderClusterMarker(avgLat, avgLng, group.length, staggerIndex++);
+      }
+    }
+  }
+
+  /**
+   * Renderizza il cerchio di area di una primary quest.
+   * Il cerchio indica la zona entro cui è nascosto il QR da scansionare.
+   * Separato dal pin marker per permettere rendering indipendente dallo zoom.
+   */
+  private renderPrimaryCircle(quest: PrimaryQuest): void {
     if (!this.primaryLayer) return;
 
     const playerStatus = this.questService.playerStatusOf(quest.id);
-
-    // Colore del cerchio in base allo stato giocatore.
-    // discovered -> forest, locked -> muted, available -> ocra
     const fillColor =
       playerStatus === 'discovered' ? '#6BA046' : playerStatus === 'locked' ? '#666' : '#C8930F';
 
@@ -419,10 +496,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
       radius: quest.searchRadiusMeters,
       color: fillColor,
       fillColor: fillColor,
-      fillOpacity: isAvailable ? 0.12 : isDiscovered ? 0.04 : 0.05,
-      opacity: isAvailable ? 0.85 : isDiscovered ? 0.3 : 0.25,
-      weight: isAvailable ? 2 : 1,
+      fillOpacity: isAvailable ? 0.20 : isDiscovered ? 0.06 : 0.05,
+      opacity: isAvailable ? 1.0 : isDiscovered ? 0.35 : 0.25,
+      weight: isAvailable ? 3 : 1.5,
       dashArray: isAvailable ? undefined : '6 8',
+      className: `quest-primary-circle quest-primary-circle--${playerStatus}`,
     });
 
     this.bindDynamicPopup(circle, 'primary-' + quest.id, () =>
@@ -433,9 +511,53 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   /**
+   * Renderizza il pin centrale di una primary quest.
+   * Più grande e prominente dei secondari (44×44 vs 36×36),
+   * con zIndexOffset alto per stare sempre sopra i marker secondari.
+   */
+  private renderPrimaryMarker(quest: PrimaryQuest, staggerIndex = 0): void {
+    if (!this.secondaryLayer) return;
+
+    const playerStatus = this.questService.playerStatusOf(quest.id);
+    const iconSvg = getQuestIcon(quest, playerStatus);
+
+    const icon = L.divIcon({
+      className: 'quest-marker-wrapper',
+      html: `
+        <div class="quest-marker quest-marker--primary quest-marker--${playerStatus}">
+          <div class="quest-marker__pin">${iconSvg}</div>
+        </div>
+      `,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+      popupAnchor: [0, -22],
+    });
+
+    const marker = L.marker([quest.searchArea.lat, quest.searchArea.lng], {
+      icon,
+      interactive: true,
+      riseOnHover: true,
+      zIndexOffset: 1000,
+    });
+
+    this.bindDynamicPopup(marker, 'primary-pin-' + quest.id, () =>
+      this.createPopupForQuest(quest, playerStatus),
+    );
+
+    marker.addTo(this.secondaryLayer);
+
+    marker.once('add', () => {
+      const el = marker.getElement();
+      if (!el) return;
+      el.style.setProperty('--stagger-delay', `${staggerIndex * 65}ms`);
+      el.classList.add('quest-marker-wrapper--enter');
+    });
+  }
+
+  /**
    * Renderizza una secondary quest come marker puntuale.
    */
-  private renderSecondaryQuest(quest: SecondaryQuest, staggerIndex = 0): void {
+  private renderSecondaryMarker(quest: SecondaryQuest, staggerIndex = 0): void {
     if (!this.secondaryLayer) return;
 
     const playerStatus = this.questService.playerStatusOf(quest.id);
@@ -453,6 +575,35 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
     marker.addTo(this.secondaryLayer);
     this.questMarkers.set(quest.id, marker);
+
+    marker.once('add', () => {
+      const el = marker.getElement();
+      if (!el) return;
+      el.style.setProperty('--stagger-delay', `${staggerIndex * 65}ms`);
+      el.classList.add('quest-marker-wrapper--enter');
+    });
+  }
+
+  /**
+   * Renderizza una bolla cluster che aggrega più quest nello stesso punto
+   * della griglia pixel. Non interattiva: l'utente zooma per vedere i singoli.
+   */
+  private renderClusterMarker(lat: number, lng: number, count: number, staggerIndex = 0): void {
+    if (!this.secondaryLayer) return;
+
+    const icon = L.divIcon({
+      className: 'quest-cluster-wrapper',
+      html: `
+        <div class="quest-cluster">
+          <span class="quest-cluster__count">${count}</span>
+        </div>
+      `,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+
+    const marker = L.marker([lat, lng], { icon, interactive: false });
+    marker.addTo(this.secondaryLayer);
 
     marker.once('add', () => {
       const el = marker.getElement();
