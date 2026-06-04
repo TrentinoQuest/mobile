@@ -128,7 +128,7 @@ function mapPosition(cap: CapacitorPosition): Position {
     lat: cap.coords.latitude,
     lng: cap.coords.longitude,
     accuracy: cap.coords.accuracy,
-    clientTimestamp: cap.timestamp,
+    clientTimestamp: Math.floor(cap.timestamp),
   };
 }
 
