@@ -93,6 +93,34 @@
       </div>
     </div>
 
+    <!-- Impostazioni mappa -->
+    <div class="profilo__section">
+      <div class="profilo__section-header">
+        <span class="profilo__section-title">Mappa</span>
+      </div>
+      <div class="profilo__settings-list">
+        <div class="profilo__settings-row profilo__settings-row--last profilo__settings-row--toggle">
+          <div class="profilo__settings-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+            </svg>
+          </div>
+          <div class="profilo__settings-text">
+            <span class="profilo__settings-label">Ruota con la bussola</span>
+            <span class="profilo__settings-hint">La mappa si orienta verso dove guardi</span>
+          </div>
+          <ion-toggle
+            [checked]="rotateWithHeading()"
+            (ionChange)="onToggleRotateMap($event)"
+            aria-label="Ruota la mappa con la bussola"
+          ></ion-toggle>
+        </div>
+      </div>
+    </div>
+
     <!-- Menu impostazioni -->
     <div class="profilo__section">
       <div class="profilo__settings-list">

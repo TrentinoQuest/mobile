@@ -1,12 +1,20 @@
 import { Component, OnInit, ViewChild, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { ActionSheetController, AlertController, IonContent } from '@ionic/angular/standalone';
+import {
+  ActionSheetController,
+  AlertController,
+  IonContent,
+  IonToggle,
+  ToggleCustomEvent,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { lockClosedOutline, trashOutline } from 'ionicons/icons';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
+import { MapSettingsService } from '../../../core/services/map/map-settings.service';
+import { HeadingService } from '../../../core/services/heading/heading.service';
 import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
 import { PlayerQrCardComponent } from '../components/player-qr-card/player-qr-card.component';
 
@@ -36,7 +44,7 @@ interface SettingsRow {
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [IonContent, DecimalPipe, ThemeSelectorComponent, PlayerQrCardComponent],
+  imports: [IonContent, IonToggle, DecimalPipe, ThemeSelectorComponent, PlayerQrCardComponent],
 })
 export class ProfiloPage implements OnInit {
   @ViewChild(IonContent) private readonly content!: IonContent;
@@ -46,6 +54,11 @@ export class ProfiloPage implements OnInit {
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
   private readonly actionSheetCtrl = inject(ActionSheetController);
+  private readonly mapSettings = inject(MapSettingsService);
+  private readonly headingService = inject(HeadingService);
+
+  /** Stato del toggle "ruota mappa con la bussola" (riflette le preferenze). */
+  protected readonly rotateWithHeading = this.mapSettings.rotateWithHeading;
 
   constructor() {
     addIcons({ lockClosedOutline, trashOutline });
@@ -102,6 +115,33 @@ export class ProfiloPage implements OnInit {
 
   async scrollToSettings(): Promise<void> {
     await this.content.scrollToBottom(400);
+  }
+
+  /**
+   * Toggle "ruota la mappa con la bussola".
+   * All'attivazione avvia il sensore bussola (gesto utente → su iOS questo
+   * fa scattare il prompt di permesso). Se il sensore non e' disponibile o il
+   * permesso e' negato, ripristina il toggle e avvisa.
+   */
+  async onToggleRotateMap(event: ToggleCustomEvent): Promise<void> {
+    const enabled = event.detail.checked;
+
+    if (enabled) {
+      const ok = await this.headingService.start();
+      if (!ok) {
+        await this.mapSettings.setRotateWithHeading(false);
+        const alert = await this.alertCtrl.create({
+          header: 'Bussola non disponibile',
+          message:
+            'Non riesco ad accedere alla bussola del dispositivo. Controlla i permessi di movimento e orientamento nelle impostazioni del telefono.',
+          buttons: ['Ho capito'],
+        });
+        await alert.present();
+        return;
+      }
+    }
+
+    await this.mapSettings.setRotateWithHeading(enabled);
   }
 
   async onSettingsRow(row: SettingsRow): Promise<void> {

@@ -47,26 +47,13 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
 /* ============================================================
- * TILE CANVAS — adattamento dark/light (stile liberty unico)
+ * TILE CANVAS
  * ============================================================
- * Il canvas MapLibre è isolato in .maplibregl-canvas-container:
- * applicare il filter qui NON impatta marker HTML, popup o controlli.
- *
- * Light: desaturazione lieve per far emergere i marker ocra/forest.
- * Dark:  inversione colori + recupero hue per sfondo scuro coerente
- *        con --tq-bg #121212.
+ * Dark e light sono ora gestiti NATIVAMENTE da stili MapLibre custom
+ * (vedi core/services/map/map-style.ts), selezionati via setStyle() al
+ * cambio tema. Niente piu' hack `filter: invert()` sul canvas: lo stile
+ * dark e' un vero stile cinematografico, non un'inversione del light.
  * ============================================================ */
-.maplibregl-canvas-container {
-  transition: filter 0.4s ease;
-}
-
-[data-theme='light'] .maplibregl-canvas-container {
-  filter: saturate(0.82) brightness(0.97);
-}
-
-[data-theme='dark'] .maplibregl-canvas-container {
-  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.9) saturate(1.1);
-}
 
 /* ============================================================================
  * Keyframes globali
@@ -78,17 +65,21 @@
  * ========================================================================== */
 
 /* ============================================================================
- * USER MARKER — posizione utente con pulse animato
+ * USER MARKER — posizione + direzione del giocatore (stile gioco)
  * ============================================================================
  * Struttura HTML (iniettata da syncUserGpsLayers() in home.page.ts):
  *
  *   .maplibregl-marker.user-marker-wrapper
  *     .user-marker
+ *       .user-marker__cone      <- ventaglio direzione (ruota con la bussola)
  *       .user-marker__pulse     <- ring che si espande e svanisce
- *       .user-marker__dot       <- punto centrale solido
+ *       .user-marker__dot       <- nucleo centrale luminoso
  *
- * Questi stili devono essere globali perché i Marker MapLibre sono
- * iniettati nel DOM fuori dall'albero Angular (ViewEncapsulation non li raggiunge).
+ * Il cono e' orientato via JS (updateUserHeadingVisual): rotazione = heading
+ * del telefono − bearing della mappa. Dimensioni generose: dev'essere il
+ * punto piu' riconoscibile della mappa ("io sono qui, sto guardando lì").
+ *
+ * Globali perché i Marker MapLibre vivono fuori dall'albero Angular.
  * ========================================================================== */
 
 .user-marker-wrapper {
@@ -98,25 +89,49 @@
 
 .user-marker {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
 }
 
+/* Cono di direzione: ventaglio che si allarga verso dove punti il telefono.
+   Ancorato al centro (il dot), ruota attorno ad esso. Nascosto finché il
+   sensore bussola non fornisce un heading (opacity gestita da JS). */
+.user-marker__cone {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 52px;
+  height: 34px;
+  margin-left: -26px;
+  /* Punta in basso (al dot), base larga in alto (direzione di marcia). */
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(
+    to top,
+    rgba(var(--tq-ocra-rgb), 0.55),
+    rgba(var(--tq-ocra-rgb), 0) 85%
+  );
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
 .user-marker__dot {
   position: relative;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--tq-ocra);
-  border: 2px solid var(--tq-bone);
+  background: radial-gradient(circle at 35% 30%, var(--tq-ocra-tint), var(--tq-ocra) 70%);
+  border: 3px solid var(--tq-bone);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 0 12px rgba(var(--tq-ocra-rgb), 0.55);
-  z-index: 2;
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(var(--tq-ocra-rgb), 0.65);
+  z-index: 3;
   flex-shrink: 0;
 }
 
@@ -124,13 +139,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: rgba(var(--tq-ocra-rgb), 0.35);
-  margin-top: -7px;
-  margin-left: -7px;
-  z-index: 1;
+  margin-top: -10px;
+  margin-left: -10px;
+  z-index: 2;
   animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
@@ -179,47 +194,76 @@
 
 .quest-marker {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  /* Altezza extra: lascia spazio al galleggiamento sopra l'ombra a terra. */
+  height: 54px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+}
 
-  &:hover,
-  &:active {
-    transform: scale(1.1);
-  }
+/* Ombra a terra: ellisse sfocata che ancora il marker al suolo 3D.
+   Pulsa in controfase col galleggiamento (piccola quando il pin sale). */
+.quest-marker__shadow {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  margin-left: -11px;
+  width: 22px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 72%);
+  animation: quest-marker-shadow 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Corpo che galleggia: bob verticale lento e continuo. */
+.quest-marker__body {
+  position: relative;
+  margin-bottom: 8px;
+  animation: quest-marker-float 3.2s ease-in-out infinite;
+  will-change: transform;
 }
 
 .quest-marker__pin {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #f4ebdc;
+  /* Bevel 3D: gloss in alto, ombra interna in basso → orb convesso lucido. */
   box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 5px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(0, 0, 0, 0.3),
-    0 4px 12px -2px rgba(0, 0, 0, 0.5);
+    0 7px 14px -3px rgba(0, 0, 0, 0.6);
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
   svg {
     display: block;
     width: 18px;
     height: 18px;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.25));
   }
 }
 
+/* Enfasi al tap: il pin scatta in avanti (l'ombra resta a terra). */
+.quest-marker:active .quest-marker__pin {
+  transform: scale(1.14);
+}
+
 .quest-marker--available .quest-marker__pin {
-  background: #c8930f;
-  color: rgba(0, 0, 0, 0.75);
+  /* Gradiente lucido: highlight ocra chiaro in alto-sx → ocra pieno. */
+  background: radial-gradient(circle at 36% 28%, #e6b545, #c8930f 68%);
+  color: rgba(0, 0, 0, 0.78);
 }
 
 .quest-marker--discovered .quest-marker__pin {
-  background: #6ba046;
-  color: rgba(0, 0, 0, 0.75);
+  background: radial-gradient(circle at 36% 28%, #8fc269, #6ba046 68%);
+  color: rgba(0, 0, 0, 0.78);
 }
 .quest-marker--discovered {
   opacity: 0.65;
@@ -388,6 +432,18 @@
   50% { opacity: 0.18; }
 }
 
+/* Galleggiamento del badge sopra la mappa 3D — bob verticale continuo. */
+@keyframes quest-marker-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Ombra a terra: si stringe e schiarisce mentre il badge sale (controfase). */
+@keyframes quest-marker-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(0.76); opacity: 0.26; }
+}
+
 /* ============================================================================
  * POPUP ENTRANCE
  * ========================================================================== */
@@ -492,6 +548,30 @@
   }
 }
 
+/* Pill di prossimita' che scende dall'alto. */
+@keyframes tq-toast-drop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* HUD obiettivo: entrata morbida dal basso con leggero overshoot. */
+@keyframes tq-objective-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ============================================================================
  * PAGE TRANSITIONS — fade-up al montaggio componente
  * ========================================================================== */
@@ -567,6 +647,19 @@
 }
 
 .quest-cluster {
+  position: relative;
+  width: 52px;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Bolla cluster che galleggia (stessa logica dei badge singoli). */
+.quest-cluster__body {
+  position: relative;
+  margin-bottom: 8px;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -577,8 +670,8 @@
   border: 2.5px solid rgba(244, 235, 220, 0.9);
   box-shadow:
     0 0 0 3px rgba(200, 147, 15, 0.25),
-    0 4px 12px -2px rgba(0, 0, 0, 0.5);
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    0 6px 14px -2px rgba(0, 0, 0, 0.55);
+  animation: quest-marker-float 3.2s ease-in-out infinite;
 }
 
 .quest-cluster__count {
@@ -610,13 +703,13 @@
  * ========================================================================== */
 
 .quest-marker--primary {
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 66px;
 }
 
 .quest-marker--primary .quest-marker__pin {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-width: 2.5px;
 
   svg {
@@ -625,10 +718,19 @@
   }
 }
 
-/* Glow ocra extra per primary disponibili — più riconoscibili di un secondario */
+/* Ombra primary leggermente piu' ampia, coerente col pin maggiorato. */
+.quest-marker--primary .quest-marker__shadow {
+  width: 28px;
+  margin-left: -14px;
+}
+
+/* Glow ocra extra per primary disponibili — più riconoscibili di un secondario.
+   Mantiene il bevel 3D inset + aggiunge l'alone caldo. */
 .quest-marker--primary.quest-marker--available .quest-marker__pin {
   box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.45),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(0, 0, 0, 0.25),
-    0 0 20px -2px rgba(200, 147, 15, 0.65),
-    0 6px 16px -4px rgba(0, 0, 0, 0.5);
+    0 0 22px -2px rgba(200, 147, 15, 0.7),
+    0 7px 16px -4px rgba(0, 0, 0, 0.55);
 }

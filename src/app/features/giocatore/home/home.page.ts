@@ -7,6 +7,7 @@ import {
   EnvironmentInjector,
   OnDestroy,
   ViewChild,
+  computed,
   createComponent,
   effect,
   inject,
@@ -28,6 +29,11 @@ import {
 import { QuestPopupComponent } from '../components/quest-popup/quest-popup.component';
 import { HomeHeaderComponent } from '../components/home-header/home-header.component';
 import { PermissionBannerComponent } from '../../../shared/components/permission-banner/permission banner.component';
+import { ThemeService } from '../../../core/services/theme/theme.service';
+import { buildGameMapStyle } from '../../../core/services/map/map-style';
+import { HapticsService } from '../../../core/services/haptics/haptics.service';
+import { HeadingService } from '../../../core/services/heading/heading.service';
+import { MapSettingsService } from '../../../core/services/map/map-settings.service';
 
 type PlayerStatus = ReturnType<QuestService['playerStatusOf']>;
 
@@ -49,8 +55,9 @@ interface CircleFeature {
 /**
  * Home Giocatore — vista principale mappa-centrica.
  *
- * Rendering mappa via MapLibre GL JS con tile vettoriali OpenFreeMap.
- * Stile adattivo: liberty (light) ↔ fiord (dark), sincronizzato con ThemeService.
+ * Rendering mappa via MapLibre GL JS con tile vettoriali OpenFreeMap e stile
+ * di gioco custom (core/services/map/map-style.ts): camera pitchata 3D, edifici
+ * estrusi, atmosfera. Dark cinematografico ↔ light caldo via ThemeService.
  *
  * Architettura dati:
  * - PrimaryQuest → cerchio GeoJSON (fill + line layer) + pin HTML Marker
@@ -88,6 +95,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly appRef = inject(ApplicationRef);
   private readonly modalCtrl = inject(ModalController);
   private readonly envInjector = inject(EnvironmentInjector);
+  private readonly themeService = inject(ThemeService);
+  private readonly haptics = inject(HapticsService);
+  private readonly headingService = inject(HeadingService);
+  private readonly mapSettings = inject(MapSettingsService);
 
   // ----------------------------------------------------------------
   // Stato interno MapLibre
@@ -124,18 +135,84 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private uncertaintyCircleData: CircleCollection = { type: 'FeatureCollection', features: [] };
 
   // ----------------------------------------------------------------
-  // Proximity toast
+  // Prossimita' (solo feedback aptico — la guida visiva e' l'HUD obiettivo)
   // ----------------------------------------------------------------
 
-  protected readonly proximityToast = signal<{
-    questId: string;
-    questName: string;
-    inRange: boolean;
-    type: QuestType;
-  } | null>(null);
+  /** Ultima quest che ha gia' fatto scattare l'alert di prossimita' (dedup). */
+  private lastProximityQuestId: string | null = null;
 
-  private toastTimer: ReturnType<typeof setTimeout> | null = null;
-  private lastToastQuestId: string | null = null;
+  // ----------------------------------------------------------------
+  // Stato camera (bussola) e obiettivo corrente
+  // ----------------------------------------------------------------
+
+  /** Angolo bussola in gradi = -bearing della mappa. Aggiornato su 'rotate'. */
+  protected readonly compassAngle = signal(0);
+
+  /** Ultimo heading bussola (gradi) applicato al cono direzione dell'utente. */
+  private userHeading: number | null = null;
+  /** Timestamp dell'ultima rotazione mappa guidata dalla bussola (throttle). */
+  private lastHeadingRotateTs = 0;
+
+  /**
+   * Obiettivo corrente — la quest disponibile piu' vicina al giocatore.
+   * E' il cuore del "cosa fare ora": l'HUD lo mostra sempre, cosi' chi apre
+   * l'app sa subito dove andare. null se non ci sono quest disponibili.
+   */
+  protected readonly objective = computed(() => {
+    // Lo status dipende dai completamenti: dichiariamo la dipendenza.
+    this.questService.completions();
+    const quests = this.questService.quests();
+    const pos = this.geolocationService.position();
+
+    const available = quests
+      .filter((q) => this.questService.playerStatusOf(q.id) === 'available')
+      .map((q) => {
+        const isPrimary = q.type === QuestType.PRIMARY;
+        const lat = isPrimary
+          ? (q as PrimaryQuest).searchArea.lat
+          : (q as SecondaryQuest).position.lat;
+        const lng = isPrimary
+          ? (q as PrimaryQuest).searchArea.lng
+          : (q as SecondaryQuest).position.lng;
+        const radius = isPrimary
+          ? (q as PrimaryQuest).searchRadiusMeters
+          : (q as SecondaryQuest).checkInRadiusMeters;
+        return { quest: q, lat, lng, radius };
+      });
+
+    if (available.length === 0) return null;
+
+    // Senza GPS non possiamo ordinare per distanza: mostriamo la prima.
+    if (!pos) {
+      const f = available[0];
+      return {
+        quest: f.quest,
+        type: f.quest.type,
+        distance: null as number | null,
+        inRange: false,
+        lat: f.lat,
+        lng: f.lng,
+      };
+    }
+
+    let best = available[0];
+    let bestDist = Infinity;
+    for (const c of available) {
+      const d = haversineMeters(pos.lat, pos.lng, c.lat, c.lng);
+      if (d < bestDist) {
+        bestDist = d;
+        best = c;
+      }
+    }
+    return {
+      quest: best.quest,
+      type: best.quest.type,
+      distance: Math.round(bestDist),
+      inRange: bestDist <= best.radius,
+      lat: best.lat,
+      lng: best.lng,
+    };
+  });
 
   // ----------------------------------------------------------------
   // Costanti di configurazione mappa
@@ -143,18 +220,22 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   /** Trento centro. MapLibre usa [lng, lat] (ordine GeoJSON). */
   private readonly INITIAL_CENTER: [number, number] = [11.1167, 46.0667];
-  private readonly INITIAL_ZOOM = 14;
-  private readonly USER_FOCUS_ZOOM = 16;
+  private readonly INITIAL_ZOOM = 15.5;
+  private readonly USER_FOCUS_ZOOM = 17;
+  /** Zoom dell'auto-centramento al primo fix: piu' ravvicinato, "sul personaggio". */
+  private readonly AUTO_CENTER_ZOOM = 17.8;
   private readonly MIN_ZOOM = 9;
-  private readonly MAX_ZOOM = 18;
+  private readonly MAX_ZOOM = 19;
+
+  /** Inclinazione camera: la chiave dell'effetto "campo da gioco" 3D. */
+  private readonly INITIAL_PITCH = 52;
+  private readonly MAX_PITCH = 68;
+
   /** Bounds Trentino: [[lng_SW, lat_SW], [lng_NE, lat_NE]]. */
   private readonly TRENTINO_BOUNDS: [[number, number], [number, number]] = [
     [10.4, 45.6],
     [12.0, 46.6],
   ];
-
-  /** Stile OpenFreeMap liberty — unico per light e dark (il dark si adatta via CSS filter). */
-  private readonly MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
   private readonly CLUSTER_ZOOM_THRESHOLD = 13;
   private readonly CLUSTER_GRID_PX = 70;
@@ -190,8 +271,42 @@ export class HomePage implements AfterViewInit, OnDestroy {
       }
     });
 
-    // Nota: il tema dark/light è gestito via CSS filter su .maplibregl-canvas-container
-    // in global.scss — non serve setStyle() perché si usa lo stesso stile liberty.
+    // Effect: cambio tema → ricarica lo stile di gioco nella modalita' giusta.
+    // setStyle preserva camera e marker DOM; onStyleLoad ri-aggiunge le sorgenti
+    // GeoJSON custom. Al primo run la mappa non esiste ancora → no-op.
+    effect(() => {
+      const mode = this.themeService.effectiveTheme();
+      if (this.map) {
+        this.map.setStyle(buildGameMapStyle(mode));
+      }
+    });
+
+    // Effect: heading bussola → orienta il cono direzione del giocatore e, se
+    // attivo nelle impostazioni, ruota la mappa in modalita' "in avanti".
+    effect(() => {
+      const heading = this.headingService.heading();
+      const rotate = this.mapSettings.rotateWithHeading();
+      if (heading == null) return;
+      this.userHeading = heading;
+      this.updateUserHeadingVisual();
+
+      // Rotazione mappa throttlata: evita una raffica di easeTo a ogni evento.
+      if (rotate && this.map) {
+        const now = Date.now();
+        if (now - this.lastHeadingRotateTs > 120) {
+          this.lastHeadingRotateTs = now;
+          this.map.easeTo({ bearing: heading, duration: 220 });
+        }
+      }
+    });
+
+    // Effect: disattivando la rotazione bussola, riporta dolcemente a nord.
+    effect(() => {
+      const rotate = this.mapSettings.rotateWithHeading();
+      if (!rotate && this.map) {
+        this.map.easeTo({ bearing: 0, duration: 400 });
+      }
+    });
   }
 
   // ----------------------------------------------------------------
@@ -216,6 +331,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
     setTimeout(() => this.map?.resize(), 100);
     this.questService.loadQuests(undefined, true);
     this.questService.loadCompletions(undefined, undefined, true);
+    // Avvia la bussola per il cono direzione (best-effort: su iOS senza gesto
+    // il permesso puo' negarsi, ma il toggle nelle impostazioni lo concede).
+    void this.headingService.start();
+  }
+
+  ionViewWillLeave(): void {
+    // Ferma il sensore bussola quando lasci la mappa: niente spreco batteria.
+    this.headingService.stop();
   }
 
   ngOnDestroy(): void {
@@ -223,10 +346,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
       clearInterval(this.refreshInterval);
       this.refreshInterval = null;
     }
-    if (this.toastTimer !== null) {
-      clearTimeout(this.toastTimer);
-      this.toastTimer = null;
-    }
+    this.headingService.stop();
 
     this.closeActivePopup();
     this.clearQuestMarkers();
@@ -242,51 +362,82 @@ export class HomePage implements AfterViewInit, OnDestroy {
   protected centerOnUser(): void {
     const pos = this.geolocationService.position();
     if (!pos || !this.map) return;
-    this.map.flyTo({ center: [pos.lng, pos.lat], zoom: this.USER_FOCUS_ZOOM, duration: 800 });
+    this.haptics.medium();
+    this.map.flyTo({
+      center: [pos.lng, pos.lat],
+      zoom: this.USER_FOCUS_ZOOM,
+      pitch: this.INITIAL_PITCH,
+      duration: 800,
+    });
   }
 
-  protected dismissToast(): void {
-    if (this.toastTimer !== null) {
-      clearTimeout(this.toastTimer);
-      this.toastTimer = null;
+  /** Bussola: riporta la camera a nord e al pitch di gioco. */
+  protected resetNorth(): void {
+    this.haptics.light();
+    this.map?.easeTo({ bearing: 0, pitch: this.INITIAL_PITCH, duration: 500 });
+  }
+
+  /** Formatta una distanza in metri per l'HUD: "320 m" / "1.4 km". */
+  protected formatDistance(meters: number | null): string {
+    if (meters === null) return 'esplora la mappa';
+    if (meters < 1000) return `a ${meters} m`;
+    return `a ${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+  }
+
+  /**
+   * CTA dell'obiettivo: se sei nel raggio avvia la quest (scan/check-in),
+   * altrimenti vola verso di essa per guidarti.
+   */
+  protected async openObjectiveAction(): Promise<void> {
+    const obj = this.objective();
+    if (!obj) return;
+    if (obj.inRange) {
+      await this.startQuest(obj.quest.id, obj.type, [obj.lng, obj.lat]);
+    } else {
+      this.haptics.medium();
+      this.map?.flyTo({
+        center: [obj.lng, obj.lat],
+        zoom: Math.max(this.map.getZoom(), this.USER_FOCUS_ZOOM),
+        pitch: this.INITIAL_PITCH,
+        duration: 900,
+      });
     }
-    this.proximityToast.set(null);
   }
 
-  protected async openToastAction(): Promise<void> {
-    const toast = this.proximityToast();
-    if (!toast) return;
-    this.dismissToast();
+  /**
+   * Avvia una quest: primary → modale di scansione QR; secondary → vola sul
+   * marker e ne apre il popup di check-in. Logica condivisa tra toast di
+   * prossimita' e CTA dell'obiettivo.
+   */
+  private async startQuest(
+    questId: string,
+    type: QuestType,
+    lngLat: [number, number] | null,
+  ): Promise<void> {
+    this.haptics.medium();
 
-    if (toast.type === QuestType.PRIMARY) {
+    if (type === QuestType.PRIMARY) {
       const modal = await this.modalCtrl.create({
         component: ScanModalComponent,
         cssClass: 'tq-scan-modal',
         backdropDismiss: false,
-        componentProps: { questId: toast.questId },
+        componentProps: { questId },
       });
       await modal.present();
-    } else {
-      const marker = this.questMarkers.get(toast.questId);
-      if (marker && this.map) {
-        const lngLat = marker.getLngLat();
-        this.map.flyTo({
-          center: [lngLat.lng, lngLat.lat],
-          zoom: Math.max(this.map.getZoom(), 16),
-          duration: 600,
-        });
-        const quest = untracked(() => this.questService.quests()).find(
-          (q) => q.id === toast.questId,
-        );
-        if (quest) {
-          setTimeout(() => {
-            this.openQuestPopup(
-              quest,
-              this.questService.playerStatusOf(quest.id),
-              [lngLat.lng, lngLat.lat],
-            );
-          }, 650);
-        }
+      return;
+    }
+
+    if (lngLat && this.map) {
+      this.map.flyTo({
+        center: lngLat,
+        zoom: Math.max(this.map.getZoom(), 16.5),
+        duration: 600,
+      });
+      const quest = untracked(() => this.questService.quests()).find((q) => q.id === questId);
+      if (quest) {
+        setTimeout(() => {
+          this.openQuestPopup(quest, this.questService.playerStatusOf(quest.id), lngLat);
+        }, 650);
       }
     }
   }
@@ -298,17 +449,20 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private initMap(): void {
     this.map = new maplibregl.Map({
       container: this.mapContainer.nativeElement,
-      style: this.MAP_STYLE,
+      style: buildGameMapStyle(untracked(() => this.themeService.effectiveTheme())),
       center: this.INITIAL_CENTER,
       zoom: this.INITIAL_ZOOM,
       minZoom: this.MIN_ZOOM,
       maxZoom: this.MAX_ZOOM,
+      pitch: this.INITIAL_PITCH,
+      maxPitch: this.MAX_PITCH,
       maxBounds: this.TRENTINO_BOUNDS,
+      // Crediti OpenFreeMap disattivati: la mappa e' il campo da gioco.
+      // I crediti dati OSM/OpenFreeMap andranno in una sezione "crediti" dedicata.
       attributionControl: false,
+      // Antialiasing per bordi 3D piu' puliti (MapLibre v5: dentro le ctx attrs).
+      canvasContextAttributes: { antialias: true },
     });
-
-    // Attribution compatta posizionata sopra la tab bar (via CSS in home.page.scss).
-    this.map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
     // Ogni volta che lo stile finisce di caricare (iniziale + setStyle per tema):
     // ri-aggiunge le sorgenti GeoJSON e i layer custom.
@@ -317,6 +471,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
     // Zoom end: aggiorna clustering.
     this.map.on('zoomend', () => {
       this.renderQuests(untracked(() => this.questService.quests()));
+    });
+
+    // Rotazione camera: aggiorna la bussola HUD e tieni il cono direzione
+    // dell'utente allineato al mondo (i marker non ruotano con la mappa).
+    this.map.on('rotate', () => {
+      if (!this.map) return;
+      this.compassAngle.set(-this.map.getBearing());
+      this.updateUserHeadingVisual();
     });
 
     // MapLibre misura il container durante la costruzione. Se il layout Ionic
@@ -477,8 +639,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
         .filter((q) => q.type === QuestType.PRIMARY)
         .map((q) => this.buildPrimaryCircleFeature(q as PrimaryQuest)),
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.map?.getSource(this.SOURCE_PRIMARY) as any)?.setData(this.primaryCirclesData);
+    (this.map?.getSource(this.SOURCE_PRIMARY) as maplibregl.GeoJSONSource | undefined)?.setData(
+      this.primaryCirclesData,
+    );
   }
 
   private buildPrimaryCircleFeature(quest: PrimaryQuest): CircleFeature {
@@ -571,12 +734,16 @@ export class HomePage implements AfterViewInit, OnDestroy {
     el.className = 'quest-marker-wrapper';
     el.innerHTML = `
       <div class="quest-marker${isPrimary ? ' quest-marker--primary' : ''} quest-marker--${playerStatus}">
-        <div class="quest-marker__pin">${iconSvg}</div>
+        <div class="quest-marker__shadow"></div>
+        <div class="quest-marker__body">
+          <div class="quest-marker__pin">${iconSvg}</div>
+        </div>
       </div>
     `;
 
     el.addEventListener('click', (e) => {
       e.stopPropagation();
+      this.haptics.light();
       this.openQuestPopup(quest, playerStatus, [lng, lat]);
     });
 
@@ -603,7 +770,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     el.className = 'quest-cluster-wrapper';
     el.innerHTML = `
       <div class="quest-cluster">
-        <span class="quest-cluster__count">${count}</span>
+        <div class="quest-marker__shadow"></div>
+        <div class="quest-cluster__body">
+          <span class="quest-cluster__count">${count}</span>
+        </div>
       </div>
     `;
 
@@ -627,11 +797,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
    * Apre un popup con QuestPopupComponent montato dinamicamente.
    * Chiude e distrugge il popup precedente se già aperto.
    */
-  private openQuestPopup(
-    quest: AnyQuest,
-    status: PlayerStatus,
-    lngLat: [number, number],
-  ): void {
+  private openQuestPopup(quest: AnyQuest, status: PlayerStatus, lngLat: [number, number]): void {
     this.closeActivePopup();
 
     const ref = this.createPopupForQuest(quest, status);
@@ -692,11 +858,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
     if (!this.map) return;
 
     // 1. Marker user — crea la prima volta, aggiorna le successive.
+    //    Struttura: cono direzione (ruota con la bussola) + alone pulsante +
+    //    dot centrale. Stile allineato alla mappa dark (ocra luminoso + glow).
     if (this.userMarker === null) {
       const el = document.createElement('div');
       el.className = 'user-marker-wrapper';
       el.innerHTML = `
         <div class="user-marker">
+          <div class="user-marker__cone"></div>
           <div class="user-marker__pulse"></div>
           <div class="user-marker__dot"></div>
         </div>
@@ -704,6 +873,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
       this.userMarker = new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([lng, lat])
         .addTo(this.map);
+      // Applica subito l'eventuale heading gia' noto.
+      this.updateUserHeadingVisual();
     } else {
       this.userMarker.setLngLat([lng, lat]);
     }
@@ -726,20 +897,49 @@ export class HomePage implements AfterViewInit, OnDestroy {
     } else {
       this.uncertaintyCircleData = { type: 'FeatureCollection', features: [] };
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.map.getSource(this.SOURCE_UNCERTAINTY) as any)?.setData(this.uncertaintyCircleData);
+    (this.map.getSource(this.SOURCE_UNCERTAINTY) as maplibregl.GeoJSONSource | undefined)?.setData(
+      this.uncertaintyCircleData,
+    );
 
     // 3. Auto-center one-shot al primo fix valido della sessione.
+    //    Zoom ravvicinato (AUTO_CENTER_ZOOM) per "atterrare" sul personaggio.
     if (!this.hasAutoCentered) {
-      this.map.flyTo({ center: [lng, lat], zoom: this.USER_FOCUS_ZOOM, duration: 1500 });
+      this.map.flyTo({
+        center: [lng, lat],
+        zoom: this.AUTO_CENTER_ZOOM,
+        pitch: this.INITIAL_PITCH,
+        duration: 1500,
+      });
       this.hasAutoCentered = true;
     }
   }
 
+  /**
+   * Orienta il cono di direzione del marker utente verso il punto in cui sta
+   * puntando il telefono. Il cono e' in spazio-schermo (i marker MapLibre non
+   * ruotano con la mappa), quindi compensiamo il bearing: angolo = heading −
+   * bearing. Cosi' in modalita' "nord in alto" il cono ruota col telefono, e
+   * in modalita' "rotazione bussola" resta dritto verso l'alto.
+   */
+  private updateUserHeadingVisual(): void {
+    if (!this.userMarker || this.userHeading == null || !this.map) return;
+    const cone = this.userMarker.getElement().querySelector<HTMLElement>('.user-marker__cone');
+    if (!cone) return;
+    const screenAngle = this.userHeading - this.map.getBearing();
+    cone.style.transform = `rotate(${screenAngle}deg)`;
+    cone.style.opacity = '1';
+  }
+
   // ----------------------------------------------------------------
-  // Proximity toast
+  // Prossimita' — alert aptico all'ingresso nel raggio di una quest
   // ----------------------------------------------------------------
 
+  /**
+   * Controlla se il giocatore e' entrato nel raggio di trigger di una quest
+   * disponibile e, in tal caso, emette feedback aptico (marcato se gia' nel
+   * raggio di azione, leggero se in avvicinamento). La guida visiva resta
+   * all'HUD obiettivo persistente: qui solo il "tocco" tattile del momento.
+   */
   private checkProximity(lat: number, lng: number): void {
     const quests = untracked(() => this.questService.quests());
     for (const quest of quests) {
@@ -761,16 +961,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
       }
 
       const dist = haversineMeters(lat, lng, questLat, questLng);
-      if (dist <= triggerRange && quest.id !== this.lastToastQuestId) {
-        this.lastToastQuestId = quest.id;
-        this.proximityToast.set({
-          questId: quest.id,
-          questName: quest.name,
-          inRange: dist <= inRangeRadius,
-          type: quest.type,
-        });
-        if (this.toastTimer !== null) clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => this.proximityToast.set(null), 5500);
+      if (dist <= triggerRange && quest.id !== this.lastProximityQuestId) {
+        this.lastProximityQuestId = quest.id;
+        if (dist <= inRangeRadius) this.haptics.warning();
+        else this.haptics.light();
         break;
       }
     }
@@ -785,13 +979,17 @@ export class HomePage implements AfterViewInit, OnDestroy {
  * Approssima un cerchio geografico come poligono GeoJSON (ring chiuso).
  * Coordine in ordine [lng, lat] — standard GeoJSON / MapLibre.
  */
-function buildCirclePolygon(lat: number, lng: number, radiusMeters: number, steps = 64): number[][] {
+function buildCirclePolygon(
+  lat: number,
+  lng: number,
+  radiusMeters: number,
+  steps = 64,
+): number[][] {
   const coords: number[][] = [];
   for (let i = 0; i <= steps; i++) {
     const angle = (i * 2 * Math.PI) / steps;
     const dLat = (radiusMeters * Math.cos(angle)) / 110540;
-    const dLng =
-      (radiusMeters * Math.sin(angle)) / (111320 * Math.cos((lat * Math.PI) / 180));
+    const dLng = (radiusMeters * Math.sin(angle)) / (111320 * Math.cos((lat * Math.PI) / 180));
     coords.push([lng + dLng, lat + dLat]);
   }
   return coords;

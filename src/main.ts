@@ -9,6 +9,8 @@ import {
   PreloadAllModules,
 } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
@@ -35,6 +37,27 @@ import { HttpBusinessRepository } from './app/core/services/business/repository/
 async function initializeTheme(): Promise<void> {
   const themeService = angularInject(ThemeService);
   await themeService.initialize();
+}
+
+/**
+ * Setup della status bar nativa per il look immersivo edge-to-edge.
+ *
+ * - setOverlaysWebView(true): la WebView disegna SOTTO la status bar, cosi'
+ *   la mappa va davvero a tutto schermo. Lo spazio in cima e' poi protetto
+ *   nei layout via il token --tq-safe-top.
+ * - Style.Light: icone/orologio chiari, leggibili sul nostro bg dark.
+ *
+ * Tutto guardato da isNativePlatform(): su web i metodi sarebbero no-op o
+ * genererebbero warning inutili.
+ */
+async function initializeNativeUi(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await StatusBar.setOverlaysWebView({ overlay: true });
+    await StatusBar.setStyle({ style: Style.Light });
+  } catch {
+    // Plugin non disponibile (es. web): ignora silenziosamente.
+  }
 }
 
 async function initializeApp(): Promise<void> {
@@ -73,6 +96,7 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, refreshInterceptor])),
     provideAppInitializer(initializeTheme),
+    provideAppInitializer(initializeNativeUi),
     provideAppInitializer(initializeApp),
 
     { provide: QuestRepository, useClass: HttpQuestRepository },

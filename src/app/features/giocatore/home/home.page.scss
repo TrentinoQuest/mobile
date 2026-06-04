@@ -1,14 +1,18 @@
 /* ============================================================================
- * HomePage — mappa full-bleed + overlay UI
+ * HomePage — mappa 3D full-bleed + overlay UI gamificata
  * ============================================================================
- * Gli stili relativi a elementi iniettati da MapLibre (marker HTML, popup)
- * vivono in global.scss perché MapLibre li inietta fuori dall'albero Angular.
+ * Gli stili degli elementi iniettati da MapLibre (marker, popup) vivono in
+ * global.scss (MapLibre li monta fuori dall'albero Angular).
  *
  * Qui vivono:
- * - Configurazione ion-content (niente padding, background mappa)
- * - Container .home__map
- * - Override attribution MapLibre (posizionata sopra la tab bar)
- * - Posizionamento overlay flottanti (permission banner, locate button, toast)
+ * - Config ion-content + container mappa
+ * - Cluster controlli mappa (bussola, zoom, locate)
+ * - HUD obiettivo persistente ("cosa fare ora")
+ * - Toast di prossimita' (pill transitoria in alto)
+ *
+ * Tutti gli offset usano i token parametrici di variables.scss
+ * (--tq-safe-*, --tq-above-tab-bar): zero numeri magici, adattivo a
+ * qualsiasi telefono (notch, Dynamic Island, home indicator).
  * ========================================================================== */
 
 .home {
@@ -28,36 +32,18 @@
   z-index: var(--tq-z-map);
 }
 
-/* ============================================================================
- * Override MapLibre controls
- * ============================================================================
- * I controlli sono iniettati da MapLibre nel container .home__map fuori
- * dall'albero Angular → ::ng-deep per raggiungerli.
- * ========================================================================== */
-
+/* ----------------------------------------------------------------------------
+ * Override MapLibre
+ * --------------------------------------------------------------------------*/
 .home {
-  /* Attribution compatta posizionata sopra la tab bar. */
-  ::ng-deep .maplibregl-ctrl-attrib {
-    background: rgba(var(--tq-bg-rgb), 0.7) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--tq-text-muted) !important;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: var(--tq-radius-sm) var(--tq-radius-sm) 0 0;
-    margin-bottom: calc(64px + env(safe-area-inset-bottom, 0)) !important;
-
-    a {
-      color: var(--tq-text-secondary) !important;
-      text-decoration: none;
-
-      &:hover {
-        color: var(--tq-ocra) !important;
-      }
-    }
+  /* Crediti/logo MapLibre nascosti: la mappa e' il campo da gioco. */
+  ::ng-deep .maplibregl-ctrl-attrib,
+  ::ng-deep .maplibregl-ctrl-bottom-left,
+  ::ng-deep .maplibregl-ctrl-bottom-right {
+    display: none !important;
   }
 
-  /* Cursore default sul canvas della mappa (override del default text). */
+  /* Cursore coerente col drag della mappa. */
   ::ng-deep .maplibregl-canvas-container canvas {
     cursor: grab;
 
@@ -67,71 +53,239 @@
   }
 }
 
-/* ============================================================================
- * Permission banner GPS
- * ============================================================================
- * Overlay flottante: si auto-mostra/nasconde via @if interno al componente.
- * Sopra la mappa (z-map-overlay), sotto la tab bar (z-tab-bar).
- * ========================================================================== */
-
-.home {
-  app-permission-banner {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: var(--tq-z-map-overlay);
-    padding-top: env(safe-area-inset-top, 0);
-  }
+/* ----------------------------------------------------------------------------
+ * Permission banner GPS — flotta in cima, rispetta la safe area
+ * --------------------------------------------------------------------------*/
+.home app-permission-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--tq-z-map-overlay);
+  padding-top: var(--tq-safe-top);
 }
 
 /* ============================================================================
- * Bottone centra-su-di-me
+ * CLUSTER CONTROLLI MAPPA
  * ============================================================================
- * FAB flottante bottom-right, sopra la mappa, sotto la tab bar.
+ * Stack verticale a destra, sopra l'HUD obiettivo. Vetro smerigliato.
  * ========================================================================== */
-
-.home__locate-btn {
+.home__controls {
   position: fixed;
-  right: 16px;
-  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  right: calc(var(--tq-safe-right) + var(--tq-space-4));
+  /* Sopra l'HUD obiettivo (che sta a --tq-above-tab-bar). */
+  bottom: calc(var(--tq-above-tab-bar) + 78px);
   z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tq-space-3);
+}
+
+%home-glass-control {
+  background: rgba(var(--tq-bg-rgb), 0.82);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--tq-hairline-strong);
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.5);
+}
+
+.home__ctrl {
+  @extend %home-glass-control;
 
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  background: rgba(var(--tq-bg-rgb), 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(244, 235, 220, 0.15);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  border-radius: 14px;
   color: var(--tq-bone);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
+    transform 0.12s var(--tq-ease-out),
     background 0.15s ease,
-    transform 0.1s ease;
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  svg {
+    transition: transform 0.3s var(--tq-ease-out);
+  }
 
   &:active {
-    transform: scale(0.92);
+    transform: scale(0.9);
     background: rgba(var(--tq-ocra-rgb), 0.18);
     border-color: rgba(var(--tq-ocra-rgb), 0.4);
     color: var(--tq-ocra);
   }
 }
 
-/* ============================================================================
- * Toast di prossimità
- * ============================================================================
- * Appare dal basso sopra la tab bar quando il giocatore entra nel raggio
- * di una quest disponibile. Auto-dismiss dopo 5.5s.
- * ========================================================================== */
+/* Bussola: la lancetta nord (rust) ruota col bearing via [style.transform]. */
+.home__ctrl--compass svg {
+  overflow: visible;
+}
 
+/* Locate: accento ocra di default (azione primaria della navigazione). */
+.home__ctrl--locate {
+  color: var(--tq-ocra);
+  border-color: rgba(var(--tq-ocra-rgb), 0.35);
+}
+
+/* ============================================================================
+ * HUD OBIETTIVO — guida persistente "cosa fare ora"
+ * ============================================================================ */
+.home__objective {
+  position: fixed;
+  left: calc(var(--tq-safe-left) + var(--tq-space-4));
+  right: calc(var(--tq-safe-right) + var(--tq-space-4));
+  bottom: var(--tq-above-tab-bar);
+  z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  align-items: center;
+  gap: var(--tq-space-3);
+  padding: 10px 12px;
+  border-radius: var(--tq-radius-lg);
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+
+  background: rgba(var(--tq-bg-rgb), 0.9);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--tq-hairline-strong);
+  box-shadow:
+    0 10px 30px -8px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(var(--tq-ocra-rgb), 0.06);
+
+  -webkit-tap-highlight-color: transparent;
+  animation: tq-objective-enter 0.4s var(--tq-ease-out) both;
+  transition:
+    transform 0.12s var(--tq-ease-out),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.985);
+  }
+
+  /* Stato "sei arrivato": accento forest + glow verde. */
+  &--inrange {
+    border-color: rgba(var(--tq-forest-rgb), 0.5);
+    box-shadow:
+      0 10px 30px -8px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(var(--tq-forest-rgb), 0.12),
+      0 0 28px -8px rgba(var(--tq-forest-rgb), 0.4);
+  }
+
+  /* Stato vuoto: non e' un button, niente affordance di tap. */
+  &--empty {
+    cursor: default;
+  }
+}
+
+.home__objective__icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--tq-ocra-rgb), 0.14);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.28);
+  color: var(--tq-ocra);
+
+  .home__objective--inrange & {
+    background: rgba(var(--tq-forest-rgb), 0.16);
+    border-color: rgba(var(--tq-forest-rgb), 0.32);
+    color: var(--tq-forest);
+  }
+
+  .home__objective--empty & {
+    background: rgba(var(--tq-bg-rgb), 0.5);
+    border-color: var(--tq-hairline-strong);
+    color: var(--tq-text-secondary);
+  }
+}
+
+.home__objective__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.home__objective__label {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tq-ocra);
+
+  .home__objective--inrange & {
+    color: var(--tq-forest);
+  }
+
+  .home__objective--empty & {
+    color: var(--tq-text-muted);
+  }
+}
+
+.home__objective__name {
+  font-family: var(--tq-font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-bone);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .home__objective--empty & {
+    white-space: normal;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--tq-text-secondary);
+  }
+}
+
+.home__objective__cta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.home__objective__dist {
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  color: var(--tq-text-secondary);
+}
+
+.home__objective__action {
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tq-forest);
+  padding: 6px 11px;
+  border-radius: 9px;
+  background: rgba(var(--tq-forest-rgb), 0.16);
+}
+
+.home__objective__arrow {
+  color: var(--tq-text-muted);
+}
+
+/* ============================================================================
+ * TOAST DI PROSSIMITA' — pill transitoria in alto-centro
+ * ============================================================================ */
 .home__proximity-toast {
   position: fixed;
-  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  top: calc(var(--tq-safe-top) + 92px);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--tq-z-map-overlay);
@@ -140,7 +294,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px 10px 12px;
-  border-radius: 16px;
+  border-radius: var(--tq-radius-lg);
   min-width: 220px;
   max-width: calc(100vw - 40px);
   white-space: nowrap;
@@ -148,23 +302,23 @@
   background: rgba(26, 24, 21, 0.92);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(200, 147, 15, 0.25);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.25);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(200, 147, 15, 0.08);
+    0 0 0 1px rgba(var(--tq-ocra-rgb), 0.08);
 
-  animation: tq-toast-enter 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tq-toast-drop 0.38s var(--tq-ease-out) both;
 
   &--inrange {
-    border-color: rgba(107, 160, 70, 0.4);
+    border-color: rgba(var(--tq-forest-rgb), 0.4);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(107, 160, 70, 0.1),
-      0 0 20px -6px rgba(107, 160, 70, 0.3);
+      0 0 0 1px rgba(var(--tq-forest-rgb), 0.1),
+      0 0 20px -6px rgba(var(--tq-forest-rgb), 0.3);
 
     .home__proximity-toast__icon {
-      background: rgba(107, 160, 70, 0.15);
-      border-color: rgba(107, 160, 70, 0.3);
+      background: rgba(var(--tq-forest-rgb), 0.15);
+      border-color: rgba(var(--tq-forest-rgb), 0.3);
       color: var(--tq-forest);
     }
 
@@ -178,8 +332,8 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: rgba(200, 147, 15, 0.12);
-    border: 1px solid rgba(200, 147, 15, 0.25);
+    background: rgba(var(--tq-ocra-rgb), 0.12);
+    border: 1px solid rgba(var(--tq-ocra-rgb), 0.25);
     color: var(--tq-ocra);
     display: flex;
     align-items: center;
