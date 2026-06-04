@@ -56,8 +56,8 @@ export class OfferFormPage implements OnInit {
   }
 
   async submit(): Promise<void> {
-    const cost = Number(this.pointsCost());
-    if (!this.title().trim() || !this.description().trim() || cost < 1) {
+    const cost = Math.round(Number(this.pointsCost()));
+    if (!this.title().trim() || !this.description().trim() || !Number.isFinite(cost) || cost < 1) {
       await this.showToast('Compila tutti i campi correttamente.', 'warning');
       return;
     }

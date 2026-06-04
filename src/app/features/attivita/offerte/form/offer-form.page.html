@@ -49,9 +49,10 @@
           id="pointsCost"
           class="offer-form-page__input"
           [value]="pointsCost()"
-          (ionInput)="pointsCost.set($any($event.target).valueAsNumber)"
+          (ionInput)="pointsCost.set(+$any($event.target).value)"
           type="number"
           min="1"
+          step="1"
           fill="outline"
           placeholder="Es. 100"
         ></ion-input>
