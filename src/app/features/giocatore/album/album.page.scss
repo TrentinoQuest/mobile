@@ -305,11 +305,25 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     cursor: pointer;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
+    // Reveal "a cascata": ogni card entra con un piccolo ritardo (delay inline).
+    animation: album-card-in 0.5s var(--tq-ease-spring) both;
 
     &:active {
       transform: scale(0.94);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
+  }
+}
+
+// Entrata card sbloccata: sale, scala e si rivela.
+@keyframes album-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

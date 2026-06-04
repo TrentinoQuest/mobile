@@ -1,50 +1,76 @@
-import { Component, Input, computed, inject, signal } from '@angular/core';
+// Angular core
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { ModalController } from '@ionic/angular/standalone';
+// Librerie esterne
+import { IonContent, ModalController } from '@ionic/angular/standalone';
+// Import locali
 import {
   AnyQuest,
   CheckInResponse,
   PlayerQuestStatus,
   QuestType,
   SecondaryQuest,
-} from '../../../../core/services/quest/quest.types';
-import { QuestService } from '../../../../core/services/quest/quest.service';
-import { GeolocationService } from '../../../../core/services/geolocation/geolocation.service';
-import { AuthService } from '../../../../core/services/auth/auth.service';
-import { PlayerProfileService } from '../../../../core/services/player-profile/player-profile.service';
-import { CheckinSuccessModalComponent } from '../checkin-success-modal/checkin-success-modal.component';
-import { ScanModalComponent } from '../scan-modal/scan-modal.component';
+} from '../../../core/services/quest/quest.types';
+import { QuestService } from '../../../core/services/quest/quest.service';
+import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
+import { HapticsService } from '../../../core/services/haptics/haptics.service';
+import { ScanModalComponent } from '../components/scan-modal/scan-modal.component';
+import { CheckinSuccessModalComponent } from '../components/checkin-success-modal/checkin-success-modal.component';
 
 type CheckInState = 'idle' | 'loading' | 'error';
 
+/**
+ * Quest Detail — pagina dedicata al dettaglio di una quest.
+ *
+ * Raggiunta via push da popup mappa / quest log (route giocatore/quest/:id).
+ * Mostra in grande lo stato, il tipo, la descrizione e i punti, con l'azione
+ * primaria (scansiona QR / check-in) e il feedback di distanza ed errore.
+ *
+ * I dati arrivano dal QuestService (signal reattivi): la quest e' derivata per
+ * id; lo status e la distanza si aggiornano da soli. Se la pagina e' aperta a
+ * freddo (deep link), in ngOnInit ricarichiamo quest e completamenti.
+ */
 @Component({
-  selector: 'app-quest-popup',
-  templateUrl: './quest-popup.component.html',
-  styleUrls: ['./quest-popup.component.scss'],
+  selector: 'app-quest-detail',
+  templateUrl: './quest-detail.page.html',
+  styleUrls: ['./quest-detail.page.scss'],
   standalone: true,
+  imports: [IonContent, DecimalPipe],
 })
-export class QuestPopupComponent {
+export class QuestDetailPage implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly questService = inject(QuestService);
   private readonly geoService = inject(GeolocationService);
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(PlayerProfileService);
   private readonly modalCtrl = inject(ModalController);
-  private readonly router = inject(Router);
-
-  protected readonly quest = signal<AnyQuest | null>(null);
-  protected readonly playerStatus = signal<PlayerQuestStatus>('available');
-  protected readonly checkInState = signal<CheckInState>('idle');
-  protected readonly checkInError = signal('');
+  private readonly haptics = inject(HapticsService);
 
   protected readonly QuestType = QuestType;
 
-  protected readonly statusLabel = computed<string>(
-    () => PLAYER_STATUS_LABELS[this.playerStatus()],
+  private readonly questId = signal<string>('');
+  protected readonly checkInState = signal<CheckInState>('idle');
+  protected readonly checkInError = signal('');
+
+  /** Quest corrente derivata per id dai dati reattivi del service. */
+  protected readonly quest = computed<AnyQuest | undefined>(() =>
+    this.questService.quests().find((q) => q.id === this.questId()),
   );
-  protected readonly statusModifier = computed<string>(
-    () => `quest-popup__kicker--${this.playerStatus()}`,
-  );
+
+  /** Stato giocatore della quest (dipende anche dai completamenti). */
+  protected readonly status = computed<PlayerQuestStatus>(() => {
+    this.questService.completions();
+    const q = this.quest();
+    return q ? this.questService.playerStatusOf(q.id) : 'available';
+  });
+
+  protected readonly statusLabel = computed<string>(() => STATUS_LABELS[this.status()]);
 
   protected readonly typeLabel = computed<string>(() => {
     const q = this.quest();
@@ -52,7 +78,7 @@ export class QuestPopupComponent {
     return q.type === QuestType.PRIMARY ? 'Quest principale · QR' : 'Quest secondaria · Check-in';
   });
 
-  /** Distanza in metri tra posizione utente e quest secondaria. */
+  /** Distanza in metri (solo quest secondarie con GPS). */
   protected readonly distanceMeters = computed<number | null>(() => {
     const q = this.quest();
     if (!q || q.type !== QuestType.SECONDARY) return null;
@@ -62,7 +88,6 @@ export class QuestPopupComponent {
     return haversineMeters(pos.lat, pos.lng, sec.position.lat, sec.position.lng);
   });
 
-  /** True se l'utente è entro il raggio di check-in. */
   protected readonly isInRange = computed<boolean>(() => {
     const q = this.quest();
     if (!q || q.type !== QuestType.SECONDARY) return false;
@@ -71,23 +96,47 @@ export class QuestPopupComponent {
     return dist <= (q as SecondaryQuest).checkInRadiusMeters;
   });
 
-  /** Etichetta distanza formattata per il template. */
   protected readonly distanceLabel = computed<string>(() => {
     const dist = this.distanceMeters();
     if (dist === null) return 'GPS non disponibile';
     if (dist < 1000) return `${Math.round(dist)} m`;
-    return `${(dist / 1000).toFixed(1)} km`;
+    return `${(dist / 1000).toFixed(1).replace('.', ',')} km`;
   });
 
-  @Input() set questData(value: AnyQuest | null) {
-    this.quest.set(value);
+  ngOnInit(): void {
+    this.questId.set(this.route.snapshot.paramMap.get('id') ?? '');
+    // Deep link a freddo: assicura che i dati siano caricati.
+    this.questService.loadQuests();
+    this.questService.loadCompletions();
   }
 
-  @Input() set status(value: PlayerQuestStatus) {
-    this.playerStatus.set(value);
+  /** Torna alla schermata precedente (mappa / album). */
+  protected back(): void {
+    this.haptics.light();
+    this.location.back();
   }
 
-  checkIn(): void {
+  protected retryCheckIn(): void {
+    this.checkInState.set('idle');
+    this.checkInError.set('');
+  }
+
+  /** Apre la modale di scansione QR per le quest primarie. */
+  protected async openScanModal(): Promise<void> {
+    const q = this.quest();
+    if (!q) return;
+    this.haptics.medium();
+    const modal = await this.modalCtrl.create({
+      component: ScanModalComponent,
+      cssClass: 'tq-scan-modal',
+      backdropDismiss: false,
+      componentProps: { questId: q.id },
+    });
+    await modal.present();
+  }
+
+  /** Esegue il check-in per le quest secondarie. */
+  protected checkIn(): void {
     const q = this.quest();
     if (!q || q.type !== QuestType.SECONDARY) return;
 
@@ -97,52 +146,27 @@ export class QuestPopupComponent {
         'Posizione GPS non disponibile. Verifica che la localizzazione sia attiva.',
       );
       this.checkInState.set('error');
+      this.haptics.error();
       return;
     }
 
     this.checkInState.set('loading');
+    this.haptics.medium();
 
-    // Nessun takeUntilDestroyed: la request HTTP deve completarsi anche se il
-    // popup viene chiuso nel frattempo (l'Observable completa da solo dopo una
-    // sola emissione, quindi non c'è memory leak).
     this.questService.checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } }).subscribe({
       next: (response: CheckInResponse) => {
-        // Aggiorna punti in auth (profilo) e invalida cache progressi
         this.authService.updateTotalPoints(response.totalPoints);
         this.profileService.reset();
-        // Apri il modal visivo — avviene prima che il re-render della mappa
-        // distrugga il popup, così l'utente vede il feedback
+        this.haptics.success();
+        this.checkInState.set('idle');
         void this.openSuccessModal(q.name, response);
       },
       error: (err: unknown) => {
         this.checkInError.set(formatCheckInError(err));
         this.checkInState.set('error');
+        this.haptics.error();
       },
     });
-  }
-
-  retryCheckIn(): void {
-    this.checkInState.set('idle');
-    this.checkInError.set('');
-  }
-
-  /** Apre la pagina di dettaglio completa della quest. */
-  async openDetail(): Promise<void> {
-    const q = this.quest();
-    if (!q) return;
-    await this.router.navigate(['/giocatore/quest', q.id]);
-  }
-
-  async openScanModal(): Promise<void> {
-    const q = this.quest();
-    if (!q) return;
-    const modal = await this.modalCtrl.create({
-      component: ScanModalComponent,
-      cssClass: 'tq-scan-modal',
-      backdropDismiss: false,
-      componentProps: { questId: q.id },
-    });
-    await modal.present();
   }
 
   private async openSuccessModal(questName: string, response: CheckInResponse): Promise<void> {
@@ -164,13 +188,12 @@ export class QuestPopupComponent {
 // Utility private al modulo
 // ----------------------------------------------------------------
 
-const PLAYER_STATUS_LABELS: Record<PlayerQuestStatus, string> = {
-  discovered: '— SCOPERTA —',
-  available: '— DA SCOPRIRE —',
-  locked: '— BLOCCATA —',
+const STATUS_LABELS: Record<PlayerQuestStatus, string> = {
+  discovered: 'Scoperta',
+  available: 'Da scoprire',
+  locked: 'Bloccata',
 };
 
-/** Formula Haversine: distanza in metri tra due coordinate WGS84. */
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6_371_000;
   const toRad = (deg: number) => (deg * Math.PI) / 180;

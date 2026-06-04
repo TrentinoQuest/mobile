@@ -11,6 +11,15 @@
     <p class="quest-popup__desc">{{ q.description }}</p>
     <p class="quest-popup__meta">{{ q.basePoints }} pt</p>
 
+    <!-- Apre la pagina di dettaglio completa -->
+    <button class="quest-popup__detail" type="button" (click)="openDetail()">
+      Vedi dettagli
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 6l6 6-6 6"/>
+      </svg>
+    </button>
+
     <!-- Scan QR: solo per quest primarie non ancora completate -->
     @if (q.type === QuestType.PRIMARY && playerStatus() === 'available') {
       <div class="quest-popup__scan">

@@ -93,19 +93,12 @@ export class ProfiloPage implements OnInit {
   protected readonly unlockedCount = this.profileService.unlockedCount;
   protected readonly totalCount = this.profileService.totalCount;
 
-  protected readonly achievements = [
-    { icon: 'mountain', label: 'Primo borgo', unlocked: true },
-    { icon: 'walk', label: '50 km in cammino', unlocked: true },
-    { icon: 'leaf', label: 'Esploratore', unlocked: true },
-    { icon: 'flame', label: '10 giorni', unlocked: false },
-    { icon: 'star', label: 'Val di Non', unlocked: false },
-  ];
-
   protected settingsRows: SettingsRow[] = [
     { icon: 'bell', label: 'Notifiche', value: 'Tutti gli eventi' },
     { icon: 'layers', label: 'Mappa offline', value: '0 valli scaricate' },
     { icon: 'person', label: 'Account & privacy', value: null },
     { icon: 'compass', label: 'Lingua', value: 'Italiano' },
+    { icon: 'info', label: 'Crediti & licenze', value: null },
   ];
 
   ngOnInit(): void {
@@ -158,23 +151,28 @@ export class ProfiloPage implements OnInit {
       case 'compass':
         await this.openLingua(row);
         break;
+      case 'info':
+        await this.openCrediti();
+        break;
     }
+  }
+
+  /** Crediti e licenze dei dati mappa (attribuzione OSM/OpenFreeMap). */
+  private async openCrediti(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Crediti & licenze',
+      message:
+        'Dati cartografici © OpenStreetMap contributors (ODbL).\n' +
+        'Tile vettoriali servite da OpenFreeMap.\n\n' +
+        'Trentino Quest · v 1.0.0',
+      buttons: ['Chiudi'],
+    });
+    await alert.present();
   }
 
   protected logout(): void {
     this.authService.logout();
     void this.router.navigate(['/']);
-  }
-
-  protected achievementIcon(name: string): string {
-    const icons: Record<string, string> = {
-      mountain: 'M3 20l5-9 3 5 2-3 8 7H3z',
-      walk: 'M13 4.5a1.8 1.8 0 100-3.6 1.8 1.8 0 000 3.6zM9 21l2-6-3-3 2-4 4 1 3 3M14 12l3 2v6',
-      leaf: 'M4 20c0-9 7-16 16-16 0 9-7 16-16 16zM4 20c4-4 8-8 16-16',
-      flame: 'M12 3s-1 3-3 5-3 4-3 7a6 6 0 0012 0c0-2.5-1.5-4-2.5-6S13.5 6 12 3z',
-      star: 'M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3z',
-    };
-    return icons[name] ?? 'M12 12m-9 0a9 9 0 1018 0 9 9 0 00-18 0';
   }
 
   // ----------------------------------------------------------------
