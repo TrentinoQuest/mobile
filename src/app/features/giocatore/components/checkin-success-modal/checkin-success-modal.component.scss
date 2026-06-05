@@ -116,6 +116,44 @@ ion-content.checkin-success {
   letter-spacing: 0.05em;
 }
 
+.checkin-success__multiplier {
+  font-family: var(--tq-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+  opacity: 0.85;
+  margin-left: 4px;
+  align-self: center;
+}
+
+.checkin-success__streak {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  color: var(--tq-ocra);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+.checkin-success__levelup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tq-forest);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  background: rgba(107, 160, 70, 0.12);
+  border: 1px solid rgba(107, 160, 70, 0.3);
+  border-radius: 20px;
+  padding: 5px 12px;
+}
+
 .checkin-success__total {
   display: flex;
   align-items: center;
@@ -124,6 +162,7 @@ ion-content.checkin-success {
   font-size: 11px;
   color: rgba(244, 235, 220, 0.4);
   letter-spacing: 0.08em;
+  margin-top: 6px;
 }
 
 .checkin-success__cta {

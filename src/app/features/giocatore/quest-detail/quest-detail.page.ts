@@ -155,7 +155,7 @@ export class QuestDetailPage implements OnInit {
 
     this.questService.checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } }).subscribe({
       next: (response: CheckInResponse) => {
-        this.authService.updateTotalPoints(response.totalPoints);
+        this.authService.updateAfterCompletion(response.totalPoints, response.gamification);
         this.profileService.reset();
         this.haptics.success();
         this.checkInState.set('idle');
@@ -178,6 +178,7 @@ export class QuestDetailPage implements OnInit {
         questName,
         pointsAwarded: response.pointsAwarded,
         newTotalPoints: response.totalPoints,
+        gamification: response.gamification,
       },
     });
     await modal.present();

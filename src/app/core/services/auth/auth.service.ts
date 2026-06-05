@@ -5,9 +5,11 @@ import { Preferences } from '@capacitor/preferences';
 import {
   AuthenticatedUser,
   AuthResponse,
+  GamificationResult,
   LoginRequest,
   LogoutRequest,
   PasswordRecoveryRequest,
+  Player,
   RefreshTokenRequest,
   RefreshTokenResponse,
   RegisterPlayerRequest,
@@ -166,14 +168,28 @@ export class AuthService {
   }
 
   /**
-   * Aggiorna i punti totali dell'utente nel signal e in Preferences.
-   * Chiamato dopo check-in o scan QR andati a buon fine, usando il
-   * totalPoints restituito dalla response del backend.
+   * Aggiorna tutti i campi gamification del player dopo un check-in o scan QR.
+   * Usa i dati restituiti dalla response del backend per mantenere il signal
+   * sincronizzato senza un roundtrip a GET /player/me.
    */
-  updateTotalPoints(newTotal: number): void {
+  updateAfterCompletion(totalPoints: number, gamification: GamificationResult): void {
     const user = this._currentUser();
-    if (!user) return;
-    const updated = { ...user, totalPoints: newTotal };
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = {
+      ...player,
+      totalPoints,
+      xp: gamification.totalXp,
+      level: gamification.newLevel ?? player.level,
+      levelTitle: gamification.levelTitle,
+      currentStreak: gamification.currentStreak,
+      longestStreak: gamification.longestStreak,
+      streakShieldActive: gamification.shieldEarned
+        ? true
+        : gamification.shieldConsumed
+          ? false
+          : player.streakShieldActive,
+    };
     this._currentUser.set(updated);
     void Preferences.set({
       key: AuthService.KEY_USER,

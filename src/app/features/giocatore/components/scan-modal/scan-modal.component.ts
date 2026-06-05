@@ -7,6 +7,8 @@ import { ScanService, type ScanError } from '../../../../core/services/scan/scan
 import { PlayerProfileService } from '../../../../core/services/player-profile/player-profile.service';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { StreakMilestoneModalComponent } from '../streak-milestone-modal/streak-milestone-modal.component';
+import { LevelUpModalComponent } from '../level-up-modal/level-up-modal.component';
 
 type ScanState = 'no-context' | 'idle' | 'submitting' | 'success' | 'error';
 
@@ -116,9 +118,9 @@ export class ScanModalComponent implements OnInit {
     try {
       const result = await this.scanService.scanAndSubmit(this.questId);
       // Aggiorna i signal reattivi: mappa → marker diventa 'discovered',
-      // header → punti aggiornati, senza attendere il prossimo loadCompletions.
+      // header → punti/XP/streak aggiornati, senza attendere il prossimo loadCompletions.
       this.questService.addCompletion(result.completion);
-      this.authService.updateTotalPoints(result.totalPoints);
+      this.authService.updateAfterCompletion(result.totalPoints, result.gamification);
       this.scanResult.set(result);
       // Invalida cache per forzare reload alla prossima apertura album/profilo
       this.profileService.reset();
@@ -140,7 +142,38 @@ export class ScanModalComponent implements OnInit {
   }
 
   async continueExploring(): Promise<void> {
+    const result = this.scanResult();
+    const gamification = result?.gamification;
+    const showLevelUp = gamification?.newLevel != null;
+    const showStreak =
+      gamification != null &&
+      gamification.currentStreak > 0 &&
+      !gamification.streakBroken;
+
     await this.modalCtrl.dismiss({ success: true });
+
+    if (showLevelUp) {
+      const levelUpModal = await this.modalCtrl.create({
+        component: LevelUpModalComponent,
+        cssClass: 'tq-scan-modal',
+        backdropDismiss: true,
+        componentProps: { gamification },
+      });
+      await levelUpModal.present();
+      await levelUpModal.onDidDismiss();
+    }
+
+    if (showStreak) {
+      const streakModal = await this.modalCtrl.create({
+        component: StreakMilestoneModalComponent,
+        cssClass: 'tq-scan-modal',
+        backdropDismiss: true,
+        componentProps: { gamification },
+      });
+      await streakModal.present();
+      await streakModal.onDidDismiss();
+    }
+
     await this.router.navigate(['/giocatore/album']);
   }
 
