@@ -496,6 +496,61 @@ ion-content.scan-modal {
   margin-top: 4px;
 }
 
+/* Gamification row (XP + streak + level-up) */
+.scan-modal__gamification {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.scan-modal__gami-xp {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.scan-modal__gami-xp-value {
+  font-family: var(--tq-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+  letter-spacing: 0.04em;
+}
+
+.scan-modal__gami-mult {
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  color: var(--tq-ocra);
+  opacity: 0.75;
+}
+
+.scan-modal__gami-streak {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+}
+
+.scan-modal__gami-levelup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #6BA046;
+  background: rgba(107, 160, 70, 0.15);
+  border: 1px solid rgba(107, 160, 70, 0.3);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+
 /* CTA success */
 .scan-modal__success-cta {
   position: absolute;

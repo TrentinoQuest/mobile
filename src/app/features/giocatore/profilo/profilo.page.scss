@@ -152,6 +152,128 @@
   }
 }
 
+// ── XP Progress ───────────────────────────────────────────────────────────────
+
+.profilo__xp-section {
+  padding: 0 22px 16px;
+}
+
+.profilo__xp-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profilo__xp-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: var(--tq-hairline-strong);
+  border-radius: var(--tq-radius-pill);
+  overflow: hidden;
+}
+
+.profilo__xp-bar-fill {
+  height: 100%;
+  border-radius: var(--tq-radius-pill);
+  background: linear-gradient(to right, var(--tq-ocra), var(--tq-ocra-tint));
+  box-shadow: 0 0 8px rgba(var(--tq-ocra-rgb), 0.4);
+  transition: width 0.5s var(--tq-ease-out);
+  min-width: 0;
+}
+
+.profilo__xp-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  color: var(--tq-text-muted);
+  letter-spacing: 0.5px;
+}
+
+// ── Streak ────────────────────────────────────────────────────────────────────
+
+.profilo__streak-section {
+  padding: 0 22px 16px;
+}
+
+.profilo__streak-card {
+  background: var(--tq-panel);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &--shielded {
+    border-color: rgba(90, 155, 232, 0.4);
+  }
+}
+
+.profilo__streak-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(var(--tq-ocra-rgb), 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--tq-ocra);
+
+  .profilo__streak-card--shielded & {
+    background: rgba(90, 155, 232, 0.12);
+    color: #5A9BE8;
+  }
+}
+
+.profilo__streak-info {
+  flex: 1;
+}
+
+.profilo__streak-count {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 26px;
+  color: var(--tq-bone);
+  line-height: 1;
+}
+
+.profilo__streak-label {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  color: var(--tq-text-muted);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.profilo__streak-best {
+  text-align: right;
+}
+
+.profilo__streak-best-count {
+  font-family: var(--tq-font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--tq-text-secondary);
+  line-height: 1;
+}
+
+.profilo__streak-best-label {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  color: var(--tq-text-muted);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.profilo__streak-shield {
+  color: #5A9BE8;
+  display: flex;
+  align-items: center;
+}
+
 // ── Sezioni ───────────────────────────────────────────────────────────────────
 
 .profilo__section {

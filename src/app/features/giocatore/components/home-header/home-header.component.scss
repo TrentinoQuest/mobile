@@ -1,9 +1,10 @@
 /* ============================================================================
- * HomeHeaderComponent — HUD superiore compatto
+ * HomeHeaderComponent — HUD identità giocatore con ring XP.
  * ============================================================================
- * Striscia in alto sopra la mappa: due chip in vetro (collezione | livello).
- * Si auto-posiziona in absolute, rispetta la safe area, e lascia trasparire
- * la mappa. Niente blocco gigante: la mappa resta il protagonista.
+ * Riga singola sopra la mappa:
+ *   [avatar+ring | username / Lv·Titolo]  [🔥 streak]  [X/Y luoghi]
+ *
+ * pointer-events: none sullo :host; auto solo sui chip interattivi.
  * ========================================================================== */
 
 :host {
@@ -13,160 +14,241 @@
   right: 0;
   z-index: var(--tq-z-map-overlay);
   display: block;
+  pointer-events: none;
 
-  /* Scrim brevissimo in cima per leggibilita' dei chip sopra mappe chiare. */
   background: linear-gradient(
     to bottom,
-    rgba(var(--tq-bg-rgb), 0.55) 0%,
-    rgba(var(--tq-bg-rgb), 0) 100%
+    rgba(var(--tq-bg-rgb), 0.72) 0%,
+    rgba(var(--tq-bg-rgb), 0.0) 100%
   );
-
-  /* Le aree vuote non bloccano il pan della mappa. */
-  pointer-events: none;
 }
+
+/* ── Contenitore ─────────────────────────────────────────────────────────── */
 
 .home-hud {
-  display: flex;
-  align-items: stretch;
-  gap: var(--tq-space-2);
-  /* Safe area in alto (notch/Dynamic Island) + respiro laterale. */
-  padding: calc(var(--tq-safe-top) + var(--tq-space-2)) var(--tq-space-4) var(--tq-space-3)
-    calc(var(--tq-safe-left) + var(--tq-space-4));
+  padding: calc(var(--tq-safe-top) + var(--tq-space-3)) var(--tq-space-4) var(--tq-space-3);
   padding-right: calc(var(--tq-safe-right) + var(--tq-space-4));
+  padding-left: calc(var(--tq-safe-left) + var(--tq-space-4));
 }
 
-/* ------------------------------------------------------------------ Chip glass */
-%home-hud-glass {
+/* ── Riga principale ─────────────────────────────────────────────────────── */
+
+.home-hud__row {
+  display: flex;
+  align-items: center;
+  gap: var(--tq-space-2);
+  pointer-events: auto;
+}
+
+.home-hud__spacer {
+  flex: 1;
+}
+
+/* ── Glass mixin locale ─────────────────────────────────────────────────── */
+
+%glass {
   background: rgba(var(--tq-bg-rgb), 0.82);
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid var(--tq-hairline-strong);
-  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.5);
-  pointer-events: auto;
+  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
 }
 
-.home-hud__chip {
-  @extend %home-hud-glass;
+/* ── Card identità ───────────────────────────────────────────────────────── */
+
+.home-hud__identity {
+  @extend %glass;
   display: flex;
   align-items: center;
-  gap: var(--tq-space-2);
+  gap: 10px;
   border-radius: var(--tq-radius-lg);
-  padding: 8px 12px;
-}
-
-/* Collezione: occupa lo spazio flessibile a sinistra. */
-.home-hud__chip--collection {
-  flex: 1;
+  padding: 6px 12px 6px 6px;
+  outline: none;
+  text-align: left;
   min-width: 0;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+
+  &:active {
+    opacity: 0.78;
+    transform: scale(0.97);
+  }
 }
 
-.home-hud__icon {
+/* ── Ring XP attorno all'avatar ─────────────────────────────────────────── */
+
+.home-hud__ring-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
-  color: var(--tq-ocra);
-  display: flex;
 }
 
-.home-hud__col {
+.home-hud__ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 44px;
+  height: 44px;
+  // Il cerchio SVG parte da "ore 3"; ruoto di -90° per partire da "ore 12"
+  transform: rotate(-90deg);
+}
+
+.home-hud__ring-bg {
+  fill: none;
+  stroke: rgba(var(--tq-ocra-rgb), 0.14);
+  stroke-width: 2.5;
+}
+
+.home-hud__ring-fill {
+  fill: none;
+  stroke: var(--tq-ocra);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--tq-duration-slow) var(--tq-ease-out);
+  filter: drop-shadow(0 0 3px rgba(var(--tq-ocra-rgb), 0.55));
+}
+
+.home-hud__avatar {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--tq-ocra), rgba(var(--tq-ocra-rgb), 0.45));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1815;
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ── Testi identità ─────────────────────────────────────────────────────── */
+
+.home-hud__id-text {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  flex: 1;
+  gap: 2px;
   min-width: 0;
 }
 
-.home-hud__line {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+.home-hud__username {
+  font-family: var(--tq-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tq-bone);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
-.home-hud__count {
+.home-hud__level-info {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  color: var(--tq-text-secondary);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+/* ── Streak ──────────────────────────────────────────────────────────────── */
+
+.home-hud__streak {
+  @extend %glass;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--tq-radius-lg);
+  padding: 7px 11px;
+  color: rgba(244, 235, 220, 0.25);
+  outline: none;
+  cursor: pointer;
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+
+  &--active {
+    color: #FF8C00;
+    background: rgba(255, 140, 0, 0.14);
+    border-color: rgba(255, 140, 0, 0.35);
+    box-shadow: 0 0 14px rgba(255, 140, 0, 0.2), 0 4px 14px -6px rgba(0, 0, 0, 0.4);
+  }
+
+  &--shielded {
+    color: #5A9BE8;
+    background: rgba(90, 155, 232, 0.12);
+    border-color: rgba(90, 155, 232, 0.35);
+  }
+
+  &:active {
+    opacity: 0.78;
+    transform: scale(0.95);
+  }
+}
+
+.home-hud__streak-flame {
+  width: 16px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.home-hud__streak-count {
+  font-family: var(--tq-font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ── Luoghi ──────────────────────────────────────────────────────────────── */
+
+.home-hud__quests {
+  @extend %glass;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: var(--tq-radius-lg);
+  padding: 6px 11px;
+  gap: 1px;
+}
+
+.home-hud__quests-count {
   font-family: var(--tq-font-mono);
   font-size: 13px;
   color: var(--tq-text-secondary);
   line-height: 1;
 
   strong {
-    font-weight: 600;
     font-size: 14px;
+    font-weight: 700;
     color: var(--tq-bone);
   }
 }
 
+.home-hud__quests-label {
+  font-family: var(--tq-font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--tq-text-muted);
+}
+
 .home-hud__skeleton {
   color: var(--tq-text-disabled);
-  animation: home-header-skeleton 1.5s ease-in-out infinite;
+  animation: hud-skeleton 1.5s ease-in-out infinite;
 }
 
-.home-hud__tag {
-  font-family: var(--tq-font-sans);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--tq-text-muted);
-  white-space: nowrap;
-}
+/* ── Skeleton ────────────────────────────────────────────────────────────── */
 
-.home-hud__bar {
-  position: relative;
-  width: 100%;
-  height: 4px;
-  background: var(--tq-hairline-strong);
-  border-radius: var(--tq-radius-pill);
-  overflow: hidden;
-}
-
-.home-hud__bar-fill {
-  height: 100%;
-  border-radius: var(--tq-radius-pill);
-  background: linear-gradient(to right, var(--tq-ocra) 0%, var(--tq-ocra-tint) 100%);
-  box-shadow: 0 0 8px rgba(var(--tq-ocra-rgb), 0.45);
-  transition: width var(--tq-duration-slow) var(--tq-ease-out);
-  min-width: 0;
-}
-
-/* Livello + punti: chip compatta a destra. */
-.home-hud__chip--level {
-  flex-shrink: 0;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-  padding: 7px 12px;
-}
-
-.home-hud__lvl {
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--tq-ocra);
-  line-height: 1.2;
-}
-
-.home-hud__pts {
-  font-family: var(--tq-font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tq-bone);
-  line-height: 1.1;
-}
-
-.home-hud__pts-unit {
-  font-size: 10px;
-  font-weight: 400;
-  color: var(--tq-text-muted);
-  margin-left: 2px;
-}
-
-/* Keyframe skeleton (riusa il nome gia' definito globalmente se presente). */
-@keyframes home-header-skeleton {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.7;
-  }
+@keyframes hud-skeleton {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.7; }
 }

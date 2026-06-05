@@ -18,6 +18,9 @@ import { HeadingService } from '../../../core/services/heading/heading.service';
 import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
 import { PlayerQrCardComponent } from '../components/player-qr-card/player-qr-card.component';
 
+/** Soglie XP per i 10 livelli (indice = livello - 1). */
+const XP_THRESHOLDS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 12000, 18000];
+
 const ITALIAN_MONTHS = [
   'gennaio',
   'febbraio',
@@ -73,21 +76,32 @@ export class ProfiloPage implements OnInit {
   protected readonly username = computed(() => this.player()?.username ?? 'Esploratore');
   protected readonly playerId = computed(() => this.player()?.id ?? '');
   protected readonly totalPoints = computed(() => this.player()?.totalPoints ?? 0);
+  protected readonly xp = computed(() => this.player()?.xp ?? 0);
+  protected readonly level = computed(() => this.player()?.level ?? 1);
+  protected readonly levelTitle = computed(() => this.player()?.levelTitle ?? '');
+  protected readonly currentStreak = computed(() => this.player()?.currentStreak ?? 0);
+  protected readonly longestStreak = computed(() => this.player()?.longestStreak ?? 0);
+  protected readonly streakShieldActive = computed(() => this.player()?.streakShieldActive ?? false);
+
+  protected readonly xpToNextLevel = computed<number | null>(() => {
+    const lvl = this.level();
+    if (lvl >= 10) return null;
+    return XP_THRESHOLDS[lvl] - this.xp();
+  });
+
+  protected readonly xpProgress = computed<number>(() => {
+    const lvl = this.level();
+    if (lvl >= 10) return 100;
+    const start = XP_THRESHOLDS[lvl - 1];
+    const end = XP_THRESHOLDS[lvl];
+    return Math.round(((this.xp() - start) / (end - start)) * 100);
+  });
 
   protected readonly registrationSince = computed(() => {
     const date = this.player()?.registrationDate;
     if (!date) return '';
     const d = new Date(date);
     return `${ITALIAN_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-  });
-
-  protected readonly level = computed(() => {
-    const pts = this.totalPoints();
-    if (pts >= 5000) return 5;
-    if (pts >= 2000) return 4;
-    if (pts >= 1000) return 3;
-    if (pts >= 500) return 2;
-    return 1;
   });
 
   protected readonly unlockedCount = this.profileService.unlockedCount;

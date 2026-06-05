@@ -26,7 +26,7 @@
           <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
           <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4M10 13v3M14 13v3"/>
         </svg>
-        <span>COLLEZIONISTA · LIVELLO {{ level() }}</span>
+        <span>LV {{ level() }} · {{ levelTitle() }}</span>
       </div>
     </div>
 
@@ -45,11 +45,65 @@
         <div class="profilo__stat-hint">continua a esplorare</div>
       </div>
       <div class="profilo__stat-card">
-        <div class="profilo__stat-big">{{ totalPoints() | number:'1.0-0' }}</div>
-        <div class="profilo__stat-label">PUNTI TOTALI</div>
-        <div class="profilo__stat-hint">livello {{ level() }}</div>
+        <div class="profilo__stat-big">{{ xp() | number:'1.0-0' }}</div>
+        <div class="profilo__stat-label">XP TOTALI</div>
+        <div class="profilo__stat-hint">
+          @if (xpToNextLevel() !== null) {
+            {{ xpToNextLevel() | number:'1.0-0' }} al livello {{ level() + 1 }}
+          } @else {
+            livello massimo
+          }
+        </div>
       </div>
     </div>
+
+    <!-- Barra progresso XP -->
+    <div class="profilo__xp-section">
+      <div class="profilo__xp-bar-wrap">
+        <div class="profilo__xp-bar"
+             role="progressbar"
+             [attr.aria-valuenow]="xpProgress()"
+             aria-valuemin="0"
+             aria-valuemax="100">
+          <div class="profilo__xp-bar-fill" [style.width.%]="xpProgress()"></div>
+        </div>
+        <div class="profilo__xp-labels">
+          <span>Lv {{ level() }}</span>
+          @if (xpToNextLevel() !== null) {
+            <span>Lv {{ level() + 1 }}</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    @if (currentStreak() > 0 || longestStreak() > 0) {
+      <div class="profilo__streak-section">
+        <div class="profilo__streak-card" [class.profilo__streak-card--shielded]="streakShieldActive()">
+          <div class="profilo__streak-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+          </div>
+          <div class="profilo__streak-info">
+            <div class="profilo__streak-count">{{ currentStreak() }}</div>
+            <div class="profilo__streak-label">STREAK ATTIVA</div>
+          </div>
+          <div class="profilo__streak-best">
+            <div class="profilo__streak-best-count">{{ longestStreak() }}</div>
+            <div class="profilo__streak-best-label">RECORD</div>
+          </div>
+          @if (streakShieldActive()) {
+            <div class="profilo__streak-shield" aria-label="Streak shield attivo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+              </svg>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
     <!-- Impostazioni tema -->
     <div class="profilo__section">

@@ -107,8 +107,8 @@ export class QuestPopupComponent {
     // sola emissione, quindi non c'è memory leak).
     this.questService.checkIn(q.id, { position: { lat: pos.lat, lng: pos.lng } }).subscribe({
       next: (response: CheckInResponse) => {
-        // Aggiorna punti in auth (profilo) e invalida cache progressi
-        this.authService.updateTotalPoints(response.totalPoints);
+        // Aggiorna XP/streak/livello in auth (profilo) e invalida cache progressi
+        this.authService.updateAfterCompletion(response.totalPoints, response.gamification);
         this.profileService.reset();
         // Apri il modal visivo — avviene prima che il re-render della mappa
         // distrugga il popup, così l'utente vede il feedback
@@ -154,6 +154,7 @@ export class QuestPopupComponent {
         questName,
         pointsAwarded: response.pointsAwarded,
         newTotalPoints: response.totalPoints,
+        gamification: response.gamification,
       },
     });
     await modal.present();

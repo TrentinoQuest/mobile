@@ -1,0 +1,312 @@
+/* ============================================================================
+ * StreakMilestoneModalComponent
+ * ============================================================================
+ * Celebrazione streak stile Duolingo — appare dopo ogni completamento che
+ * mantiene/aumenta la streak giornaliera. Fullscreen, fuoco e particelle.
+ * ========================================================================== */
+
+ion-content.streak-modal {
+  --background: #0e0800;
+}
+
+/* ── Glow di sfondo ─────────────────────────────────────────────────────── */
+
+.streak-modal__glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 100, 0, 0.32) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Particelle burst ───────────────────────────────────────────────────── */
+
+.streak-modal__particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.streak-modal__particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF8C00;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  animation: streak-particle-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms) both;
+
+  &:nth-child(even) { background: #FFD060; width: 6px; height: 6px; }
+  &:nth-child(3n)   { background: #C84000; width: 10px; height: 10px; }
+}
+
+@keyframes streak-particle-burst {
+  from {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--travel)));
+    opacity: 0;
+  }
+}
+
+/* ── Pulsante chiudi ────────────────────────────────────────────────────── */
+
+.streak-modal__close {
+  position: absolute;
+  top: calc(var(--tq-safe-top) + 12px);
+  right: 20px;
+  z-index: 30;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(244, 235, 220, 0.07);
+  border: 1px solid rgba(244, 235, 220, 0.12);
+  color: var(--tq-bone);
+  font-size: 22px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ── Corpo centrale ─────────────────────────────────────────────────────── */
+
+.streak-modal__body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 28px;
+  z-index: 1;
+}
+
+/* ── Icona fuoco ────────────────────────────────────────────────────────── */
+
+.streak-modal__fire-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  animation: streak-fire-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.streak-modal__fire-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.2) 0%, transparent 70%);
+  animation: streak-ring-pulse 2s ease-in-out infinite;
+}
+
+.streak-modal__fire-svg {
+  width: 56px;
+  height: 72px;
+  filter: drop-shadow(0 0 20px rgba(255, 140, 0, 0.7));
+}
+
+@keyframes streak-fire-in {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes streak-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.3); opacity: 0.2; }
+}
+
+/* ── Contatore ─────────────────────────────────────────────────────────── */
+
+.streak-modal__count {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 84px;
+  font-weight: 600;
+  color: #FF8C00;
+  line-height: 1;
+  letter-spacing: -2px;
+  filter: drop-shadow(0 0 24px rgba(255, 140, 0, 0.5));
+  animation: streak-count-in 0.5s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.streak-modal__label {
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  color: rgba(255, 200, 100, 0.7);
+  margin-top: 4px;
+  margin-bottom: 32px;
+  animation: streak-count-in 0.5s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes streak-count-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Traccia 7 giorni ──────────────────────────────────────────────────── */
+
+.streak-modal__week {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 28px;
+  animation: streak-week-in 0.6s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.streak-modal__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-modal__day-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  .streak-modal__day--filled & {
+    background: rgba(255, 140, 0, 0.18);
+    border-color: rgba(255, 140, 0, 0.6);
+    color: #FF8C00;
+  }
+
+  .streak-modal__day--today.streak-modal__day--filled & {
+    background: rgba(255, 140, 0, 0.3);
+    border-color: #FF8C00;
+    box-shadow: 0 0 16px rgba(255, 140, 0, 0.5), inset 0 0 8px rgba(255, 140, 0, 0.2);
+    width: 44px;
+    height: 44px;
+  }
+
+  .streak-modal__day--today:not(.streak-modal__day--filled) & {
+    border-color: rgba(255, 255, 255, 0.25);
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.streak-modal__day--future .streak-modal__day-dot {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.streak-modal__day-label {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(244, 235, 220, 0.35);
+
+  .streak-modal__day--filled & {
+    color: rgba(255, 200, 100, 0.7);
+  }
+
+  .streak-modal__day--today & {
+    color: rgba(244, 235, 220, 0.65);
+  }
+
+  .streak-modal__day--future & {
+    color: rgba(244, 235, 220, 0.18);
+  }
+}
+
+@keyframes streak-week-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Moltiplicatore ────────────────────────────────────────────────────── */
+
+.streak-modal__multiplier {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 140, 0, 0.12);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 24px;
+  padding: 8px 16px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  color: rgba(255, 200, 100, 0.85);
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+  animation: streak-week-in 0.5s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.streak-modal__mult-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FF8C00;
+  letter-spacing: 0;
+}
+
+/* ── Shield banner ─────────────────────────────────────────────────────── */
+
+.streak-modal__shield-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  color: #5A9BE8;
+  letter-spacing: 0.06em;
+  background: rgba(90, 155, 232, 0.1);
+  border: 1px solid rgba(90, 155, 232, 0.3);
+  border-radius: 24px;
+  padding: 8px 16px;
+  animation: streak-week-in 0.5s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── CTA ────────────────────────────────────────────────────────────────── */
+
+.streak-modal__cta {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 48px;
+  z-index: 1;
+  animation: streak-count-in 0.5s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.streak-modal__cta-btn {
+  width: 100%;
+  background: #FF8C00;
+  color: #1a0e00;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--tq-font-sans);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 140, 0, 0.4);
+  letter-spacing: 0.01em;
+}

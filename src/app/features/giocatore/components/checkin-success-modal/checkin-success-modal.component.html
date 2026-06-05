@@ -32,21 +32,48 @@
     <!-- Nome quest -->
     <h2 class="checkin-success__quest-name">{{ questName }}</h2>
 
-    <!-- Punti guadagnati -->
+    <!-- XP guadagnati -->
     <div class="checkin-success__points-wrap">
       <span class="checkin-success__points-prefix">+</span>
-      <span class="checkin-success__points">{{ pointsAwarded }}</span>
-      <span class="checkin-success__points-unit">pt</span>
+      <span class="checkin-success__points">{{ gamification?.xpAwarded ?? pointsAwarded }}</span>
+      <span class="checkin-success__points-unit">xp</span>
+      @if (hasStreakMultiplier) {
+        <span class="checkin-success__multiplier">×{{ gamification!.streakMultiplier }}</span>
+      }
     </div>
 
-    <!-- Totale aggiornato -->
+    <!-- Streak attiva -->
+    @if ((gamification?.currentStreak ?? 0) > 0) {
+      <div class="checkin-success__streak">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--tq-ocra)" aria-hidden="true">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        streak {{ gamification!.currentStreak }}
+        @if (gamification?.streakBroken) { &nbsp;(azzerata) }
+        @if (gamification?.shieldConsumed) { &nbsp;· shield usato }
+        @if (gamification?.shieldEarned) { &nbsp;· shield guadagnato }
+      </div>
+    }
+
+    <!-- Level up -->
+    @if (leveledUp) {
+      <div class="checkin-success__levelup">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+        Livello {{ gamification!.newLevel }} · {{ gamification!.levelTitle }}
+      </div>
+    }
+
+    <!-- Totale XP aggiornato -->
     <div class="checkin-success__total">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
            stroke="rgba(244,235,220,0.45)" stroke-width="1.7" stroke-linecap="round">
-        <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
-        <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4"/>
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
-      totale {{ newTotalPoints }} punti
+      totale {{ gamification?.totalXp ?? newTotalPoints }} xp
     </div>
 
   </div>

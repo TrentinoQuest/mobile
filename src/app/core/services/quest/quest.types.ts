@@ -50,6 +50,9 @@ export {
 
   // Placement QR
   PlacementStatus,
+
+  // Gamification
+  GamificationResult,
 } from '@trentino-quest/shared-types';
 
 // NOTA: GeoPoint e Links vivono in @trentino-quest/shared-types/common.
