@@ -123,6 +123,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/giocatore/profilo/profilo.page').then((m) => m.ProfiloPage),
       },
+      // Missioni giornaliere (Couch Loop)
+      {
+        path: 'daily-quests',
+        loadComponent: () =>
+          import('./features/giocatore/daily-quests/daily-quests.page').then(
+            (m) => m.DailyQuestsPage,
+          ),
+      },
       // Dettaglio quest (push da popup mappa / quest log)
       {
         path: 'quest/:id',

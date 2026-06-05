@@ -128,6 +128,68 @@
   margin-right: 4px;
 }
 
+.profilo__daily {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 44px);
+  margin: 0 22px 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(var(--tq-ocra-rgb), 0.1);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.3);
+  cursor: pointer;
+  color: var(--tq-bone);
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.profilo__daily-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.profilo__daily-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.profilo__daily-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-bone);
+}
+
+.profilo__daily-sub {
+  font-size: 11px;
+  color: var(--tq-text-muted);
+  margin-top: 2px;
+}
+
+.profilo__daily-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--tq-radius-pill);
+  background: #c0392b;
+  color: #fff;
+  font-family: var(--tq-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.profilo__daily-arrow {
+  color: var(--tq-text-muted);
+  flex-shrink: 0;
+}
+
 .profilo__stat-big {
   font-family: var(--tq-font-serif);
   font-style: italic;

@@ -65,6 +65,22 @@
       </div>
     </div>
 
+    <!-- Missioni giornaliere (Couch Loop) -->
+    <button class="profilo__daily" type="button" (click)="openDailyQuests()">
+      <span class="profilo__daily-icon" aria-hidden="true">🎯</span>
+      <span class="profilo__daily-text">
+        <span class="profilo__daily-title">Missioni del giorno</span>
+        <span class="profilo__daily-sub">XP e monete da guadagnare oggi</span>
+      </span>
+      @if (dailyPending() > 0) {
+        <span class="profilo__daily-badge">{{ dailyPending() }}</span>
+      }
+      <svg class="profilo__daily-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 6l6 6-6 6"/>
+      </svg>
+    </button>
+
     <!-- Barra progresso XP -->
     <div class="profilo__xp-section">
       <div class="profilo__xp-bar-wrap">

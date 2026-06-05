@@ -13,6 +13,7 @@ import { lockClosedOutline, trashOutline } from 'ionicons/icons';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
+import { DailyQuestsService } from '../../../core/services/daily-quests/daily-quests.service';
 import { MapSettingsService } from '../../../core/services/map/map-settings.service';
 import { HeadingService } from '../../../core/services/heading/heading.service';
 import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
@@ -54,6 +55,7 @@ export class ProfiloPage implements OnInit {
 
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(PlayerProfileService);
+  private readonly dailyQuests = inject(DailyQuestsService);
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
   private readonly actionSheetCtrl = inject(ActionSheetController);
@@ -110,6 +112,9 @@ export class ProfiloPage implements OnInit {
   protected readonly unlockedCount = this.profileService.unlockedCount;
   protected readonly totalCount = this.profileService.totalCount;
 
+  /** Missioni giornaliere ancora da completare (badge sull'entry point). */
+  protected readonly dailyPending = this.dailyQuests.pendingCount;
+
   protected settingsRows: SettingsRow[] = [
     { icon: 'bell', label: 'Notifiche', value: 'Tutti gli eventi' },
     { icon: 'layers', label: 'Mappa offline', value: '0 valli scaricate' },
@@ -121,6 +126,12 @@ export class ProfiloPage implements OnInit {
   ngOnInit(): void {
     this.profileService.loadProgress();
     this.profileService.loadCollection();
+    this.dailyQuests.load();
+  }
+
+  /** Apre il pannello delle missioni giornaliere. */
+  protected openDailyQuests(): void {
+    void this.router.navigate(['/giocatore/daily-quests']);
   }
 
   async scrollToSettings(): Promise<void> {

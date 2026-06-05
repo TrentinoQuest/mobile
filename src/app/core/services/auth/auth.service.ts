@@ -199,6 +199,28 @@ export class AuthService {
   }
 
   /**
+   * Applica una ricompensa incrementale di XP e monete al player corrente.
+   * Usato dopo azioni che assegnano premi senza una GamificationResult completa
+   * (es. riscossione di una daily quest o del quiz lore). Aggiorna solo i saldi
+   * visibili; livello e titolo restano allineati al prossimo GET /player/me.
+   */
+  applyReward(xpDelta: number, coinsDelta: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = {
+      ...player,
+      xp: player.xp + xpDelta,
+      coins: player.coins + coinsDelta,
+    };
+    this._currentUser.set(updated);
+    void Preferences.set({
+      key: AuthService.KEY_USER,
+      value: JSON.stringify(updated),
+    });
+  }
+
+  /**
    * Avvia il flusso di recupero password.
    * Il backend risponde sempre con 202 per non rivelare quali email sono
    * registrate.

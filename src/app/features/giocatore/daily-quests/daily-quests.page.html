@@ -1,0 +1,79 @@
+<ion-content [fullscreen]="true" class="daily">
+
+  <!-- Header glass -->
+  <div class="daily__header">
+    <div class="daily__header-row">
+      <button class="daily__back" type="button" (click)="goBack()" aria-label="Indietro">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 6l-6 6 6 6"/>
+        </svg>
+      </button>
+      <div class="daily__header-center">
+        <span class="daily__header-sub">OGNI GIORNO</span>
+        <span class="daily__header-title">Missioni del giorno</span>
+      </div>
+      <span class="daily__back daily__back--ghost" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="daily__body">
+
+    @if (loading() && quests().length === 0) {
+      <div class="daily__empty">Caricamento missioni…</div>
+    } @else if (error()) {
+      <div class="daily__empty daily__empty--error">{{ error() }}</div>
+    } @else {
+      <div class="daily__list">
+        @for (q of quests(); track q.type) {
+          <div class="daily__quest"
+               [class.daily__quest--done]="statusOf(q) !== 'pending'">
+            <div class="daily__quest-top">
+              <div class="daily__quest-status" [attr.data-status]="statusOf(q)">
+                @if (statusOf(q) === 'claimed') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                       stroke="#6BA046" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                } @else if (statusOf(q) === 'claimable') {
+                  <span class="daily__quest-ready">!</span>
+                }
+              </div>
+              <div class="daily__quest-text">
+                <div class="daily__quest-title">{{ q.title }}</div>
+                <div class="daily__quest-desc">{{ q.description }}</div>
+              </div>
+            </div>
+            <div class="daily__quest-bottom">
+              <div class="daily__rewards">
+                <span class="daily__reward">+{{ q.xpReward }} XP</span>
+                <span class="daily__reward daily__reward--coins">+{{ q.coinsReward }} 🪙</span>
+              </div>
+              @switch (statusOf(q)) {
+                @case ('claimable') {
+                  <button class="daily__claim" type="button" (click)="claim(q)">Riscuoti</button>
+                }
+                @case ('claimed') {
+                  <span class="daily__claimed">Riscossa</span>
+                }
+                @default {
+                  <span class="daily__pending">Da completare</span>
+                }
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="daily__empty">Nessuna missione per oggi.</div>
+        }
+      </div>
+
+      <p class="daily__note">
+        Le missioni scadono a mezzanotte. Completa tutte le missioni per 7 giorni
+        di fila per il bonus settimanale.
+      </p>
+    }
+
+    <div class="daily__spacer"></div>
+  </div>
+
+</ion-content>
