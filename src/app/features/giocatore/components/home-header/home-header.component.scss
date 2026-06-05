@@ -207,6 +207,33 @@
   letter-spacing: -0.02em;
 }
 
+/* ── Monete ──────────────────────────────────────────────────────────────── */
+
+.home-hud__coins {
+  @extend %glass;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--tq-radius-lg);
+  padding: 7px 11px;
+  color: var(--tq-ocra);
+  background: rgba(var(--tq-ocra-rgb), 0.12);
+  border-color: rgba(var(--tq-ocra-rgb), 0.32);
+}
+
+.home-hud__coins-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.home-hud__coins-count {
+  font-family: var(--tq-font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
 /* ── Luoghi ──────────────────────────────────────────────────────────────── */
 
 .home-hud__quests {

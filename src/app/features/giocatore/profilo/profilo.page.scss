@@ -114,6 +114,18 @@
   border: 1px solid var(--tq-hairline);
   border-radius: 14px;
   padding: 14px;
+
+  &--coins {
+    grid-column: 1 / -1;
+    background: rgba(var(--tq-ocra-rgb), 0.1);
+    border-color: rgba(var(--tq-ocra-rgb), 0.3);
+  }
+}
+
+.profilo__coins-icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-right: 4px;
 }
 
 .profilo__stat-big {

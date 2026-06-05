@@ -42,6 +42,14 @@
       }
     </div>
 
+    <!-- Monete guadagnate -->
+    @if ((gamification?.coinsAwarded ?? 0) > 0) {
+      <div class="checkin-success__coins">
+        <span class="checkin-success__coins-icon">🪙</span>
+        +{{ gamification!.coinsAwarded }} monete
+      </div>
+    }
+
     <!-- Streak attiva -->
     @if ((gamification?.currentStreak ?? 0) > 0) {
       <div class="checkin-success__streak">

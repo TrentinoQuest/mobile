@@ -55,6 +55,14 @@
           }
         </div>
       </div>
+      <div class="profilo__stat-card profilo__stat-card--coins">
+        <div class="profilo__stat-big">
+          <span class="profilo__coins-icon" aria-hidden="true">🪙</span>
+          {{ coins() | number:'1.0-0' }}
+        </div>
+        <div class="profilo__stat-label">MONETE</div>
+        <div class="profilo__stat-hint">spendibili al mercato</div>
+      </div>
     </div>
 
     <!-- Barra progresso XP -->

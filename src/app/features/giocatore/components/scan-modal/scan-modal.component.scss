@@ -537,6 +537,16 @@ ion-content.scan-modal {
   color: var(--tq-ocra);
 }
 
+.scan-modal__gami-coins {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--tq-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+}
+
 .scan-modal__gami-levelup {
   display: flex;
   align-items: center;

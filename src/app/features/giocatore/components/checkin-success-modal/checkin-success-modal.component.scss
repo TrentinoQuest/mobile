@@ -138,6 +138,23 @@ ion-content.checkin-success {
   opacity: 0.85;
 }
 
+.checkin-success__coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--tq-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.checkin-success__coins-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
 .checkin-success__levelup {
   display: flex;
   align-items: center;

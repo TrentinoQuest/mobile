@@ -213,6 +213,12 @@
                 <span class="scan-modal__gami-mult">×{{ scanResult()!.gamification.streakMultiplier }}</span>
               }
             </div>
+            @if ((scanResult()!.gamification.coinsAwarded) > 0) {
+              <div class="scan-modal__gami-coins">
+                <span aria-hidden="true">🪙</span>
+                +{{ scanResult()!.gamification.coinsAwarded }} monete
+              </div>
+            }
             @if ((scanResult()!.gamification.currentStreak) > 0) {
               <div class="scan-modal__gami-streak">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

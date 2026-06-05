@@ -45,6 +45,12 @@
       <span class="home-hud__streak-count">{{ currentStreak() }}</span>
     </button>
 
+    <!-- Monete (Sacchetto dei Tesori) -->
+    <div class="home-hud__coins" aria-label="Monete {{ coins() }}">
+      <span class="home-hud__coins-icon" aria-hidden="true">🪙</span>
+      <span class="home-hud__coins-count">{{ coins() }}</span>
+    </div>
+
     <!-- Luoghi scoperti -->
     <div class="home-hud__quests">
       @if (loading() && total() === 0) {

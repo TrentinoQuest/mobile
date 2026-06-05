@@ -179,6 +179,7 @@ export class AuthService {
     const updated: Player = {
       ...player,
       totalPoints,
+      coins: player.coins + gamification.coinsAwarded,
       xp: gamification.totalXp,
       level: gamification.newLevel ?? player.level,
       levelTitle: gamification.levelTitle,

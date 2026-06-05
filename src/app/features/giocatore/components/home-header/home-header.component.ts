@@ -42,6 +42,7 @@ export class HomeHeaderComponent {
   protected readonly levelTitle = computed<string>(() => this.player()?.levelTitle ?? 'Visitatore');
   protected readonly xp = computed<number>(() => this.player()?.xp ?? 0);
   protected readonly currentStreak = computed<number>(() => this.player()?.currentStreak ?? 0);
+  protected readonly coins = computed<number>(() => this.player()?.coins ?? 0);
   protected readonly streakShieldActive = computed<boolean>(
     () => this.player()?.streakShieldActive ?? false,
   );

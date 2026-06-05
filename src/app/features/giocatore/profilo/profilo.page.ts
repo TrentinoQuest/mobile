@@ -76,6 +76,7 @@ export class ProfiloPage implements OnInit {
   protected readonly username = computed(() => this.player()?.username ?? 'Esploratore');
   protected readonly playerId = computed(() => this.player()?.id ?? '');
   protected readonly totalPoints = computed(() => this.player()?.totalPoints ?? 0);
+  protected readonly coins = computed(() => this.player()?.coins ?? 0);
   protected readonly xp = computed(() => this.player()?.xp ?? 0);
   protected readonly level = computed(() => this.player()?.level ?? 1);
   protected readonly levelTitle = computed(() => this.player()?.levelTitle ?? '');
