@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Ionic App</title>
+    <title>Trentino Quest</title>
 
     <base href="/" />
 
@@ -13,12 +13,20 @@
     />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
+    <!-- theme-color: tinta la barra di sistema col bg dark del gioco. -->
+    <meta name="theme-color" content="#121212" />
 
     <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
 
     <!-- add to homescreen for ios -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <!--
+      black-translucent: la WebView va edge-to-edge sotto la status bar
+      (contenuto a tutto schermo). Lo spazio della status bar e' protetto
+      via var(--tq-safe-top) nei layout. Necessario per il look immersivo
+      mappa-fullscreen.
+    -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <!--
       Font loading per Trentino Quest.

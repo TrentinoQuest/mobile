@@ -113,6 +113,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/giocatore/profilo/profilo.page').then((m) => m.ProfiloPage),
       },
+      // Dettaglio quest (push da popup mappa / quest log)
+      {
+        path: 'quest/:id',
+        loadComponent: () =>
+          import('./features/giocatore/quest-detail/quest-detail.page').then(
+            (m) => m.QuestDetailPage,
+          ),
+      },
     ],
   },
 

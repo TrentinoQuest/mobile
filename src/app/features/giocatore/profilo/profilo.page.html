@@ -37,7 +37,7 @@
       </div>
     }
 
-    <!-- Griglia statistiche -->
+    <!-- Griglia statistiche (solo dati reali). -->
     <div class="profilo__stats">
       <div class="profilo__stat-card">
         <div class="profilo__stat-big">{{ unlockedCount() }} / {{ totalCount() }}</div>
@@ -49,38 +49,6 @@
         <div class="profilo__stat-label">PUNTI TOTALI</div>
         <div class="profilo__stat-hint">livello {{ level() }}</div>
       </div>
-      <div class="profilo__stat-card profilo__stat-card--accent">
-        <div class="profilo__stat-big profilo__stat-big--accent">6 g</div>
-        <div class="profilo__stat-label">STREAK ATTIVA</div>
-        <div class="profilo__stat-hint profilo__stat-hint--accent">continua oggi</div>
-      </div>
-      <div class="profilo__stat-card">
-        <div class="profilo__stat-big profilo__stat-big--serif">Val di Non</div>
-        <div class="profilo__stat-label">VALLE PREFERITA</div>
-        <div class="profilo__stat-hint">4 scoperte</div>
-      </div>
-    </div>
-
-    <!-- Riconoscimenti -->
-    <div class="profilo__section">
-      <div class="profilo__section-header">
-        <span class="profilo__section-title">Riconoscimenti</span>
-        <span class="profilo__section-count">3 / 12</span>
-      </div>
-      <div class="profilo__achievements">
-        @for (a of achievements; track a.label) {
-          <div class="profilo__achievement" [class.profilo__achievement--locked]="!a.unlocked">
-            <div class="profilo__achievement-icon" [class.profilo__achievement-icon--active]="a.unlocked">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                   [attr.stroke]="a.unlocked ? 'var(--tq-ocra)' : 'rgba(244,235,220,0.3)'"
-                   stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <path [attr.d]="achievementIcon(a.icon)"/>
-              </svg>
-            </div>
-            <span class="profilo__achievement-label">{{ a.label }}</span>
-          </div>
-        }
-      </div>
     </div>
 
     <!-- Impostazioni tema -->
@@ -90,6 +58,34 @@
       </div>
       <div class="profilo__theme-wrap">
         <app-theme-selector/>
+      </div>
+    </div>
+
+    <!-- Impostazioni mappa -->
+    <div class="profilo__section">
+      <div class="profilo__section-header">
+        <span class="profilo__section-title">Mappa</span>
+      </div>
+      <div class="profilo__settings-list">
+        <div class="profilo__settings-row profilo__settings-row--last profilo__settings-row--toggle">
+          <div class="profilo__settings-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+            </svg>
+          </div>
+          <div class="profilo__settings-text">
+            <span class="profilo__settings-label">Ruota con la bussola</span>
+            <span class="profilo__settings-hint">La mappa si orienta verso dove guardi</span>
+          </div>
+          <ion-toggle
+            [checked]="rotateWithHeading()"
+            (ionChange)="onToggleRotateMap($event)"
+            aria-label="Ruota la mappa con la bussola"
+          ></ion-toggle>
+        </div>
       </div>
     </div>
 
@@ -117,6 +113,10 @@
                   @case ('compass') {
                     <circle cx="12" cy="12" r="9"/>
                     <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+                  }
+                  @case ('info') {
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 16v-4M12 8h.01"/>
                   }
                 }
               </svg>

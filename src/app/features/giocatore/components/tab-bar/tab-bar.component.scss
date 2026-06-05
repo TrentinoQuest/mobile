@@ -22,16 +22,20 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: var(--tq-z-tab-bar);
 
   /* Layout: 5 slot equi-distribuiti. */
   display: flex;
   align-items: center;
   justify-content: space-around;
 
-  /* Altezza fissa + safe area per home indicator iOS. */
-  height: 64px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  /* Altezza parametrica + safe area (home indicator / gesture bar).
+     I token vivono in variables.scss: cambiare --tq-tab-bar-height aggiorna
+     in automatico tutti gli overlay che scavalcano la barra. */
+  height: var(--tq-tab-bar-height);
+  padding-bottom: var(--tq-safe-bottom);
+  padding-left: var(--tq-safe-left);
+  padding-right: var(--tq-safe-right);
   /* Aumenta l'altezza totale quando c'e' safe area (iPhone moderni). */
   box-sizing: content-box;
 
@@ -134,10 +138,10 @@
     cursor: pointer;
     padding: 0;
 
-    /* Dimensione fissa, perfettamente circolare. */
-    flex: 0 0 58px;
-    width: 58px;
-    height: 58px;
+    /* Dimensione parametrica, perfettamente circolare. */
+    flex: 0 0 var(--tq-fab-size);
+    width: var(--tq-fab-size);
+    height: var(--tq-fab-size);
     border-radius: 50%;
 
     /* Effetto "stacco" dalla barra: si solleva sopra. */

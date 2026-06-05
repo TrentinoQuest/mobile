@@ -15,9 +15,12 @@
 // Definiti una sola volta — nessuna duplicazione tra dark e light.
 // =============================================================================
 :root {
-  /* Famiglie tipografiche */
+  /* Famiglie tipografiche
+   * NOTA: il serif e' Instrument Serif (caricato in index.html, solo italic).
+   * In passato qui c'era 'Playfair Display' che NON veniva mai caricato → i titoli
+   * narrativi cadevano sul fallback Georgia. Allineato al font realmente servito. */
   --tq-font-sans: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --tq-font-serif: 'Playfair Display', Georgia, serif;
+  --tq-font-serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
   --tq-font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
 
   /* Scala di spaziatura (base 4 px) */
@@ -29,18 +32,53 @@
   --tq-space-6: 24px;
   --tq-space-7: 28px;
   --tq-space-8: 32px;
+  --tq-space-10: 40px;
+  --tq-space-12: 48px;
 
   /* Raggi */
   --tq-radius-sm: 4px;
   --tq-radius-md: 8px;
+  --tq-radius-lg: 16px;
+  --tq-radius-xl: 24px;
   --tq-radius-pill: 999px;
 
   /* Durate animazioni */
   --tq-duration-fast: 150ms;
+  --tq-duration-base: 280ms;
   --tq-duration-slow: 500ms;
 
   /* Easing */
   --tq-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Easing "spring": leggero overshoot per il feel gamificato (entrate, pop). */
+  --tq-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* =========================================================================
+   * SAFE-AREA PARAMETRICA — fondamento del layout responsive
+   * =========================================================================
+   * Espone gli inset di sistema come token riutilizzabili: nessun componente
+   * deve piu' scrivere env(safe-area-inset-*) a mano. Funziona su qualsiasi
+   * telefono — notch, Dynamic Island, home indicator, o niente.
+   * Richiede viewport-fit=cover in index.html (gia' presente).
+   * ========================================================================= */
+  --tq-safe-top: env(safe-area-inset-top, 0px);
+  --tq-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tq-safe-left: env(safe-area-inset-left, 0px);
+  --tq-safe-right: env(safe-area-inset-right, 0px);
+
+  /* =========================================================================
+   * METRICHE CHROME — dimensioni degli elementi di navigazione persistenti
+   * =========================================================================
+   * Definite una volta sola: cambiare l'altezza della tab bar aggiorna in
+   * automatico tutti gli overlay che la scavalcano (FAB, toast, sheet, liste).
+   * ========================================================================= */
+  --tq-tab-bar-height: 62px;
+  /* Altezza reale occupata = barra + safe area inferiore (home indicator). */
+  --tq-tab-bar-total: calc(var(--tq-tab-bar-height) + var(--tq-safe-bottom));
+  --tq-fab-size: 60px;
+
+  /* Offset pronti per posizionare overlay flottanti senza numeri magici. */
+  --tq-above-tab-bar: calc(var(--tq-tab-bar-total) + var(--tq-space-4));
+  --tq-hud-top: calc(var(--tq-safe-top) + var(--tq-space-3));
 }
 
 // =============================================================================
@@ -76,8 +114,10 @@
   --tq-ocra-shade: #a2770a;
   /** Verde bosco schiarito: contrasto sufficiente su sfondo scuro **/
   --tq-forest: #5a8a3a;
+  --tq-forest-rgb: 90, 138, 58;
   /** Ruggine calda: variante luminosa per dark mode **/
   --tq-rust: #c4673a;
+  --tq-rust-rgb: 196, 103, 58;
 
   /* -------------------------------------------------------------------------
    * Ionic color palette — primary (ocra, Giocatore)
@@ -252,8 +292,10 @@
   --tq-ocra-shade: #7a5a07;
   /** Verde bosco piu' scuro: contrasto AA garantito su sfondo bianco **/
   --tq-forest: #4a7a2c;
+  --tq-forest-rgb: 74, 122, 44;
   /** Ruggine scura: contrasto AA garantito su sfondo bianco **/
   --tq-rust: #9c4830;
+  --tq-rust-rgb: 156, 72, 48;
 
   /* -------------------------------------------------------------------------
    * Ionic color palette — primary (ocra, Giocatore)

@@ -23,60 +23,194 @@
   -->
   <div #mapContainer class="home__map"></div>
 
-  <!-- Header overlay: greeting + collection chip. -->
+  <!-- Header overlay: HUD compatto collezione + livello. -->
   <app-home-header></app-home-header>
 
-  <!-- Bottone centra sulla posizione utente -->
-  <button class="home__locate-btn" type="button" aria-label="Centra sulla mia posizione"
-          (click)="centerOnUser()">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.8"
-         stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-      <path d="M12 8a4 4 0 100 8 4 4 0 000-8z" opacity="0"/>
-    </svg>
-  </button>
+  <!-- Filtri quest: cosa mostrare sulla mappa. -->
+  <div class="home__filters" role="tablist" aria-label="Filtra quest">
+    <button class="home__filter" type="button" role="tab"
+            [class.home__filter--active]="questFilter() === 'all'"
+            [attr.aria-selected]="questFilter() === 'all'"
+            (click)="setQuestFilter('all')">Tutte</button>
+    <button class="home__filter" type="button" role="tab"
+            [class.home__filter--active]="questFilter() === 'todo'"
+            [attr.aria-selected]="questFilter() === 'todo'"
+            (click)="setQuestFilter('todo')">Da fare</button>
+    <button class="home__filter" type="button" role="tab"
+            [class.home__filter--active]="questFilter() === 'done'"
+            [attr.aria-selected]="questFilter() === 'done'"
+            (click)="setQuestFilter('done')">Scoperte</button>
+  </div>
 
-  <!-- Toast di prossimità: appare quando il giocatore si avvicina a una quest -->
-  @if (proximityToast(); as toast) {
-    <div class="home__proximity-toast"
-         [class.home__proximity-toast--inrange]="toast.inRange">
-      <div class="home__proximity-toast__icon">
-        @if (toast.inRange) {
-          <!-- Checkmark: sei già nel raggio -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-            <path d="M9 12l2 2 4-4"/>
-            <circle cx="12" cy="12" r="9"/>
+  <!--
+    Cluster controlli mappa (destra, sopra tab bar e HUD obiettivo).
+    Quest log (con badge), bussola (reset nord+pitch) e centra-su-di-me.
+    Lo zoom si fa col pinch.
+  -->
+  <div class="home__controls">
+    <button class="home__ctrl home__ctrl--log" type="button"
+            aria-label="Quest vicine" (click)="openNearby()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.9"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 6h12M8 12h12M8 18h12M3 6h.01M3 12h.01M3 18h.01"/>
+      </svg>
+      @if (availableCount() > 0) {
+        <span class="home__ctrl-badge">{{ availableCount() }}</span>
+      }
+    </button>
+
+    <button class="home__ctrl home__ctrl--compass" type="button"
+            aria-label="Orienta a nord" (click)="resetNorth()">
+      <svg width="22" height="22" viewBox="0 0 24 24"
+           [style.transform]="'rotate(' + compassAngle() + 'deg)'">
+        <polygon points="12,3 8.5,12 12,10.5 15.5,12" fill="var(--tq-rust)"/>
+        <polygon points="12,21 8.5,12 12,13.5 15.5,12" fill="currentColor"/>
+      </svg>
+    </button>
+
+    <button class="home__ctrl home__ctrl--locate" type="button"
+            aria-label="Centra sulla mia posizione" (click)="centerOnUser()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.9"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      </svg>
+    </button>
+  </div>
+
+  <!--
+    HUD OBIETTIVO — guida persistente "cosa fare ora".
+    Mostra sempre la quest disponibile piu' vicina: chi apre l'app sa subito
+    dove andare. Tap → vola sull'obiettivo o avvia la quest se sei nel raggio.
+  -->
+  @if (objective(); as obj) {
+    <button class="home__objective"
+            [class.home__objective--inrange]="obj.inRange"
+            type="button" (click)="openObjectiveAction()">
+      <span class="home__objective__icon">
+        @if (obj.inRange) {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
           </svg>
         } @else {
-          <!-- Radar: ti stai avvicinando -->
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/>
-            <circle cx="12" cy="12" r="4"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.4"/>
           </svg>
         }
-      </div>
-      <div class="home__proximity-toast__text">
-        <span class="home__proximity-toast__label">
-          {{ toast.inRange ? 'Sei nell\'area!' : 'Quest vicina' }}
+      </span>
+      <span class="home__objective__text">
+        <span class="home__objective__label">
+          {{ obj.inRange ? 'Sei arrivato!' : 'Obiettivo più vicino' }}
         </span>
-        <span class="home__proximity-toast__name">{{ toast.questName }}</span>
-      </div>
-      <!-- CTA diretta quando sei nel raggio -->
-      @if (toast.inRange) {
-        <button class="home__proximity-toast__action" (click)="openToastAction()">
-          {{ toast.type === QuestType.PRIMARY ? 'Scansiona' : 'Check-in' }}
-        </button>
-      }
-      <button class="home__proximity-toast__dismiss" (click)="dismissToast()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M18 6L6 18M6 6l12 12"/>
+        <span class="home__objective__name">{{ obj.quest.name }}</span>
+      </span>
+      <span class="home__objective__cta">
+        @if (obj.inRange) {
+          <span class="home__objective__action">
+            {{ obj.type === QuestType.PRIMARY ? 'Scansiona' : 'Check-in' }}
+          </span>
+        } @else {
+          <span class="home__objective__dist">{{ formatDistance(obj.distance) }}</span>
+        }
+        <svg class="home__objective__arrow" width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 6l6 6-6 6"/>
         </svg>
-      </button>
+      </span>
+    </button>
+  } @else {
+    <!-- Nessuna quest disponibile: incoraggia l'esplorazione. -->
+    <div class="home__objective home__objective--empty">
+      <span class="home__objective__icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+        </svg>
+      </span>
+      <span class="home__objective__text">
+        <span class="home__objective__label">Esplora</span>
+        <span class="home__objective__name">Muoviti sulla mappa per scoprire nuove quest</span>
+      </span>
     </div>
   }
+
+  <!--
+    BOTTOM SHEET "QUEST VICINE" — quest log scorrevole, ordinato per distanza.
+    Sheet modal Ionic con breakpoints; ogni riga vola sulla quest sulla mappa.
+  -->
+  <ion-modal
+    class="nearby-sheet"
+    [isOpen]="nearbySheetOpen()"
+    [breakpoints]="[0, 0.5, 0.92]"
+    [initialBreakpoint]="0.5"
+    handle="true"
+    (ionModalDidDismiss)="nearbySheetOpen.set(false)"
+  >
+    <ng-template>
+      <div class="nearby">
+        <div class="nearby__header">
+          <div class="nearby__heading">
+            <h2 class="nearby__title">Quest vicine</h2>
+            <p class="nearby__sub">{{ availableCount() }} da fare intorno a te</p>
+          </div>
+          <button class="nearby__close" type="button"
+                  aria-label="Chiudi" (click)="nearbySheetOpen.set(false)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="nearby__list">
+          @for (item of nearbyItems(); track item.id) {
+            <button class="nearby__row nearby__row--{{ item.status }}"
+                    type="button" (click)="goToQuestFromList(item)">
+              <span class="nearby__row-icon">
+                @if (item.status === 'discovered') {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+                  </svg>
+                } @else if (item.type === QuestType.PRIMARY) {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5 4h14a2 2 0 012 2v3H3V6a2 2 0 012-2zm-2 7h18v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9zm9 2v3h2v-3h-2z"/>
+                  </svg>
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+                  </svg>
+                }
+              </span>
+              <span class="nearby__row-text">
+                <span class="nearby__row-name">{{ item.name }}</span>
+                <span class="nearby__row-meta">
+                  {{ item.type === QuestType.PRIMARY ? 'Scrigno' : 'Check-in' }}
+                  @if (item.status === 'discovered') {
+                    · Scoperta
+                  } @else if (item.inRange) {
+                    · Sei nell'area
+                  }
+                </span>
+              </span>
+              @if (item.distance !== null) {
+                <span class="nearby__row-dist">{{ formatDistance(item.distance) }}</span>
+              }
+            </button>
+          } @empty {
+            <div class="nearby__empty">
+              Nessuna quest qui intorno. Muoviti ed esplora la mappa!
+            </div>
+          }
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

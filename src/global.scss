@@ -38,14 +38,22 @@
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
 /* ===========================================================
- * Leaflet base styles.
+ * MapLibre GL base styles.
  * Obbligatorio per rendering corretto di tile, marker e controlli mappa.
- * Lo carichiamo globalmente perch the CSS interno di Leaflet usa
- * selettori .leaflet-* non scoped; isolarli nel singolo componente
- * darebbe problemi di rendering quando creiamo marker dinamici.
+ * Carichiamo globalmente perché MapLibre inietta elementi fuori
+ * dall'albero Angular (controlli, popup, canvas).
  * ===========================================================
  */
-@import 'leaflet/dist/leaflet.css';
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+/* ============================================================
+ * TILE CANVAS
+ * ============================================================
+ * Dark e light sono ora gestiti NATIVAMENTE da stili MapLibre custom
+ * (vedi core/services/map/map-style.ts), selezionati via setStyle() al
+ * cambio tema. Niente piu' hack `filter: invert()` sul canvas: lo stile
+ * dark e' un vero stile cinematografico, non un'inversione del light.
+ * ============================================================ */
 
 /* ============================================================================
  * Keyframes globali
@@ -56,18 +64,95 @@
  * fuori dall'albero Angular) li teniamo globali qui.
  * ========================================================================== */
 
-/* Wrapper esterno aggiunto da Leaflet (className di L.divIcon): rimuove
-   il background bianco di default che Leaflet applicherebbe. */
+/* ============================================================================
+ * USER MARKER — posizione + direzione del giocatore (stile gioco)
+ * ============================================================================
+ * Struttura HTML (iniettata da syncUserGpsLayers() in home.page.ts):
+ *
+ *   .maplibregl-marker.user-marker-wrapper
+ *     .user-marker
+ *       .user-marker__cone      <- ventaglio direzione (ruota con la bussola)
+ *       .user-marker__pulse     <- ring che si espande e svanisce
+ *       .user-marker__dot       <- nucleo centrale luminoso
+ *
+ * Il cono e' orientato via JS (updateUserHeadingVisual): rotazione = heading
+ * del telefono − bearing della mappa. Dimensioni generose: dev'essere il
+ * punto piu' riconoscibile della mappa ("io sono qui, sto guardando lì").
+ *
+ * Globali perché i Marker MapLibre vivono fuori dall'albero Angular.
+ * ========================================================================== */
+
 .user-marker-wrapper {
   background: transparent !important;
   border: none !important;
 }
 
-/* Animazione del ring che pulsa attorno al marker utente. */
+.user-marker {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Cono di direzione: ventaglio che si allarga verso dove punti il telefono.
+   Ancorato al centro (il dot), ruota attorno ad esso. Nascosto finché il
+   sensore bussola non fornisce un heading (opacity gestita da JS). */
+.user-marker__cone {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 52px;
+  height: 34px;
+  margin-left: -26px;
+  /* Punta in basso (al dot), base larga in alto (direzione di marcia). */
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(
+    to top,
+    rgba(var(--tq-ocra-rgb), 0.55),
+    rgba(var(--tq-ocra-rgb), 0) 85%
+  );
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.user-marker__dot {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--tq-ocra-tint), var(--tq-ocra) 70%);
+  border: 3px solid var(--tq-bone);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(var(--tq-ocra-rgb), 0.65);
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.user-marker__pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(var(--tq-ocra-rgb), 0.35);
+  margin-top: -10px;
+  margin-left: -10px;
+  z-index: 2;
+  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
 @keyframes user-marker-pulse {
   0% {
     transform: scale(1);
-    opacity: 1;
+    opacity: 0.7;
   }
   70% {
     opacity: 0;
@@ -78,26 +163,11 @@
   }
 }
 
-/* Forziamo l'animation sul pulse anche se la regola scopata nel
-   home.page.scss non venisse applicata per encapsulation. */
-.user-marker__pulse {
-  /* Auto-sufficiente: definisce tutto quello che serve all'animazione visibile. */
-  background: rgba(200, 147, 15, 0.6) !important;
-  width: 14px !important;
-  height: 14px !important;
-  border-radius: 50% !important;
-  animation: user-marker-pulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite !important;
-}
-
 /* ============================================================================
- * AGGIUNTE A src/global.scss
+ * MARKER QUEST — HTML markers iniettati da MapLibre
  * ============================================================================
- * Aggiungi questo blocco IN FONDO al tuo src/global.scss esistente,
- * dopo la sezione "Stili globali per marker Leaflet" del user marker.
- *
- * I quest marker e i popup vivono qui (non nel componente) perche'
- * Leaflet li inietta nel DOM fuori dall'albero Angular, e le regole
- * scopate non li raggiungono.
+ * I quest marker e i popup vivono qui perché MapLibre li inietta nel DOM
+ * fuori dall'albero Angular, e le regole scopate non li raggiungono.
  * ========================================================================== */
 
 /* ============================================================================
@@ -105,7 +175,7 @@
  * ============================================================================
  * Struttura HTML iniettata da L.divIcon (vedi home.page.ts):
  *
- *   .leaflet-marker-icon.quest-marker-wrapper
+ *   .maplibregl-marker.quest-marker-wrapper
  *     .quest-marker.quest-marker--{status}        <- discovered / available / locked
  *       .quest-marker__pin                         <- contenitore circolare
  *         <svg>                                    <- icona categoria o lucchetto
@@ -124,47 +194,76 @@
 
 .quest-marker {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  /* Altezza extra: lascia spazio al galleggiamento sopra l'ombra a terra. */
+  height: 54px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+}
 
-  &:hover,
-  &:active {
-    transform: scale(1.1);
-  }
+/* Ombra a terra: ellisse sfocata che ancora il marker al suolo 3D.
+   Pulsa in controfase col galleggiamento (piccola quando il pin sale). */
+.quest-marker__shadow {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  margin-left: -11px;
+  width: 22px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0) 72%);
+  animation: quest-marker-shadow 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Corpo che galleggia: bob verticale lento e continuo. */
+.quest-marker__body {
+  position: relative;
+  margin-bottom: 8px;
+  animation: quest-marker-float 3.2s ease-in-out infinite;
+  will-change: transform;
 }
 
 .quest-marker__pin {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #f4ebdc;
+  /* Bevel 3D: gloss in alto, ombra interna in basso → orb convesso lucido. */
   box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.4),
+    inset 0 -4px 5px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(0, 0, 0, 0.3),
-    0 4px 12px -2px rgba(0, 0, 0, 0.5);
+    0 7px 14px -3px rgba(0, 0, 0, 0.6);
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 
   svg {
     display: block;
     width: 18px;
     height: 18px;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.25));
   }
 }
 
+/* Enfasi al tap: il pin scatta in avanti (l'ombra resta a terra). */
+.quest-marker:active .quest-marker__pin {
+  transform: scale(1.14);
+}
+
 .quest-marker--available .quest-marker__pin {
-  background: #c8930f;
-  color: rgba(0, 0, 0, 0.75);
+  /* Gradiente lucido: highlight ocra chiaro in alto-sx → ocra pieno. */
+  background: radial-gradient(circle at 36% 28%, #e6b545, #c8930f 68%);
+  color: rgba(0, 0, 0, 0.78);
 }
 
 .quest-marker--discovered .quest-marker__pin {
-  background: #6ba046;
-  color: rgba(0, 0, 0, 0.75);
+  background: radial-gradient(circle at 36% 28%, #8fc269, #6ba046 68%);
+  color: rgba(0, 0, 0, 0.78);
 }
 .quest-marker--discovered {
   opacity: 0.65;
@@ -180,45 +279,78 @@
 }
 
 /* ============================================================================
- * LEAFLET POPUP — frame esterno warm-dark
+ * MAPLIBRE POPUP — frame esterno warm-dark
  * ============================================================================
  * Il contenuto interno del popup e' renderizzato da QuestPopupComponent
  * (gli stili sono scoped al componente).
  *
- * Qui stiliziamo SOLO il wrapper esterno iniettato da Leaflet.
+ * Struttura MapLibre:
+ *   .maplibregl-popup.tq-quest-popup
+ *     .maplibregl-popup-tip
+ *     .maplibregl-popup-content
+ *       button.maplibregl-popup-close-button
+ *       <!-- QuestPopupComponent -->
+ *
+ * Qui stiliziamo SOLO il wrapper esterno iniettato da MapLibre.
  * ========================================================================== */
 
-.leaflet-popup-content-wrapper {
-  background: #1a1815 !important;
-  color: #f4ebdc !important;
+/* ============================================================================
+ * POPUP FRAME — wrapper esterno warm-panel
+ * ============================================================================
+ * Struttura MapLibre:
+ *   .maplibregl-popup.tq-quest-popup
+ *     .maplibregl-popup-tip
+ *     .maplibregl-popup-content
+ *       button.maplibregl-popup-close-button  ← position:absolute top-right
+ *       <!-- QuestPopupComponent host -->
+ *
+ * Padding: top/right extra per non sovrapporre il pulsante close (≈ 22px wide).
+ * Width fissa su .tq-quest-popup per coerenza tra popup ricchi e poveri.
+ * ========================================================================== */
+
+.maplibregl-popup-content {
+  background: var(--tq-panel) !important;
+  color: var(--tq-text-primary) !important;
   border-radius: 12px !important;
   box-shadow:
-    0 8px 24px -8px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(244, 235, 220, 0.08) !important;
-  padding: 4px !important;
-}
-
-.leaflet-popup-content {
-  margin: 12px 16px !important;
-  font-family:
-    'Geist',
-    -apple-system,
-    system-ui,
-    sans-serif !important;
+    0 8px 24px -8px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--tq-hairline-strong) !important;
+  /* top: 10px lascia spazio al close btn (h≈22px); right: 26px copre la sua larghezza */
+  padding: 10px 26px 14px 14px !important;
+  font-family: var(--tq-font-sans) !important;
   line-height: 1.45 !important;
 }
 
-.leaflet-popup-tip {
-  background: #1a1815 !important;
+/* Shadow più leggera in light mode */
+[data-theme='light'] .maplibregl-popup-content {
+  box-shadow:
+    0 4px 20px -6px rgba(0, 0, 0, 0.14),
+    0 0 0 1px var(--tq-hairline-strong) !important;
 }
 
-.leaflet-popup-close-button {
-  color: rgba(244, 235, 220, 0.55) !important;
+/* Larghezza fissa per tutti i popup quest: rende ogni popup identico in larghezza
+   indipendentemente dalla lunghezza del titolo o della descrizione. */
+.tq-quest-popup .maplibregl-popup-content {
+  width: 272px;
+}
+
+/* Tip (freccia): colore uguale al pannello per qualsiasi direzione di ancoraggio */
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--tq-panel) !important; }
+.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--tq-panel) !important; }
+
+.maplibregl-popup-close-button {
+  color: var(--tq-text-muted) !important;
   font-size: 20px !important;
   padding: 6px 8px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 12px 0 0 !important;
 
   &:hover {
-    color: #c8930f !important;
+    color: var(--tq-ocra) !important;
+    background: transparent !important;
   }
 }
 
@@ -298,6 +430,18 @@
 @keyframes primary-circle-shimmer {
   0%, 100% { opacity: 0.08; }
   50% { opacity: 0.18; }
+}
+
+/* Galleggiamento del badge sopra la mappa 3D — bob verticale continuo. */
+@keyframes quest-marker-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Ombra a terra: si stringe e schiarisce mentre il badge sale (controfase). */
+@keyframes quest-marker-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(0.76); opacity: 0.26; }
 }
 
 /* ============================================================================
@@ -404,6 +548,30 @@
   }
 }
 
+/* Pill di prossimita' che scende dall'alto. */
+@keyframes tq-toast-drop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* HUD obiettivo: entrata morbida dal basso con leggero overshoot. */
+@keyframes tq-objective-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ============================================================================
  * PAGE TRANSITIONS — fade-up al montaggio componente
  * ========================================================================== */
@@ -457,8 +625,112 @@
 }
 
 /* Popup content-wrapper entrance.
-   NON animare .tq-quest-popup root: Leaflet usa transform su quell'elemento
+   NON animare .tq-quest-popup root: MapLibre usa transform su quell'elemento
    per il posizionamento — l'animation CSS sovrascrive il suo translate3d. */
-.tq-quest-popup .leaflet-popup-content-wrapper {
+.tq-quest-popup .maplibregl-popup-content {
   animation: tq-popup-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) 30ms both;
+}
+
+/* ============================================================================
+ * CLUSTER MARKERS — bolle aggregate per zoom ridotto
+ * ============================================================================
+ * Struttura HTML iniettata da renderClusterMarker() in home.page.ts:
+ *
+ *   .maplibregl-marker.quest-cluster-wrapper
+ *     .quest-cluster
+ *       .quest-cluster__count
+ * ========================================================================== */
+
+.quest-cluster-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.quest-cluster {
+  position: relative;
+  width: 52px;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Bolla cluster che galleggia (stessa logica dei badge singoli). */
+.quest-cluster__body {
+  position: relative;
+  margin-bottom: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #c8930f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid rgba(244, 235, 220, 0.9);
+  box-shadow:
+    0 0 0 3px rgba(200, 147, 15, 0.25),
+    0 6px 14px -2px rgba(0, 0, 0, 0.55);
+  animation: quest-marker-float 3.2s ease-in-out infinite;
+}
+
+.quest-cluster__count {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.8);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+/* Entrata cluster — riusa lo stesso keyframe dei marker individuali */
+.quest-marker-wrapper--enter .quest-cluster {
+  animation: quest-marker-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+/* ============================================================================
+ * PRIMARY QUEST MARKERS — pin centrale più prominente dei secondari
+ * ============================================================================
+ * Struttura HTML iniettata da renderPrimaryMarker() in home.page.ts:
+ *
+ *   .quest-marker.quest-marker--primary.quest-marker--{status}
+ *     .quest-marker__pin
+ *       <svg>
+ *
+ * Dimensione: 44×44 (vs 36×36 dei secondari).
+ * zIndexOffset: 1000 (garantito sopra qualsiasi secondario via Leaflet).
+ * ========================================================================== */
+
+.quest-marker--primary {
+  width: 54px;
+  height: 66px;
+}
+
+.quest-marker--primary .quest-marker__pin {
+  width: 42px;
+  height: 42px;
+  border-width: 2.5px;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Ombra primary leggermente piu' ampia, coerente col pin maggiorato. */
+.quest-marker--primary .quest-marker__shadow {
+  width: 28px;
+  margin-left: -14px;
+}
+
+/* Glow ocra extra per primary disponibili — più riconoscibili di un secondario.
+   Mantiene il bevel 3D inset + aggiunge l'alone caldo. */
+.quest-marker--primary.quest-marker--available .quest-marker__pin {
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.45),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 0 22px -2px rgba(200, 147, 15, 0.7),
+    0 7px 16px -4px rgba(0, 0, 0, 0.55);
 }

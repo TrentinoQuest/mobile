@@ -3,26 +3,22 @@
  * ============================================================================
  * Stili interni del popup quest.
  *
- * NOTA: il componente e' montato dentro Leaflet via createComponent +
- * appendChild, quindi vive nel DOM ma NON come figlio normale dell'albero
- * Angular. ViewEncapsulation funziona comunque perche' Angular emette
- * gli stili scoped via attributo sull'host element.
- *
- * Il "frame" esterno del popup (cornice, freccia che punta al marker) e'
- * stilizzato in global.scss perche' .leaflet-popup-* sono iniettati da
- * Leaflet fuori da questo componente.
+ * NOTA: il componente e' montato dentro MapLibre via createComponent +
+ * setDOMContent(). Il "frame" esterno (cornice, larghezza fissa, freccia) e'
+ * stilizzato in global.scss (.tq-quest-popup .maplibregl-popup-content).
+ * Qui vivono solo gli stili del contenuto interno.
  * ========================================================================== */
 
 :host {
   display: block;
+  width: 100%;
 }
 
 .quest-popup {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-width: 200px;
-  max-width: 260px;
+  /* La larghezza è controllata dall'outer wrapper in global.scss. */
 }
 
 .quest-popup__kicker {
@@ -85,7 +81,7 @@
 .quest-popup__scan {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(244, 235, 220, 0.1);
+  border-top: 1px solid var(--tq-hairline);
 }
 
 .quest-popup__scan-btn {
@@ -118,7 +114,7 @@
   gap: 8px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(244, 235, 220, 0.1);
+  border-top: 1px solid var(--tq-hairline);
 }
 
 .quest-popup__distance {
@@ -208,4 +204,25 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
+}
+
+/* Link "Vedi dettagli" → apre la pagina di dettaglio completa. */
+.quest-popup__detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--tq-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tq-ocra);
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.7;
+  }
 }

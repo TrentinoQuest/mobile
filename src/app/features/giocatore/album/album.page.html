@@ -124,6 +124,7 @@
         } @else {
           <div class="album__card album__card--unlocked"
                [style.background]="card.imageUrl ? '#0d0d0d' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'"
+               [style.animation-delay.ms]="(i % 12) * 45"
                (click)="openDetail(card)"
                role="button"
                [attr.aria-label]="'Dettaglio ' + card.name">

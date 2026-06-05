@@ -7,8 +7,9 @@
 .profilo__body {
   position: absolute;
   inset: 0;
-  padding-top: 50px;
-  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  /* Safe area parametrica in alto, spazio tab bar in basso. */
+  padding-top: calc(var(--tq-safe-top) + var(--tq-space-3));
+  padding-bottom: calc(var(--tq-tab-bar-total) + var(--tq-space-6));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -292,6 +293,32 @@
 .profilo__settings-chevron {
   color: var(--tq-text-muted);
   flex-shrink: 0;
+}
+
+/* Riga con toggle (es. rotazione mappa): label + hint a sinistra, switch a destra. */
+.profilo__settings-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profilo__settings-hint {
+  font-size: 11px;
+  color: var(--tq-text-muted);
+  line-height: 1.3;
+}
+
+.profilo__settings-row--toggle {
+  cursor: default;
+
+  ion-toggle {
+    flex-shrink: 0;
+    padding: 0;
+    --track-background-checked: var(--tq-ocra);
+    --handle-background-checked: #fff;
+  }
 }
 
 // ── Logout ────────────────────────────────────────────────────────────────────
