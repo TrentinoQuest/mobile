@@ -241,6 +241,51 @@
 
 // ── Filtri ───────────────────────────────────────────────────────────────────
 
+.album__quiz {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 44px);
+  margin: 0 22px 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(var(--tq-ocra-rgb), 0.1);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.3);
+  cursor: pointer;
+
+  &:active { transform: scale(0.99); }
+}
+
+.album__quiz-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.album__quiz-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.album__quiz-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tq-bone);
+}
+
+.album__quiz-sub {
+  font-size: 11px;
+  color: var(--tq-text-muted);
+  margin-top: 2px;
+}
+
+.album__quiz-arrow {
+  color: var(--tq-text-muted);
+  flex-shrink: 0;
+}
+
 .album__filters {
   display: flex;
   gap: 8px;

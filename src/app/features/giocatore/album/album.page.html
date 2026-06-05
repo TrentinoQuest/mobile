@@ -81,6 +81,21 @@
       </div>
     }
 
+    <!-- Quiz della lore (Sapere Territoriale) -->
+    @if (!searchQuery()) {
+      <button class="album__quiz" type="button" (click)="openLoreQuiz()">
+        <span class="album__quiz-icon" aria-hidden="true">📜</span>
+        <span class="album__quiz-text">
+          <span class="album__quiz-title">Quiz del giorno</span>
+          <span class="album__quiz-sub">Monete e un frammento di mappa in palio</span>
+        </span>
+        <svg class="album__quiz-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
+    }
+
     <!-- Chip filtri (nascosti durante ricerca attiva) -->
     @if (!searchQuery()) {
       <div class="album__filters">

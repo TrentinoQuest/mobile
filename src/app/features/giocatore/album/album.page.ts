@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { IonContent, ModalController } from '@ionic/angular/standalone';
 import { CollectibleRarity, PrimaryQuest, QuestType } from '@trentino-quest/shared-types';
 import type { CollectibleEntry } from '@trentino-quest/shared-types';
@@ -31,6 +32,7 @@ export class AlbumPage implements OnInit {
   private readonly profileService = inject(PlayerProfileService);
   private readonly questService = inject(QuestService);
   private readonly modalCtrl = inject(ModalController);
+  private readonly router = inject(Router);
 
   protected readonly loading = this.profileService.loading;
   protected readonly error = this.profileService.error;
@@ -167,6 +169,11 @@ export class AlbumPage implements OnInit {
   ngOnInit(): void {
     this.profileService.loadCollection();
     this.profileService.loadProgress();
+  }
+
+  /** Apre il quiz della lore giornaliero. */
+  protected openLoreQuiz(): void {
+    void this.router.navigate(['/giocatore/lore-quiz']);
   }
 
   protected setFilter(filter: AlbumFilter): void {

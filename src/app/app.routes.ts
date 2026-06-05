@@ -131,6 +131,12 @@ export const routes: Routes = [
             (m) => m.DailyQuestsPage,
           ),
       },
+      // Quiz della lore (Sapere Territoriale)
+      {
+        path: 'lore-quiz',
+        loadComponent: () =>
+          import('./features/giocatore/lore-quiz/lore-quiz.page').then((m) => m.LoreQuizPage),
+      },
       // Dettaglio quest (push da popup mappa / quest log)
       {
         path: 'quest/:id',

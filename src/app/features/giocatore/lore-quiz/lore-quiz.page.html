@@ -1,0 +1,91 @@
+<ion-content [fullscreen]="true" class="lore">
+
+  <!-- Header glass -->
+  <div class="lore__header">
+    <div class="lore__header-row">
+      <button class="lore__back" type="button" (click)="goBack()" aria-label="Indietro">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 6l-6 6 6 6"/>
+        </svg>
+      </button>
+      <div class="lore__header-center">
+        <span class="lore__header-sub">SAPERE TERRITORIALE</span>
+        <span class="lore__header-title">Quiz del giorno</span>
+      </div>
+      <span class="lore__back lore__back--ghost" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="lore__body">
+
+    @if (loading() && !question()) {
+      <div class="lore__empty">Caricamento quiz…</div>
+    } @else if (error()) {
+      <div class="lore__empty lore__empty--error">{{ error() }}</div>
+    } @else if (question(); as q) {
+
+      <div class="lore__category">{{ q.category }}</div>
+      <h1 class="lore__question">{{ q.text }}</h1>
+
+      <div class="lore__options">
+        @for (opt of q.options; track $index) {
+          <button class="lore__option"
+                  [attr.data-state]="optionState($index)"
+                  type="button"
+                  [disabled]="answered()"
+                  (click)="select($index)">
+            <span class="lore__option-letter">{{ letters[$index] }}</span>
+            <span class="lore__option-text">{{ opt }}</span>
+            @if (optionState($index) === 'correct') {
+              <svg class="lore__option-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"/>
+              </svg>
+            } @else if (optionState($index) === 'wrong') {
+              <svg class="lore__option-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            }
+          </button>
+        }
+      </div>
+
+      @if (answered()) {
+        <!-- Esito + ricompensa -->
+        @if (answer(); as a) {
+          <div class="lore__result" [class.lore__result--ok]="a.correct" [class.lore__result--ko]="!a.correct">
+            @if (a.correct) {
+              <span class="lore__result-title">Risposta corretta!</span>
+              @if (a.coinsAwarded > 0) {
+                <span class="lore__reward">+{{ a.coinsAwarded }} 🪙</span>
+              }
+            } @else {
+              <span class="lore__result-title">Non è corretta</span>
+            }
+          </div>
+        } @else {
+          <div class="lore__result lore__result--seen">
+            <span class="lore__result-title">Hai già risposto oggi</span>
+          </div>
+        }
+
+        <!-- Spiegazione -->
+        @if (explanation(); as exp) {
+          <div class="lore__explanation">{{ exp }}</div>
+        }
+
+        <p class="lore__note">Torna domani per una nuova domanda.</p>
+      } @else {
+        <p class="lore__note">Hai un solo tentativo: scegli con cura.</p>
+      }
+
+    } @else {
+      <div class="lore__empty">Nessuna domanda disponibile.</div>
+    }
+
+    <div class="lore__spacer"></div>
+  </div>
+
+</ion-content>
