@@ -8,7 +8,7 @@
         <span class="amici__header-title">Amici</span>
       </div>
       <button class="amici__header-btn" type="button" aria-label="Aggiungi amico"
-              (click)="setTab('amici')">
+              (click)="openAddFriend()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 5v14M5 12h14"/>
@@ -86,26 +86,6 @@
         }
       </div>
 
-      <!-- Persone che potresti conoscere -->
-      @if (suggestions().length > 0) {
-        <div class="amici__suggestions-section">
-          <div class="amici__suggestions-kicker">POTRESTI CONOSCERE</div>
-          <div class="amici__suggestions">
-            @for (s of suggestions(); track s.playerId) {
-              <div class="amici__suggestion">
-                <div class="amici__suggestion-avatar" [style.background]="avatarGradient(s.playerId)">
-                  {{ initial(s.username) }}
-                </div>
-                <div class="amici__suggestion-name">{{ s.username }}</div>
-                <div class="amici__suggestion-count">{{ s.questCompletions }} luoghi</div>
-                <button class="amici__suggestion-add" type="button"
-                        (click)="addSuggestion(s)">Aggiungi</button>
-              </div>
-            }
-          </div>
-        </div>
-      }
-
     }
 
     <!-- Tab: Amici -->
@@ -170,6 +150,26 @@
           }
         }
       </div>
+
+      <!-- Persone che potresti conoscere -->
+      @if (suggestions().length > 0) {
+        <div class="amici__suggestions-section">
+          <div class="amici__suggestions-kicker">POTRESTI CONOSCERE</div>
+          <div class="amici__suggestions">
+            @for (s of suggestions(); track s.playerId) {
+              <div class="amici__suggestion">
+                <div class="amici__suggestion-avatar" [style.background]="avatarGradient(s.playerId)">
+                  {{ initial(s.username) }}
+                </div>
+                <div class="amici__suggestion-name">{{ s.username }}</div>
+                <div class="amici__suggestion-count">{{ s.questCompletions }} luoghi</div>
+                <button class="amici__suggestion-add" type="button"
+                        (click)="addSuggestion(s)">Aggiungi</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
     }
 

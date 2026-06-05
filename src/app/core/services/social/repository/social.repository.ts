@@ -54,6 +54,16 @@ export abstract class SocialRepository {
   abstract sendFriendRequest(recipientId: string): Observable<void>;
 
   /**
+   * Invia una richiesta di amicizia cercando per nickname/username.
+   * Endpoint: POST /social/friends/request  Body: { username }
+   *
+   * NOTA: il contratto documentato (CLAUDE.md) prevede { recipientId }. Non
+   * esiste un endpoint di ricerca utente: questa variante per username e' DA
+   * CONFERMARE col backend (potrebbe servire un GET /social/search dedicato).
+   */
+  abstract sendFriendRequestByUsername(username: string): Observable<void>;
+
+  /**
    * Accetta una richiesta ricevuta.
    * Endpoint: POST /social/friends/:friendshipId/accept
    */

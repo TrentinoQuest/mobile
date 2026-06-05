@@ -262,6 +262,28 @@ export class SocialService {
     }
   }
 
+  /**
+   * Invia una richiesta di amicizia cercando per nickname.
+   * Restituisce true se la richiesta e' stata accettata dal server.
+   * NOTA: endpoint per username DA CONFERMARE (vedi SocialRepository).
+   */
+  async sendFriendRequestByUsername(username: string): Promise<boolean> {
+    const trimmed = username.trim();
+    if (!trimmed) return false;
+    try {
+      await new Promise<void>((resolve, reject) => {
+        this.repository.sendFriendRequestByUsername(trimmed).subscribe({
+          next: () => resolve(),
+          error: (err) => reject(err),
+        });
+      });
+      return true;
+    } catch (err) {
+      this._error.set(this.formatError(err, 'invio richiesta di amicizia'));
+      return false;
+    }
+  }
+
   /** Segna una notifica come letta (locale + server). */
   markNotificationRead(notification: SocialNotification): void {
     if (notification.read) return;

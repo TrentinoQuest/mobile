@@ -74,8 +74,8 @@
 .amici__body {
   position: absolute;
   inset: 0;
-  /* Sotto l'header (safe-top + altezza) e sopra la tab bar, parametrico. */
-  padding-top: calc(var(--tq-safe-top) + 50px);
+  /* Sotto l'header (safe-top + altezza header ~60px) e sopra la tab bar. */
+  padding-top: calc(var(--tq-safe-top) + 64px);
   padding-bottom: calc(var(--tq-tab-bar-total) + var(--tq-space-6));
   overflow-y: auto;
 }

@@ -46,6 +46,12 @@ export class HttpSocialRepository extends SocialRepository {
     return this.http.post<void>(`${this.apiUrl}/social/friends/request`, { recipientId });
   }
 
+  override sendFriendRequestByUsername(username: string): Observable<void> {
+    // DA CONFERMARE: il backend deve accettare { username } su questo endpoint
+    // (oppure esporre un GET /social/search per risolvere lo username in id).
+    return this.http.post<void>(`${this.apiUrl}/social/friends/request`, { username });
+  }
+
   override acceptRequest(friendshipId: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/social/friends/${friendshipId}/accept`, {});
   }

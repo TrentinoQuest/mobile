@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { IonContent, ToastController } from '@ionic/angular/standalone';
+import { AlertController, IonContent, ToastController } from '@ionic/angular/standalone';
 import type { FeedActivityItem, KudosRequest } from '@trentino-quest/shared-types';
 import { SocialService } from '../../../core/services/social/social.service';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
@@ -38,6 +38,7 @@ export class AmiciPage implements OnInit {
   private readonly socialService = inject(SocialService);
   private readonly haptics = inject(HapticsService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly alertCtrl = inject(AlertController);
 
   protected readonly activeTab = signal<AmiciTab>('attivita');
 
@@ -130,6 +131,44 @@ export class AmiciPage implements OnInit {
     const ok = await this.socialService.sendFriendRequest(suggestion);
     await this.presentToast(
       ok ? `Richiesta inviata a ${suggestion.username}` : 'Impossibile inviare la richiesta',
+    );
+  }
+
+  /** Apre il dialog per aggiungere un amico cercandolo per nickname. */
+  protected async openAddFriend(): Promise<void> {
+    this.haptics.light();
+    const alert = await this.alertCtrl.create({
+      header: 'Aggiungi un amico',
+      message: 'Inserisci il nickname della persona da invitare.',
+      inputs: [
+        {
+          name: 'username',
+          type: 'text',
+          placeholder: 'Nickname',
+          attributes: { autocapitalize: 'off', autocorrect: 'off' },
+        },
+      ],
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Invia richiesta',
+          handler: (data: { username?: string }) => {
+            const username = (data.username ?? '').trim();
+            if (!username) return false;
+            void this.submitAddFriend(username);
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async submitAddFriend(username: string): Promise<void> {
+    const ok = await this.socialService.sendFriendRequestByUsername(username);
+    if (ok) this.haptics.success();
+    await this.presentToast(
+      ok ? `Richiesta inviata a ${username}` : 'Nessun utente trovato con questo nickname',
     );
   }
 
