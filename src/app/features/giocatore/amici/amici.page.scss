@@ -286,6 +286,158 @@
   color: var(--tq-text-muted);
 }
 
+// ── Badge richieste sul tab ───────────────────────────────────────────────────
+
+.amici__tab {
+  position: relative;
+}
+
+.amici__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: 5px;
+  border-radius: var(--tq-radius-pill);
+  background: #c0392b;
+  color: #fff;
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+// ── Kudos one-tap ─────────────────────────────────────────────────────────────
+
+.amici__kudos {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.amici__kudos-btn {
+  width: 34px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(244, 235, 220, 0.05);
+  border: 1px solid var(--tq-hairline);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--tq-duration-fast), background var(--tq-duration-fast),
+    opacity var(--tq-duration-fast);
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &--sent {
+    opacity: 0.45;
+    cursor: default;
+    border-color: rgba(var(--tq-ocra-rgb), 0.4);
+    background: rgba(var(--tq-ocra-rgb), 0.12);
+  }
+}
+
+// ── Richieste ricevute ─────────────────────────────────────────────────────────
+
+.amici__requests-section {
+  padding: 0 22px 8px;
+}
+
+.amici__request {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tq-hairline);
+}
+
+.amici__request-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tq-bone);
+}
+
+.amici__request-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.amici__btn {
+  padding: 6px 12px;
+  border-radius: var(--tq-radius-pill);
+  font-family: var(--tq-font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--tq-hairline);
+
+  &--accept {
+    background: rgba(90, 138, 58, 0.18);
+    color: #6ba046;
+    border-color: rgba(90, 138, 58, 0.4);
+  }
+
+  &--reject {
+    background: transparent;
+    color: var(--tq-text-muted);
+  }
+}
+
+// ── Lista amici ────────────────────────────────────────────────────────────────
+
+.amici__friends {
+  padding: 8px 22px 0;
+}
+
+.amici__friend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tq-hairline);
+}
+
+.amici__friend-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.amici__friend-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tq-bone);
+}
+
+.amici__friend-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  color: var(--tq-text-muted);
+  font-size: 10.5px;
+}
+
+.amici__friend-remove {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--tq-hairline);
+  color: var(--tq-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 // ── Spaziatura fondo ─────────────────────────────────────────────────────────
 
 .amici__spacer {

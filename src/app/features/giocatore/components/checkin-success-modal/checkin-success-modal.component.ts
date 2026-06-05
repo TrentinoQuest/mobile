@@ -31,9 +31,7 @@ export class CheckinSuccessModalComponent {
     const gamification = this.gamification;
     const showLevelUp = gamification?.newLevel != null;
     const showStreak =
-      gamification != null &&
-      gamification.currentStreak > 0 &&
-      !gamification.streakBroken;
+      gamification != null && gamification.currentStreak > 0 && !gamification.streakBroken;
 
     await this.modalCtrl.dismiss();
 

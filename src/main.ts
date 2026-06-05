@@ -34,6 +34,9 @@ import { HttpPlayerProfileRepository } from './app/core/services/player-profile/
 import { BusinessRepository } from './app/core/services/business/repository/business.repository';
 import { HttpBusinessRepository } from './app/core/services/business/repository/business.repository.http';
 
+import { SocialRepository } from './app/core/services/social/repository/social.repository';
+import { HttpSocialRepository } from './app/core/services/social/repository/social.repository.http';
+
 async function initializeTheme(): Promise<void> {
   const themeService = angularInject(ThemeService);
   await themeService.initialize();
@@ -103,5 +106,6 @@ bootstrapApplication(AppComponent, {
     { provide: GeolocationRepository, useClass: GeolocationRepositoryCapacitor },
     { provide: PlayerProfileRepository, useClass: HttpPlayerProfileRepository },
     { provide: BusinessRepository, useClass: HttpBusinessRepository },
+    { provide: SocialRepository, useClass: HttpSocialRepository },
   ],
 });

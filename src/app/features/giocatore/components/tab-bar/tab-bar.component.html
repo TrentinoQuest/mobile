@@ -45,7 +45,12 @@
     routerLinkActive="tab-bar__tab--active"
     aria-label="Amici"
   >
-    <ion-icon name="people-outline" class="tab-bar__icon"></ion-icon>
+    <span class="tab-bar__icon-wrap">
+      <ion-icon name="people-outline" class="tab-bar__icon"></ion-icon>
+      @if (unreadNotifications() > 0) {
+        <span class="tab-bar__badge">{{ unreadNotifications() > 9 ? '9+' : unreadNotifications() }}</span>
+      }
+    </span>
     <span class="tab-bar__label">Amici</span>
   </a>
 

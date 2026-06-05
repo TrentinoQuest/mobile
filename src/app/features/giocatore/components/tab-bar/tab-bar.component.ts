@@ -7,6 +7,7 @@ import { QuestType } from '@trentino-quest/shared-types';
 import type { PrimaryQuest } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { GeolocationService } from '../../../../core/services/geolocation/geolocation.service';
+import { SocialService } from '../../../../core/services/social/social.service';
 import { ScanModalComponent } from '../scan-modal/scan-modal.component';
 
 @Component({
@@ -20,9 +21,15 @@ export class TabBarComponent {
   private readonly modalCtrl = inject(ModalController);
   private readonly questService = inject(QuestService);
   private readonly geoService = inject(GeolocationService);
+  private readonly socialService = inject(SocialService);
+
+  /** Conteggio notifiche social non lette, per il badge sul tab Amici. */
+  protected readonly unreadNotifications = this.socialService.unreadNotifications;
 
   constructor() {
     addIcons({ mapOutline, imagesOutline, peopleOutline, personOutline, qrCode });
+    // Carica le notifiche all'avvio per popolare il badge della bottom nav.
+    this.socialService.loadNotifications();
   }
 
   async openScanModal(): Promise<void> {

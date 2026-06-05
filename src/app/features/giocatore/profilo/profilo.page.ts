@@ -81,7 +81,9 @@ export class ProfiloPage implements OnInit {
   protected readonly levelTitle = computed(() => this.player()?.levelTitle ?? '');
   protected readonly currentStreak = computed(() => this.player()?.currentStreak ?? 0);
   protected readonly longestStreak = computed(() => this.player()?.longestStreak ?? 0);
-  protected readonly streakShieldActive = computed(() => this.player()?.streakShieldActive ?? false);
+  protected readonly streakShieldActive = computed(
+    () => this.player()?.streakShieldActive ?? false,
+  );
 
   protected readonly xpToNextLevel = computed<number | null>(() => {
     const lvl = this.level();

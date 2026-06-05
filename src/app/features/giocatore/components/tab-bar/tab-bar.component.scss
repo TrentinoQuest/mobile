@@ -96,6 +96,30 @@
     line-height: 1;
   }
 
+  /* Wrapper per ancorare il badge notifiche all'icona. */
+  &__icon-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: var(--tq-radius-pill);
+    background: #c0392b;
+    color: #fff;
+    font-family: var(--tq-font-mono);
+    font-size: 8.5px;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--tq-bg);
+  }
+
   &__label {
     font-family: var(--tq-font-sans);
     font-size: 11px;
