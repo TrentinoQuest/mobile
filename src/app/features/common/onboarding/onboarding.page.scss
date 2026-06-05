@@ -1,0 +1,536 @@
+.onb {
+  --background: var(--tq-bg);
+}
+
+// ── Sfondo notte in montagna ──────────────────────────────────────────────────
+.onb__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(var(--tq-ocra-rgb), 0.16), transparent 55%),
+    radial-gradient(circle at 80% 90%, rgba(90, 138, 58, 0.14), transparent 50%),
+    var(--tq-bg);
+  pointer-events: none;
+}
+
+// ── Chrome (skip, steps) ──────────────────────────────────────────────────────
+.onb__skip {
+  position: absolute;
+  top: calc(var(--tq-safe-top) + 8px);
+  right: 14px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(244, 235, 220, 0.06);
+  border: 1px solid var(--tq-hairline);
+  color: var(--tq-bone);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.onb__steps {
+  position: absolute;
+  top: calc(var(--tq-safe-top) + 18px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  z-index: 4;
+}
+
+.onb__step {
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--tq-hairline);
+  transition: background var(--tq-duration-normal);
+
+  &--active {
+    background: var(--tq-ocra);
+  }
+}
+
+// ── Layout fase ───────────────────────────────────────────────────────────────
+.onb__phase {
+  position: absolute;
+  inset: 0;
+  padding: calc(var(--tq-safe-top) + 56px) 26px 40px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
+  &--center {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 14px;
+  }
+}
+
+.onb__kicker {
+  font-family: var(--tq-font-mono);
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: rgba(var(--tq-ocra-rgb), 0.8);
+  margin: 0;
+}
+
+.onb__title {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 26px;
+  color: var(--tq-bone);
+  margin: 0;
+  line-height: 1.15;
+}
+
+.onb__hint {
+  font-size: 13px;
+  color: var(--tq-text-muted);
+  margin: 0;
+  max-width: 280px;
+}
+
+// ── CTA ───────────────────────────────────────────────────────────────────────
+.onb__cta {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 320px;
+  padding: 15px;
+  border-radius: var(--tq-radius-pill);
+  background: #6ba046;
+  color: #10210a;
+  border: none;
+  font-family: var(--tq-font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #3f6a26;
+  transition: transform var(--tq-duration-fast), box-shadow var(--tq-duration-fast);
+
+  &:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #3f6a26;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &--save {
+    box-shadow: 0 4px 0 #3f6a26, 0 8px 22px -6px rgba(107, 160, 70, 0.6);
+  }
+}
+
+// ── Fase 1: bussola + classi ───────────────────────────────────────────────────
+.onb__compass {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin-bottom: 4px;
+}
+
+.onb__compass-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(var(--tq-ocra-rgb), 0.4);
+  animation: onb-spin 18s linear infinite;
+}
+
+.onb__compass-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+}
+
+.onb__compass-face {
+  fill: var(--tq-panel);
+  stroke: rgba(var(--tq-ocra-rgb), 0.5);
+  stroke-width: 1.5;
+}
+
+.onb__compass-needle {
+  transform-origin: 50px 50px;
+  animation: onb-needle 6s ease-in-out infinite;
+}
+
+.onb__compass-hub {
+  fill: var(--tq-ocra);
+}
+
+.onb__classes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 6px;
+}
+
+.onb__class {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--tq-panel);
+  border: 1px solid var(--tq-hairline);
+  cursor: pointer;
+  text-align: left;
+  transition: transform var(--tq-duration-fast), border-color var(--tq-duration-fast),
+    background var(--tq-duration-fast);
+
+  &:active {
+    transform: translateY(4px);
+  }
+
+  &--active {
+    border-color: var(--tq-ocra);
+    background: rgba(var(--tq-ocra-rgb), 0.12);
+  }
+}
+
+.onb__class-label {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--tq-bone);
+}
+
+.onb__class-hint {
+  font-size: 11px;
+  color: var(--tq-text-muted);
+}
+
+// ── Fase 2: radar ───────────────────────────────────────────────────────────────
+.onb__radar {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  max-width: 80vw;
+  max-height: 80vw;
+  border-radius: 50%;
+  margin-top: 10px;
+  overflow: hidden;
+  touch-action: none;
+  background: #2b2f33;
+  border: 2px solid var(--tq-hairline);
+  transition: background var(--tq-duration-normal), border-color var(--tq-duration-normal),
+    box-shadow var(--tq-duration-normal);
+
+  &--mid {
+    background: #4a3d12;
+    border-color: #C8930F;
+    box-shadow: 0 0 30px rgba(200, 147, 15, 0.4);
+  }
+
+  &--near {
+    background: #1f3d18;
+    border-color: #6ba046;
+    box-shadow: 0 0 40px rgba(107, 160, 70, 0.6);
+  }
+}
+
+.onb__radar-fog {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(244, 235, 220, 0.08), transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(244, 235, 220, 0.06), transparent 40%);
+  animation: onb-fog 8s linear infinite;
+  pointer-events: none;
+}
+
+.onb__radar-sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(244, 235, 220, 0.12) 40deg, transparent 80deg);
+  animation: onb-spin 4s linear infinite;
+  pointer-events: none;
+}
+
+.onb__radar-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: onb-flash 0.3s ease-out forwards;
+  pointer-events: none;
+}
+
+// ── Fase 3: sigillo ─────────────────────────────────────────────────────────────
+.onb__seal-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-top: 12px;
+}
+
+.onb__seal-ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.onb__seal-ring-bg {
+  fill: none;
+  stroke: var(--tq-hairline);
+  stroke-width: 4;
+}
+
+.onb__seal-ring-fill {
+  fill: none;
+  stroke: var(--tq-ocra);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 80ms linear;
+}
+
+.onb__seal {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  background: var(--tq-panel);
+  border: 1px solid rgba(var(--tq-ocra-rgb), 0.4);
+  color: var(--tq-ocra);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+
+  &--done {
+    border-color: #6ba046;
+    background: rgba(107, 160, 70, 0.14);
+  }
+}
+
+.onb__validated {
+  font-family: var(--tq-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: #6ba046;
+  margin: 0;
+}
+
+// ── Fase 4: WOW ─────────────────────────────────────────────────────────────────
+.onb__phase--wow {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.onb__notebook {
+  position: relative;
+  width: 180px;
+  height: 220px;
+  margin: 6px 0 10px;
+  perspective: 900px;
+}
+
+.onb__notebook-cover,
+.onb__notebook-page {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px 14px 14px 8px;
+}
+
+.onb__notebook-page {
+  background: #f4ebdc;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onb__notebook-cover {
+  background: linear-gradient(135deg, #5c3e0a, #8e6314);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  transform-origin: left center;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+
+.onb__notebook--open .onb__notebook-cover {
+  transform: rotateY(-150deg);
+}
+
+.onb__collectible {
+  text-align: center;
+  animation: onb-pop 0.4s 0.3s both;
+}
+
+.onb__collectible-art {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.onb__collectible-name {
+  font-family: var(--tq-font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: #1a1815;
+  margin-top: 8px;
+}
+
+.onb__collectible-rarity {
+  font-family: var(--tq-font-mono);
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  color: #8a6e3a;
+  margin-top: 3px;
+}
+
+.onb__stamp {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -120vh);
+  font-size: 60px;
+  color: rgba(192, 57, 43, 0.85);
+  z-index: 3;
+
+  &--down {
+    animation: onb-stamp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+}
+
+.onb__reward {
+  font-family: var(--tq-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tq-ocra);
+}
+
+.onb__confetti {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.onb__confetti-piece {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  transform: rotate(var(--angle)) translateY(0);
+  animation: onb-confetti 0.9s var(--delay) ease-out forwards;
+
+  &--h0 { background: #c8930f; }
+  &--h1 { background: #6ba046; }
+  &--h2 { background: #3498db; }
+  &--h3 { background: #9b59b6; }
+}
+
+// ── Fase 5: popup + form ────────────────────────────────────────────────────────
+.onb__popup {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 22px;
+  border-radius: 24px;
+  background: var(--tq-panel);
+  border: 1px solid var(--tq-hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.onb__discard {
+  background: none;
+  border: none;
+  color: var(--tq-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.onb__login {
+  font-size: 12px;
+  color: var(--tq-text-muted);
+  margin: 4px 0 0;
+}
+
+.onb__login-link {
+  background: none;
+  border: none;
+  color: var(--tq-ocra);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.onb__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onb__input {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: var(--tq-bg);
+  border: 1px solid var(--tq-hairline);
+  color: var(--tq-bone);
+  font-size: 14px;
+
+  &::placeholder {
+    color: var(--tq-text-disabled);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--tq-ocra);
+  }
+}
+
+// ── Keyframes ───────────────────────────────────────────────────────────────────
+@keyframes onb-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes onb-needle {
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(14deg); }
+}
+
+@keyframes onb-fog {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-6%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes onb-flash {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes onb-stamp {
+  0% { transform: translate(-50%, -120vh) scale(1.4); opacity: 0; }
+  70% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  85% { transform: translate(-50%, -10px) scale(1.05); }
+  100% { transform: translate(-50%, 0) scale(1); opacity: 0.9; }
+}
+
+@keyframes onb-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes onb-confetti {
+  0% { transform: rotate(var(--angle)) translateY(0); opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateY(calc(var(--travel) * -1)); opacity: 0; }
+}

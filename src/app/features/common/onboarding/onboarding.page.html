@@ -1,0 +1,203 @@
+<ion-content [fullscreen]="true" class="onb">
+
+  <!-- Sfondo "notte in montagna" -->
+  <div class="onb__bg" aria-hidden="true"></div>
+
+  <!-- Chiudi / salta (escape per l'ospite) -->
+  <button class="onb__skip" type="button" (click)="skip()" aria-label="Chiudi onboarding">×</button>
+
+  <!-- Indicatore di fase -->
+  <div class="onb__steps" aria-hidden="true">
+    @for (s of [1,2,3,4,5]; track s) {
+      <span class="onb__step" [class.onb__step--active]="phase() >= s"></span>
+    }
+  </div>
+
+  <!-- ============================ FASE 1 ============================ -->
+  @if (phase() === 1) {
+    <div class="onb__phase onb__phase--center">
+      <!-- Bussola animata (CSS/SVG, niente 3D) -->
+      <div class="onb__compass" aria-hidden="true">
+        <div class="onb__compass-ring"></div>
+        <svg viewBox="0 0 100 100" class="onb__compass-svg">
+          <circle cx="50" cy="50" r="44" class="onb__compass-face"/>
+          <g class="onb__compass-needle">
+            <path d="M50 12 L57 50 L50 60 L43 50 Z" fill="#C0392B"/>
+            <path d="M50 88 L43 50 L50 40 L57 50 Z" fill="#E8DFCB"/>
+          </g>
+          <circle cx="50" cy="50" r="4" class="onb__compass-hub"/>
+        </svg>
+      </div>
+
+      <p class="onb__kicker">SCEGLI IL TUO CAMMINO</p>
+      <h1 class="onb__title">Che esploratore sei?</h1>
+
+      <div class="onb__classes">
+        @for (opt of classOptions; track opt.id) {
+          <button class="onb__class"
+                  type="button"
+                  [class.onb__class--active]="selectedClass() === opt.id"
+                  (click)="selectClass(opt)">
+            <span class="onb__class-label">{{ opt.label }}</span>
+            <span class="onb__class-hint">{{ opt.hint }}</span>
+          </button>
+        }
+      </div>
+
+      <button class="onb__cta"
+              type="button"
+              [disabled]="!selectedClass()"
+              (click)="confirmClass()">
+        Inizia l'avventura
+      </button>
+    </div>
+  }
+
+  <!-- ============================ FASE 2 ============================ -->
+  @if (phase() === 2) {
+    <div class="onb__phase onb__phase--center">
+      <p class="onb__kicker">RADAR</p>
+      <h2 class="onb__title">Trova il segnale nascosto</h2>
+      <p class="onb__hint">Trascina il dito nella nebbia: più sei vicino, più vibra.</p>
+
+      <div class="onb__radar"
+           [class.onb__radar--mid]="radarZone() === 'mid'"
+           [class.onb__radar--near]="radarZone() === 'near'"
+           (pointermove)="onRadarMove($event)"
+           (pointerdown)="onRadarMove($event)"
+           (pointerleave)="onRadarLeave()">
+        <div class="onb__radar-fog"></div>
+        <div class="onb__radar-sweep"></div>
+        @if (radarFlash()) {
+          <div class="onb__radar-flash"></div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ============================ FASE 3 ============================ -->
+  @if (phase() === 3) {
+    <div class="onb__phase onb__phase--center">
+      <p class="onb__kicker">VALIDAZIONE</p>
+      <h2 class="onb__title">Convalida le coordinate</h2>
+      <p class="onb__hint">Tieni premuto sul sigillo per 2 secondi.</p>
+
+      <div class="onb__seal-wrap">
+        <svg class="onb__seal-ring" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" class="onb__seal-ring-bg"/>
+          <circle cx="50" cy="50" r="46" class="onb__seal-ring-fill"
+                  [style.stroke-dasharray]="sealCircumference"
+                  [style.stroke-dashoffset]="sealCircumference * (1 - sealProgress())"/>
+        </svg>
+        <button class="onb__seal"
+                type="button"
+                [class.onb__seal--done]="sealValidated()"
+                (pointerdown)="onSealPressStart()"
+                (pointerup)="onSealPressEnd()"
+                (pointerleave)="onSealPressEnd()"
+                aria-label="Tieni premuto per validare">
+          @if (sealValidated()) {
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none"
+                 stroke="#6BA046" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          } @else {
+            <!-- Sigillo con QR decorativo -->
+            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <path d="M14 14h3v3h-3zM20 14v7M14 20h3" stroke-linecap="round"/>
+            </svg>
+          }
+        </button>
+      </div>
+
+      @if (sealValidated()) {
+        <p class="onb__validated">✓ Coordinate validate!</p>
+      }
+    </div>
+  }
+
+  <!-- ============================ FASE 4 ============================ -->
+  @if (phase() === 4) {
+    <div class="onb__phase onb__phase--center onb__phase--wow">
+      <!-- Coriandoli -->
+      @if (stamped()) {
+        <div class="onb__confetti" aria-hidden="true">
+          @for (c of confetti; track $index) {
+            <span class="onb__confetti-piece onb__confetti-piece--h{{ c.hue }}"
+                  [style.--angle]="c.angle + 'deg'"
+                  [style.--travel]="c.travel + 'px'"
+                  [style.--delay]="c.delay + 'ms'"></span>
+          }
+        </div>
+      }
+
+      <!-- Taccuino che si apre -->
+      <div class="onb__notebook" [class.onb__notebook--open]="stamped()">
+        <div class="onb__notebook-cover"></div>
+        <div class="onb__notebook-page">
+          @if (stamped()) {
+            <div class="onb__collectible">
+              <div class="onb__collectible-art">🧿</div>
+              <div class="onb__collectible-name">Amuleto del Viandante</div>
+              <div class="onb__collectible-rarity">COMUNE</div>
+            </div>
+          }
+        </div>
+        <!-- Timbro che cala -->
+        <div class="onb__stamp" [class.onb__stamp--down]="stamped()" aria-hidden="true">★</div>
+      </div>
+
+      @if (!stamped()) {
+        <p class="onb__hint">Il tuo primo cimelio ti aspetta.</p>
+        <button class="onb__cta" type="button" (click)="stampNotebook()">
+          Timbra il taccuino
+        </button>
+      } @else {
+        <div class="onb__reward">+100 XP · +50 🪙</div>
+        <button class="onb__cta" type="button" (click)="phase.set(5)">
+          Continua
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ============================ FASE 5 ============================ -->
+  @if (phase() === 5) {
+    <div class="onb__phase onb__phase--center">
+      <div class="onb__popup">
+        <p class="onb__kicker">QUASI FATTO</p>
+        <h2 class="onb__title">Salva i tuoi progressi</h2>
+        <p class="onb__hint">Hai già guadagnato il primo cimelio e 100 XP. Non perderli!</p>
+
+        @if (!showRegister()) {
+          <button class="onb__cta onb__cta--save" type="button" (click)="openRegister()">
+            Salva i miei progressi
+          </button>
+          <button class="onb__discard" type="button" (click)="cancelProgress()">
+            Cancella progressi
+          </button>
+          <p class="onb__login">
+            Hai già un account?
+            <button class="onb__login-link" type="button" (click)="goToLogin()">Accedi</button>
+          </p>
+        } @else {
+          <form class="onb__form" [formGroup]="form" (ngSubmit)="submitRegister()">
+            <input class="onb__input" type="email" formControlName="email"
+                   placeholder="Email" autocomplete="email"/>
+            <input class="onb__input" type="text" formControlName="username"
+                   placeholder="Username" autocomplete="username"/>
+            <input class="onb__input" type="password" formControlName="password"
+                   placeholder="Password (min 8 caratteri)" autocomplete="new-password"/>
+            <button class="onb__cta onb__cta--save" type="submit" [disabled]="submitting()">
+              {{ submitting() ? 'Creazione...' : 'Crea account' }}
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+  }
+
+</ion-content>

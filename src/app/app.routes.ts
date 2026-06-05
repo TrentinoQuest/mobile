@@ -44,6 +44,16 @@ export const routes: Routes = [
   },
 
   // ============================================================
+  // Onboarding 5 fasi (pubblico, ingresso nuovi esploratori)
+  // ============================================================
+  {
+    path: 'onboarding',
+    loadComponent: () =>
+      import('./features/common/onboarding/onboarding.page').then((m) => m.OnboardingPage),
+    canActivate: [guestGuard],
+  },
+
+  // ============================================================
   // Auth — rotte trasversali, pubbliche
   // ============================================================
   {
