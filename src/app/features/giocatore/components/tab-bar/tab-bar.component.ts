@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IonIcon, ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mapOutline, imagesOutline, peopleOutline, personOutline, qrCode } from 'ionicons/icons';
+import { mapOutline, bookOutline, peopleOutline, personOutline, qrCode } from 'ionicons/icons';
 import { QuestType } from '@trentino-quest/shared-types';
 import type { PrimaryQuest } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
@@ -22,7 +22,7 @@ export class TabBarComponent {
   private readonly geoService = inject(GeolocationService);
 
   constructor() {
-    addIcons({ mapOutline, imagesOutline, peopleOutline, personOutline, qrCode });
+    addIcons({ mapOutline, bookOutline, peopleOutline, personOutline, qrCode });
   }
 
   async openScanModal(): Promise<void> {

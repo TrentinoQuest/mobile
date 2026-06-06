@@ -1,8 +1,16 @@
 import { Component, Input } from '@angular/core';
 
-type BadgeColor =
-  | 'primary' | 'accent' | 'success' | 'error'
-  | 'warning' | 'xp' | 'common' | 'rare' | 'epic' | 'legendary';
+export type BadgeColor =
+  | 'primary'
+  | 'accent'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'xp'
+  | 'common'
+  | 'rare'
+  | 'epic'
+  | 'legendary';
 
 @Component({
   selector: 'tq-badge',

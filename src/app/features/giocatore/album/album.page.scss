@@ -1,340 +1,198 @@
-.album {
-  --background: var(--tq-bg);
+.taccuino {
+  --background: var(--color-bg);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
 }
 
-// ── Header glass ────────────────────────────────────────────────────────────
+/* ─── Header ──────────────────────────────────────────────────────────────── */
 
-.album__header {
-  position: absolute;
+.taccuino__header {
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--tq-z-map-overlay);
-  /* Safe area parametrica (notch/Dynamic Island) invece di 50px fissi. */
-  padding-top: calc(var(--tq-safe-top) + var(--tq-space-2));
-  padding-bottom: 14px;
-  background: linear-gradient(
-    to bottom,
-    rgba(var(--tq-bg-rgb), 0.95),
-    rgba(var(--tq-bg-rgb), 0.6) 80%,
-    transparent
-  );
+  z-index: 10;
+  padding: calc(var(--space-16) + env(safe-area-inset-top)) var(--space-24) var(--space-8);
+  background: rgba(var(--color-bg-rgb), 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.album__header-row {
+.taccuino__title {
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-h2);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* ─── Segment control ─────────────────────────────────────────────────────── */
+
+.taccuino__segment {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  min-height: 38px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 3px;
 }
 
-.album__header-center {
+.taccuino__seg-btn {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.album__header-sub {
-  font-family: var(--tq-font-mono);
-  font-size: 9px;
-  color: rgba(var(--tq-ocra-rgb), 0.7);
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
-
-.album__header-title {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 19px;
-  color: var(--tq-bone);
-  line-height: 1.1;
-}
-
-.album__header-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(244, 235, 220, 0.04);
-  border: 1px solid var(--tq-hairline);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-8) var(--space-4);
+  font-size: var(--font-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
   cursor: pointer;
-  color: var(--tq-bone);
-  flex-shrink: 0;
-  transition: background var(--tq-duration-fast), border-color var(--tq-duration-fast);
+  transition: all 200ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 
   &--active {
-    background: rgba(200, 147, 15, 0.12);
-    border-color: rgba(200, 147, 15, 0.35);
-    color: var(--tq-ocra);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-primary);
+    font-weight: 600;
   }
 }
 
-// ── Campo ricerca ─────────────────────────────────────────────────────────────
+/* ─── Body scrollabile ────────────────────────────────────────────────────── */
 
-.album__search-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 16px 4px;
-  padding: 10px 14px;
-  background: rgba(244, 235, 220, 0.05);
-  border: 1px solid var(--tq-hairline);
-  border-radius: var(--tq-radius-md);
+.taccuino__body {
+  padding: var(--space-16) var(--space-24) calc(var(--space-32) + 64px);
 }
 
-.album__search-icon {
-  color: rgba(244, 235, 220, 0.4);
-  flex-shrink: 0;
-}
+/* ─── Spinner ─────────────────────────────────────────────────────────────── */
 
-.album__search-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: var(--tq-font-sans);
-  font-size: 14px;
-  color: var(--tq-bone);
-
-  &::placeholder {
-    color: rgba(244, 235, 220, 0.35);
-  }
-
-  // Rimuove icona nativa del browser per il tipo "search"
-  &::-webkit-search-cancel-button { display: none; }
-}
-
-// ── Nessun risultato ricerca ──────────────────────────────────────────────────
-
-.album__empty-search {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  color: rgba(244, 235, 220, 0.4);
-  font-size: 13px;
-  text-align: center;
-}
-
-// ── Body scrollabile ─────────────────────────────────────────────────────────
-
-.album__body {
-  position: absolute;
-  inset: 0;
-  /* Sotto l'header (safe-top + altezza header) e sopra la tab bar, parametrico. */
-  padding-top: calc(var(--tq-safe-top) + 60px);
-  padding-bottom: calc(var(--tq-tab-bar-total) + var(--tq-space-6));
-  overflow-y: auto;
-
-  // Quando la barra di ricerca è aperta l'header cresce di ~60px
-  &--search-open {
-    padding-top: calc(var(--tq-safe-top) + 122px);
-  }
-}
-
-// ── Loading ──────────────────────────────────────────────────────────────────
-
-.album__loading {
-  display: flex;
-  justify-content: center;
-  padding: 48px 0;
-}
-
-.album__loading-ring {
+.taccuino__spinner {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--tq-hairline);
-  border-top-color: var(--tq-ocra);
-  animation: album-spin 0.8s linear infinite;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  animation: spin 0.8s linear infinite;
+  margin: var(--space-48) auto;
 }
 
-@keyframes album-spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-// ── Hero ─────────────────────────────────────────────────────────────────────
+/* ─── Hero progressione collezione ───────────────────────────────────────── */
 
-.album__hero {
+.taccuino__hero {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 8px 22px 18px;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
 }
 
-.album__radial {
+.taccuino__radial {
   position: relative;
-  width: 84px;
-  height: 84px;
   flex-shrink: 0;
+  width: 72px;
+  height: 72px;
 
-  svg { display: block; }
+  svg {
+    display: block;
+    width: 72px;
+    height: 72px;
+  }
+
+  circle {
+    transition: stroke-dashoffset 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
-.album__radial-track {
-  stroke: var(--tq-hairline);
-}
-
-.album__radial-arc {
-  stroke: var(--tq-ocra);
-  transition: stroke-dashoffset 0.6s var(--tq-ease-out);
-}
-
-.album__radial-label {
+.taccuino__radial-label {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--tq-font-mono);
-  font-size: 13px;
-  color: var(--tq-ocra);
-  letter-spacing: -0.3px;
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
-.album__hero-info {
-  flex: 1;
-}
-
-.album__hero-count {
+.taccuino__hero-count {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: var(--space-4);
 }
 
-.album__hero-big {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 44px;
-  color: var(--tq-ocra);
+.taccuino__hero-num {
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: var(--color-primary);
   line-height: 1;
 }
 
-.album__hero-sep {
-  font-family: var(--tq-font-serif);
-  font-size: 22px;
-  color: var(--tq-text-muted);
+.taccuino__hero-total {
+  font-size: var(--font-h3);
+  color: var(--color-text-secondary);
 }
 
-.album__hero-sub {
-  font-size: 12px;
-  color: var(--tq-text-muted);
-  margin-top: 6px;
-  line-height: 1.4;
+.taccuino__hero-sub {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
 }
 
-.album__hero-level {
-  font-family: var(--tq-font-mono);
-  font-size: 9.5px;
-  color: var(--tq-ocra);
-  margin-top: 6px;
-  letter-spacing: 0.5px;
-}
+/* ─── Griglia collezionabili ──────────────────────────────────────────────── */
 
-// ── Filtri ───────────────────────────────────────────────────────────────────
-
-.album__filters {
-  display: flex;
-  gap: 8px;
-  padding: 0 22px 16px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
-}
-
-.album__filter-chip {
-  flex-shrink: 0;
-  background: rgba(244, 235, 220, 0.05);
-  color: var(--tq-bone);
-  border: 1px solid var(--tq-hairline);
-  padding: 8px 14px;
-  border-radius: var(--tq-radius-pill);
-  font-family: var(--tq-font-sans);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background var(--tq-duration-fast), color var(--tq-duration-fast),
-              border-color var(--tq-duration-fast);
-
-  &--active {
-    background: var(--tq-ocra);
-    color: #1a1815;
-    border-color: var(--tq-ocra);
-    font-weight: 700;
-  }
-}
-
-// ── Griglia card ─────────────────────────────────────────────────────────────
-
-.album__grid {
+.taccuino__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 0 22px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-12);
 }
 
-.album__card {
-  border-radius: 10px;
+.taccuino__card {
+  border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
-  aspect-ratio: 108 / 146;
+  aspect-ratio: 3 / 4;
 
   &--locked {
-    background: var(--tq-panel);
-    border: 1px dashed var(--tq-hairline);
+    background: var(--color-surface-2);
+    border: 1px dashed var(--color-border);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    color: var(--tq-text-muted);
+    color: var(--color-text-disabled);
   }
 
   &--unlocked {
-    border: 1px solid rgba(244, 235, 220, 0.1);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    // Reveal "a cascata": ogni card entra con un piccolo ritardo (delay inline).
-    animation: album-card-in 0.5s var(--tq-ease-spring) both;
+    animation: cardIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transition: transform 100ms ease-out, box-shadow 100ms ease-out;
 
     &:active {
-      transform: scale(0.94);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      transform: scale(0.96);
+      box-shadow: none;
     }
   }
+
+  /* Bordo rarità + glow */
+  &--uncommon { border: 2px solid var(--color-rare); box-shadow: 0 0 8px rgba(52, 152, 219, 0.25); }
+  &--rare     { border: 2px solid var(--color-rare); box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
+  &--legendary{ border: 2px solid var(--color-legendary); box-shadow: 0 0 10px rgba(230, 126, 34, 0.5); }
 }
 
-// Entrata card sbloccata: sale, scala e si rivela.
-@keyframes album-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.85);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.88); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.album__card-art {
+.taccuino__card-art {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 
-.album__card-img {
+.taccuino__card-img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -342,99 +200,296 @@
   object-fit: cover;
 }
 
-// Sfumatura dal basso per leggibilità del nome sopra immagini reali
-.album__card-scrim {
+.taccuino__card-scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 55%);
   pointer-events: none;
 }
 
-// Dot indicatore rarità (top-left della card)
-.album__card-rarity {
+.taccuino__card-badge {
   position: absolute;
-  top: 7px;
-  left: 7px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  z-index: 1;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
-
-  &.album__card-rarity--common {
-    background: rgba(244, 235, 220, 0.45);
-  }
-
-  &.album__card-rarity--uncommon {
-    background: var(--tq-forest);
-    box-shadow: 0 0 6px rgba(107, 160, 70, 0.6);
-  }
-
-  &.album__card-rarity--rare {
-    background: var(--tq-ocra);
-    box-shadow: 0 0 6px rgba(200, 147, 15, 0.6);
-  }
-
-  &.album__card-rarity--legendary {
-    background: var(--tq-rust);
-    box-shadow: 0 0 8px rgba(196, 103, 58, 0.8);
-  }
-}
-
-.album__card-lock-icon {
-  opacity: 0.5;
-}
-
-.album__card-mystery {
-  font-family: var(--tq-font-mono);
-  font-size: 8px;
-  letter-spacing: 1px;
-  opacity: 0.5;
-}
-
-.album__card-num {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  font-family: var(--tq-font-mono);
-  font-size: 7px;
-  color: rgba(244, 235, 220, 0.5);
-  letter-spacing: 0.5px;
+  top: var(--space-8);
+  left: var(--space-8);
   z-index: 1;
 }
 
-.album__card-name {
+.taccuino__card-name {
   position: absolute;
-  bottom: 6px;
-  left: 6px;
-  right: 6px;
-  font-family: var(--tq-font-sans);
-  font-size: 9px;
-  font-weight: 500;
-  color: var(--tq-bone);
+  bottom: var(--space-8);
+  left: var(--space-8);
+  right: var(--space-8);
+  font-size: var(--font-micro);
+  font-weight: 600;
+  color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-  letter-spacing: 0.2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   z-index: 1;
 }
 
-// ── Errore ───────────────────────────────────────────────────────────────────
+/* ─── Messaggi ────────────────────────────────────────────────────────────── */
 
-.album__error {
-  margin: 16px 22px;
-  padding: 12px 16px;
-  border-radius: var(--tq-radius-md);
-  background: rgba(196, 103, 58, 0.12);
-  border: 1px solid rgba(196, 103, 58, 0.3);
-  color: var(--tq-rust);
-  font-size: 13px;
+.taccuino__empty {
+  text-align: center;
+  padding: var(--space-48) var(--space-16);
+  font-size: var(--font-body);
+  color: var(--color-text-disabled);
+}
+
+.taccuino__error {
+  margin: var(--space-16) 0;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-error-rgb), 0.08);
+  border: 1px solid rgba(var(--color-error-rgb), 0.25);
+  color: var(--color-error);
+  font-size: var(--font-small);
   text-align: center;
 }
 
-// ── Spaziatura fondo ─────────────────────────────────────────────────────────
+/* ─── Quiz del Giorno ─────────────────────────────────────────────────────── */
 
-.album__spacer {
-  height: 32px;
+.quiz-card {
+  display: block;
+}
+
+.quiz-card__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.quiz-card__cat {
+  align-self: flex-start;
+}
+
+.quiz-card__question {
+  margin: 0;
+  font-size: var(--font-h2);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--font-body);
+  color: var(--color-text-primary);
+  transition: border-color 150ms ease, background 150ms ease, opacity 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active:not(:disabled) {
+    background: var(--color-surface-2);
+  }
+
+  &--dimmed { opacity: 0.5; pointer-events: none; }
+
+  &--correct {
+    border-color: var(--color-success);
+    background: rgba(var(--color-success-rgb), 0.08);
+  }
+
+  &--wrong {
+    border-color: var(--color-error);
+    background: rgba(var(--color-error-rgb), 0.08);
+  }
+
+  &:disabled { cursor: default; }
+}
+
+.quiz-option__letter {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+
+  .quiz-option--correct & {
+    background: var(--color-success);
+    color: #ffffff;
+  }
+
+  .quiz-option--wrong & {
+    background: var(--color-error);
+    color: #ffffff;
+  }
+}
+
+.quiz-option__text {
+  flex: 1;
+  line-height: var(--line-height-normal);
+}
+
+.quiz-option__icon {
+  flex-shrink: 0;
+  font-size: 20px;
+
+  &--ok  { color: var(--color-success); }
+  &--err { color: var(--color-error); }
+}
+
+.quiz-explanation {
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-ultra);
+  border: 1px solid var(--color-accent-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.quiz-explanation__text {
+  margin: 0;
+  font-size: var(--font-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-loose);
+}
+
+.quiz-explanation__reward {
+  margin: 0;
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.quiz-fragment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-accent-light);
+}
+
+.quiz-fragment__icon {
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+.quiz-fragment__hint {
+  margin: 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.quiz-countdown {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+}
+
+/* ─── Missioni ────────────────────────────────────────────────────────────── */
+
+.missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.mission-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+
+  &--completed {
+    border-left-color: var(--color-success);
+    opacity: 0.75;
+  }
+
+  &--expired {
+    border-left-color: var(--color-text-disabled);
+    opacity: 0.6;
+  }
+}
+
+.mission-card__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--color-primary);
+  }
+}
+
+.mission-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mission-card__title {
+  margin: 0 0 2px;
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.mission-card__desc {
+  margin: 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.mission-card__right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-8);
+}
+
+.mission-card__rewards {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.mission-card__done {
+  font-size: 24px;
+  color: var(--color-success);
+}
+
+.missions-countdown {
+  margin: var(--space-16) 0 0;
+  text-align: center;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
 }
