@@ -1,0 +1,333 @@
+.lega {
+  --background: var(--color-bg);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+
+.lega__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: calc(var(--space-16) + env(safe-area-inset-top)) var(--space-24) var(--space-8);
+  background: rgba(var(--color-bg-rgb), 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lega__tier-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+.lega__tier-icon {
+  font-size: 22px;
+  color: var(--color-primary);
+}
+
+.lega__tier-name {
+  margin: 0;
+  font-size: var(--font-h2);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.lega__week {
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+}
+
+/* ─── Segment control ─────────────────────────────────────────────────────── */
+
+.lega__segment {
+  display: flex;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.lega__seg-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-8) var(--space-16);
+  font-size: var(--font-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 200ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+
+  &--active {
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+}
+
+/* ─── Body scrollabile ────────────────────────────────────────────────────── */
+
+.lega__body {
+  padding: var(--space-16) var(--space-16) calc(var(--space-32) + 64px);
+}
+
+/* ─── Spinner ─────────────────────────────────────────────────────────────── */
+
+.lega__spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  animation: spin 0.8s linear infinite;
+  margin: var(--space-48) auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Card stats personali ────────────────────────────────────────────────── */
+
+.lega__my-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-12) var(--space-16);
+  margin-bottom: var(--space-16);
+  background: var(--color-primary-ultra);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+.lega__my-rank {
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lega__my-xp-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lega__my-xp-label {
+  font-size: var(--font-micro);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lega__my-xp-value {
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ─── Lista classifica ────────────────────────────────────────────────────── */
+
+.lega__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── Separatori zone ─────────────────────────────────────────────────────── */
+
+.lega__separator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-8);
+  font-size: var(--font-micro);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    border-radius: var(--radius-full);
+  }
+
+  &--promotion {
+    color: var(--color-success);
+    &::before, &::after { background: var(--color-success); }
+  }
+
+  &--relegation {
+    color: var(--color-error);
+    &::before, &::after { background: var(--color-error); }
+  }
+}
+
+/* ─── Riga classifica ─────────────────────────────────────────────────────── */
+
+.league-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-8);
+  border-radius: var(--radius-md);
+  border-left: 3px solid transparent;
+  transition: background 150ms ease;
+
+  &--me {
+    background: var(--color-primary-ultra);
+    border-left-color: var(--color-primary-light);
+  }
+
+  &--promotion:not(&--me) {
+    background: rgba(var(--color-success-rgb), 0.05);
+    border-left-color: var(--color-success);
+  }
+
+  &--relegation:not(&--me) {
+    background: rgba(var(--color-error-rgb), 0.04);
+    border-left-color: var(--color-error);
+  }
+
+  &__rank {
+    flex-shrink: 0;
+    width: 28px;
+    font-size: var(--font-small);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: center;
+
+    &--top {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-micro);
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    overflow: hidden;
+  }
+
+  &__username {
+    font-size: var(--font-small);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__friend-icon {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--color-text-disabled);
+  }
+
+  &__xp {
+    flex-shrink: 0;
+    font-size: var(--font-small);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+}
+
+/* ─── Messaggio vuoto ─────────────────────────────────────────────────────── */
+
+.lega__empty {
+  text-align: center;
+  padding: var(--space-48) var(--space-16);
+  font-size: var(--font-body);
+  color: var(--color-text-disabled);
+}
+
+/* ─── Storico stagioni ────────────────────────────────────────────────────── */
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.history-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-12) var(--space-16);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+  }
+
+  &__tier-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  &__tier-icon {
+    font-size: 18px;
+    color: var(--color-text-secondary);
+
+    &--dolomiti {
+      color: var(--color-accent);
+    }
+  }
+
+  &__tier-name {
+    font-size: var(--font-h3);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  &__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-12) var(--space-16);
+  }
+
+  &__period {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+  }
+
+  &__rank {
+    font-size: var(--font-h2);
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+}

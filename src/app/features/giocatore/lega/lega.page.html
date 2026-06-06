@@ -1,0 +1,146 @@
+<ion-content [fullscreen]="true" class="lega">
+
+  <!-- ═══════════════════════════════════════════════════════════ HEADER -->
+  <div class="lega__header">
+
+    @if (current(); as league) {
+      <!-- Tier + nome lega -->
+      <div class="lega__tier-row">
+        <ion-icon [name]="TIER_ICONS[league.tier]" class="lega__tier-icon"></ion-icon>
+        <h1 class="lega__tier-name">{{ TIER_LABEL[league.tier] }}</h1>
+      </div>
+      <!-- Periodo settimana -->
+      <p class="lega__week">
+        {{ formatDate(league.season.weekStart) }} — {{ formatDate(league.season.weekEnd) }}
+      </p>
+    } @else if (!loading()) {
+      <h1 class="lega__tier-name">Lega</h1>
+    }
+
+    <!-- Segment control -->
+    <div class="lega__segment" role="tablist">
+      <button class="lega__seg-btn"
+              [class.lega__seg-btn--active]="activeTab() === 'classifica'"
+              role="tab" type="button"
+              (click)="setTab('classifica')">Classifica</button>
+      <button class="lega__seg-btn"
+              [class.lega__seg-btn--active]="activeTab() === 'storico'"
+              role="tab" type="button"
+              (click)="setTab('storico')">Storico</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ CLASSIFICA -->
+  @if (activeTab() === 'classifica') {
+    <div class="lega__body">
+
+      @if (loading()) {
+        <div class="lega__spinner"></div>
+      } @else if (current(); as league) {
+
+        <!-- Card XP personali -->
+        <div class="lega__my-stats">
+          <span class="lega__my-rank">#{{ league.rank }}</span>
+          <div class="lega__my-xp-group">
+            <span class="lega__my-xp-label">Tuoi XP questa settimana</span>
+            <span class="lega__my-xp-value">{{ league.weeklyXp }} XP</span>
+          </div>
+        </div>
+
+        <!-- Lista girone -->
+        <div class="lega__list" role="list">
+          @for (member of league.leaderboard; track member.playerId; let i = $index) {
+
+            <!-- Separatore zona promozione (dopo rank 5) -->
+            @if (member.rank === 6) {
+              <div class="lega__separator lega__separator--promotion">
+                <span>Zona promozione</span>
+              </div>
+            }
+
+            <!-- Separatore zona retrocessione (prima di rank 26) -->
+            @if (member.rank === 26) {
+              <div class="lega__separator lega__separator--relegation">
+                <span>Zona retrocessione</span>
+              </div>
+            }
+
+            <div [ngClass]="rowClasses(member)" role="listitem">
+              <!-- Rank -->
+              <span class="league-row__rank"
+                    [class.league-row__rank--top]="member.rank <= 3">{{ member.rank }}</span>
+
+              <!-- Avatar -->
+              <div class="league-row__avatar"
+                   [style.background]="avatarGradient(member.playerId)"
+                   aria-hidden="true">
+                {{ avatarInitial(member.username) }}
+              </div>
+
+              <!-- Username + badge amico -->
+              <div class="league-row__info">
+                <span class="league-row__username">{{ member.username }}</span>
+                @if (member.isFriend) {
+                  <ion-icon name="person-outline" class="league-row__friend-icon"></ion-icon>
+                }
+              </div>
+
+              <!-- XP settimanali -->
+              <span class="league-row__xp">{{ member.weeklyXp }} XP</span>
+            </div>
+          }
+        </div>
+
+      } @else {
+        <p class="lega__empty">Nessuna lega disponibile al momento.</p>
+      }
+
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════ STORICO -->
+  @if (activeTab() === 'storico') {
+    <div class="lega__body">
+
+      @if (historyLoading()) {
+        <div class="lega__spinner"></div>
+      } @else if (history().length > 0) {
+
+        <div class="history-list">
+          @for (entry of history(); track entry.seasonId) {
+            <div class="history-card">
+              <!-- Tier e badge risultato -->
+              <div class="history-card__header">
+                <div class="history-card__tier-row">
+                  <ion-icon [name]="TIER_ICONS[entry.tier]"
+                            class="history-card__tier-icon"
+                            [class.history-card__tier-icon--dolomiti]="entry.tier === LeagueTier.DOLOMITI">
+                  </ion-icon>
+                  <span class="history-card__tier-name">{{ TIER_LABEL[entry.tier] }}</span>
+                </div>
+                <tq-badge [color]="historyBadgeColor(entry)" size="sm">
+                  {{ historyBadgeLabel(entry) }}
+                </tq-badge>
+              </div>
+
+              <!-- Periodo e rank -->
+              <div class="history-card__body">
+                <span class="history-card__period">
+                  {{ formatDate(entry.weekStart) }} — {{ formatDate(entry.weekEnd) }}
+                </span>
+                @if (entry.rank !== null) {
+                  <span class="history-card__rank">#{{ entry.rank }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+      } @else if (!historyLoading()) {
+        <p class="lega__empty">Nessuna stagione precedente.</p>
+      }
+
+    </div>
+  }
+
+</ion-content>
