@@ -1,28 +1,14 @@
 import type { StyleSpecification } from 'maplibre-gl';
 
 /**
- * Stile MapLibre custom di Trentino Quest — "il campo da gioco".
+ * Stile MapLibre 2D di Trentino Quest — palette brand-aligned.
  *
- * Non usiamo uno stile generico (liberty/positron): qui costruiamo a mano
- * un look cinematografico, coerente coi token del brand, che faccia sembrare
- * la mappa l'arena di un gioco — non una mappa stradale.
+ * Architettura: una funzione costruisce i layer da una PALETTE,
+ * supportando light (default, warm paper) e dark (sera alpina).
+ * Nessun 3D: pitch=0, no fill-extrusion, no sky/fog.
  *
  * Sorgente dati: vector tiles OpenFreeMap (schema OpenMapTiles).
- * - source vettoriale: openmaptiles → https://tiles.openfreemap.org/planet
- * - glyphs (font label): https://tiles.openfreemap.org/fonts/...
- * Font disponibili lato server: "Noto Sans Regular | Bold | Italic".
- *
- * Architettura: una sola funzione costruisce i layer da una PALETTE, cosi'
- * supportiamo due "ore del giorno" (dark cinematografico / light caldo)
- * senza duplicare la struttura. Default: dark (scelta di design).
- *
- * 3D: il source-layer "building" espone render_height / render_min_height,
- * usati dal layer fill-extrusion. La camera pitchata + edifici estrusi danno
- * l'effetto Pokémon-Go. Vedi home.page.ts per pitch/bearing.
- *
- * NOTA crediti: attributionControl e' disattivato in home.page.ts su richiesta.
- * OpenFreeMap non richiede attribution obbligatoria (dati ODbL OSM: il credito
- * andra' reintrodotto in una sezione "crediti" dedicata dell'app — TODO).
+ * Glyphs: https://tiles.openfreemap.org/fonts/...
  */
 
 const TILE_HOST = 'https://tiles.openfreemap.org';
@@ -31,92 +17,63 @@ const GLYPHS_URL = `${TILE_HOST}/fonts/{fontstack}/{range}.pbf`;
 
 export type MapMode = 'dark' | 'light';
 
-/** Tinte di un'ora del giorno. Un layer builder le consuma per produrre i paint. */
 interface MapPalette {
-  /** Sfondo base sotto ogni cosa. */
   background: string;
-  /** Acqua (laghi, fiumi larghi). */
   water: string;
   waterLabel: string;
   waterLabelHalo: string;
-  /** Boschi / vegetazione fitta. */
   wood: string;
-  /** Prati / verde aperto. */
   grass: string;
-  /** Parchi urbani. */
   park: string;
-  /** Aree edificate (riempimento landuse). */
   landuse: string;
-  /** Edifici — riempimento piatto (zoom medi). */
   buildingFlat: string;
-  /** Edifici 3D — base e cima (gradiente verticale per altezza). */
-  building3dLow: string;
-  building3dHigh: string;
-  /** Strade principali (warm, fanno da "vene" luminose). */
   roadMajor: string;
-  /** Strade secondarie / minori. */
   roadMinor: string;
-  /** Sentieri / track (rilevanti per l'esplorazione a piedi). */
   roadPath: string;
-  /** Confini amministrativi. */
   boundary: string;
-  /** Label luoghi principali. */
   placeLabel: string;
   placeLabelHalo: string;
-  /** Label luoghi minori. */
   placeMinorLabel: string;
-  /** Atmosfera (sky) quando la camera e' pitchata. */
-  skyTop: string;
-  skyHorizon: string;
-  fog: string;
 }
 
-const DARK_PALETTE: MapPalette = {
-  background: '#0e0e12',
-  water: '#0b1a24',
-  waterLabel: '#4d6b7d',
-  waterLabelHalo: '#06121a',
-  wood: '#12231a',
-  grass: '#16241b',
-  park: '#142a1d',
-  landuse: '#141418',
-  buildingFlat: '#1b1b22',
-  building3dLow: '#1c1c24',
-  building3dHigh: '#2e2e3a',
-  roadMajor: '#3a352b',
-  roadMinor: '#1e1e24',
-  roadPath: '#2a261d',
-  boundary: '#2e2e38',
-  placeLabel: '#f4ebdc',
-  placeLabelHalo: '#08080b',
-  placeMinorLabel: '#9c968a',
-  skyTop: '#090912',
-  skyHorizon: '#241826',
-  fog: '#0e0e12',
+/** Carta geografica calda — allineata al design system brand (#fafaf8 / #2d6a4f). */
+const LIGHT_PALETTE: MapPalette = {
+  background: '#f0ebe0',
+  water: '#a8d4ec',
+  waterLabel: '#3d6b80',
+  waterLabelHalo: '#e8f4fa',
+  wood: '#c8e0c8',
+  grass: '#d8e8cc',
+  park: '#c2ddb8',
+  landuse: '#e8e2d4',
+  buildingFlat: '#d8d0c0',
+  roadMajor: '#ffffff',
+  roadMinor: '#ede6d8',
+  roadPath: '#dfd6c4',
+  boundary: '#c0b099',
+  placeLabel: '#1a1a18',
+  placeLabelHalo: '#f0ebe0',
+  placeMinorLabel: '#6b7068',
 };
 
-const LIGHT_PALETTE: MapPalette = {
-  background: '#ece6da',
-  water: '#a9cfe0',
-  waterLabel: '#3f6273',
-  waterLabelHalo: '#eef4f7',
-  wood: '#cddcc0',
-  grass: '#d9e3c9',
-  park: '#cfe0c2',
-  landuse: '#e7e0d2',
-  buildingFlat: '#ded5c4',
-  building3dLow: '#e2d9c8',
-  building3dHigh: '#f1ebdf',
-  roadMajor: '#ffffff',
-  roadMinor: '#f4efe5',
-  roadPath: '#e6dcc8',
-  boundary: '#c4b9a5',
-  placeLabel: '#33302a',
-  placeLabelHalo: '#f3eee3',
-  placeMinorLabel: '#6b6354',
-  skyTop: '#bcd6e6',
-  skyHorizon: '#e9ddc9',
-  fog: '#dfe6e0',
+/** Sera alpina — toni profondi, verde foresta e accenti caldi. */
+const DARK_PALETTE: MapPalette = {
+  background: '#12181a',
+  water: '#0d1e2e',
+  waterLabel: '#3a5a70',
+  waterLabelHalo: '#0a1218',
+  wood: '#162a1e',
+  grass: '#182e20',
+  park: '#162c1c',
+  landuse: '#161c1e',
+  buildingFlat: '#1e2428',
+  roadMajor: '#2e3830',
+  roadMinor: '#1c2422',
+  roadPath: '#263020',
+  boundary: '#283030',
+  placeLabel: '#e8e4dc',
+  placeLabelHalo: '#0c1214',
+  placeMinorLabel: '#7a8480',
 };
 
 /** Preferisce il nome italiano, poi latino, poi quello di default del dato. */
@@ -127,12 +84,9 @@ const NAME_FIELD: unknown = [
   ['get', 'name'],
 ];
 
-/**
- * Costruisce lo stile completo per la modalita' richiesta.
- * Default 'dark' — il mondo di gioco e' cinematografico-notturno.
- */
-export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
-  const p = mode === 'light' ? LIGHT_PALETTE : DARK_PALETTE;
+/** Costruisce lo stile 2D per la modalità richiesta. Default: 'light'. */
+export function buildGameMapStyle(mode: MapMode = 'light'): StyleSpecification {
+  const p = mode === 'dark' ? DARK_PALETTE : LIGHT_PALETTE;
 
   const style = {
     version: 8,
@@ -144,30 +98,14 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         url: VECTOR_SOURCE_URL,
       },
     },
-    // Atmosfera: orizzonte sfumato + nebbia, visibili solo con camera pitchata.
-    sky: {
-      'sky-color': p.skyTop,
-      'sky-horizon-blend': 0.6,
-      'horizon-color': p.skyHorizon,
-      'horizon-fog-blend': 0.7,
-      'fog-color': p.fog,
-      'fog-ground-blend': 0.4,
-      'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 12, 0.4, 16, 0.1],
-    },
-    light: {
-      anchor: 'viewport',
-      color: mode === 'dark' ? '#ffe9c2' : '#ffffff',
-      intensity: mode === 'dark' ? 0.35 : 0.5,
-      position: [1.4, 210, 30],
-    },
     layers: [
-      // -- Sfondo base ----------------------------------------------------
+      // Sfondo base
       {
         id: 'background',
         type: 'background',
         paint: { 'background-color': p.background },
       },
-      // -- Vegetazione ----------------------------------------------------
+      // Vegetazione — foreste
       {
         id: 'landcover-wood',
         type: 'fill',
@@ -176,18 +114,19 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         filter: ['==', ['get', 'class'], 'wood'],
         paint: {
           'fill-color': p.wood,
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 13, 0.85],
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 14, 0.9],
         },
       },
+      // Prati e zone umide
       {
         id: 'landcover-grass',
         type: 'fill',
         source: 'openmaptiles',
         'source-layer': 'landcover',
         filter: ['match', ['get', 'class'], ['grass', 'wetland'], true, false],
-        paint: { 'fill-color': p.grass, 'fill-opacity': 0.6 },
+        paint: { 'fill-color': p.grass, 'fill-opacity': 0.65 },
       },
-      // -- Aree edificate (riempimento tenue) -----------------------------
+      // Aree edificate (residenziale, commerciale, industriale)
       {
         id: 'landuse-built',
         type: 'fill',
@@ -203,18 +142,18 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         minzoom: 11,
         paint: {
           'fill-color': p.landuse,
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 13, 0.7],
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 13, 0.75],
         },
       },
-      // -- Parchi ---------------------------------------------------------
+      // Parchi
       {
         id: 'park',
         type: 'fill',
         source: 'openmaptiles',
         'source-layer': 'park',
-        paint: { 'fill-color': p.park, 'fill-opacity': 0.55 },
+        paint: { 'fill-color': p.park, 'fill-opacity': 0.6 },
       },
-      // -- Acqua ----------------------------------------------------------
+      // Acqua
       {
         id: 'water',
         type: 'fill',
@@ -230,11 +169,10 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         minzoom: 11,
         paint: {
           'line-color': p.water,
-          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.6, 16, 2.5],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.8, 16, 3],
         },
       },
-      // -- Strade ---------------------------------------------------------
-      // Sentieri/track: importanti per chi esplora a piedi, tratteggiati.
+      // Sentieri (tratteggiati, importanti per l'esplorazione a piedi)
       {
         id: 'road-path',
         type: 'line',
@@ -244,11 +182,12 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         minzoom: 13,
         paint: {
           'line-color': p.roadPath,
-          'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.6, 18, 2.5],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 18, 2.5],
           'line-dasharray': [2, 2],
-          'line-opacity': 0.8,
+          'line-opacity': 0.85,
         },
       },
+      // Strade minori
       {
         id: 'road-minor',
         type: 'line',
@@ -258,9 +197,10 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         minzoom: 13,
         paint: {
           'line-color': p.roadMinor,
-          'line-width': ['interpolate', ['linear'], ['zoom'], 13, 0.5, 18, 6],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1, 18, 7],
         },
       },
+      // Strade principali
       {
         id: 'road-major',
         type: 'line',
@@ -276,11 +216,11 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         minzoom: 9,
         paint: {
           'line-color': p.roadMajor,
-          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.6, 14, 2.5, 18, 9],
-          'line-opacity': 0.9,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 14, 3, 18, 10],
+          'line-opacity': 0.95,
         },
       },
-      // -- Confini --------------------------------------------------------
+      // Confini amministrativi
       {
         id: 'boundary',
         type: 'line',
@@ -289,68 +229,25 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         filter: ['<=', ['get', 'admin_level'], 6],
         paint: {
           'line-color': p.boundary,
-          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 12, 1.4],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 12, 1.5],
           'line-dasharray': [3, 3],
           'line-opacity': 0.7,
         },
       },
-      // -- Edifici --------------------------------------------------------
-      // Riempimento piatto nei zoom medi, poi cede il passo al 3D.
+      // Edifici piatti (2D)
       {
         id: 'building-flat',
         type: 'fill',
         source: 'openmaptiles',
         'source-layer': 'building',
-        minzoom: 12,
-        maxzoom: 15,
+        minzoom: 13,
         paint: {
           'fill-color': p.buildingFlat,
-          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 13, 0.7, 15, 0],
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14.5, 0.85],
+          'fill-outline-color': mode === 'light' ? 'rgba(180,168,148,0.4)' : 'rgba(40,52,56,0.6)',
         },
       },
-      // Estrusione 3D: il cuore dell'effetto "campo da gioco" pitchato.
-      {
-        id: 'building-3d',
-        type: 'fill-extrusion',
-        source: 'openmaptiles',
-        'source-layer': 'building',
-        minzoom: 14,
-        paint: {
-          // Colore per altezza: edifici alti piu' chiari → senso di profondita'.
-          'fill-extrusion-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'render_height'],
-            0,
-            p.building3dLow,
-            40,
-            p.building3dHigh,
-            120,
-            p.building3dHigh,
-          ],
-          'fill-extrusion-height': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            14,
-            0,
-            15.5,
-            ['get', 'render_height'],
-          ],
-          'fill-extrusion-base': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            14,
-            0,
-            15.5,
-            ['get', 'render_min_height'],
-          ],
-          'fill-extrusion-opacity': 0.92,
-          'fill-extrusion-vertical-gradient': true,
-        },
-      },
-      // -- Label acqua ----------------------------------------------------
+      // Label acqua
       {
         id: 'water-label',
         type: 'symbol',
@@ -360,7 +257,7 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         layout: {
           'text-field': NAME_FIELD,
           'text-font': ['Noto Sans Italic'],
-          'text-size': 12,
+          'text-size': 11,
           'text-letter-spacing': 0.1,
           'text-max-width': 6,
         },
@@ -370,7 +267,7 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
           'text-halo-width': 1,
         },
       },
-      // -- Label luoghi minori (villaggi, sobborghi) ----------------------
+      // Label luoghi minori
       {
         id: 'place-minor',
         type: 'symbol',
@@ -388,7 +285,7 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
           'text-field': NAME_FIELD,
           'text-font': ['Noto Sans Regular'],
           'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 13],
-          'text-letter-spacing': 0.05,
+          'text-letter-spacing': 0.04,
           'text-max-width': 7,
         },
         paint: {
@@ -397,7 +294,7 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
           'text-halo-width': 1.2,
         },
       },
-      // -- Label luoghi principali (citta', paesi) ------------------------
+      // Label luoghi principali
       {
         id: 'place-major',
         type: 'symbol',
@@ -407,22 +304,19 @@ export function buildGameMapStyle(mode: MapMode = 'dark'): StyleSpecification {
         layout: {
           'text-field': NAME_FIELD,
           'text-font': ['Noto Sans Bold'],
-          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 12, 12, 18, 16, 22],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 6, 12, 12, 16, 16, 20],
           'text-letter-spacing': 0.04,
           'text-max-width': 8,
-          'text-transform': 'uppercase',
         },
         paint: {
           'text-color': p.placeLabel,
           'text-halo-color': p.placeLabelHalo,
-          'text-halo-width': 1.6,
+          'text-halo-width': 1.8,
           'text-halo-blur': 0.5,
         },
       },
     ],
   };
 
-  // Cast unico: le espressioni MapLibre sono tipizzate in modo molto stretto,
-  // ma la struttura e' conforme alla StyleSpecification v8.
   return style as unknown as StyleSpecification;
 }

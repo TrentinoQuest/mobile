@@ -45,6 +45,14 @@
   --color-xp: #7b2fbe;
   --color-coins: #f4701b;
 
+  // Varianti RGB per rgba() (valori numerici estratti dai colori sopra)
+  --color-primary-rgb: 45, 106, 79;
+  --color-accent-rgb: 244, 112, 27;
+  --color-bg-rgb: 250, 250, 248;
+  --color-surface-rgb: 255, 255, 255;
+  --color-success-rgb: 64, 145, 108;
+  --color-error-rgb: 214, 40, 40;
+
   // Rarità collezionabili (immutabili)
   --color-common: #bdc3c7;
   --color-rare: #3498db;

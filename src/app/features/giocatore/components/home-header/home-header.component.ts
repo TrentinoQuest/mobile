@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonIcon, ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { flame, logoBitcoin } from 'ionicons/icons';
+import { flame, diamondOutline } from 'ionicons/icons';
 import type { GamificationResult } from '@trentino-quest/shared-types';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
@@ -65,7 +65,7 @@ export class HomeHeaderComponent {
   protected readonly coins = computed<number>(() => this.player()?.coins ?? 0);
 
   constructor() {
-    addIcons({ flame, logoBitcoin });
+    addIcons({ flame, diamondOutline });
   }
 
   openProfile(): void {

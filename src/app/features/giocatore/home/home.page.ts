@@ -218,8 +218,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly AUTO_CENTER_ZOOM = 17.8;
   private readonly MIN_ZOOM = 9;
   private readonly MAX_ZOOM = 19;
-  private readonly INITIAL_PITCH = 52;
-  private readonly MAX_PITCH = 68;
+  private readonly INITIAL_PITCH = 0;
+  private readonly MAX_PITCH = 0;
   private readonly TRENTINO_BOUNDS: [[number, number], [number, number]] = [
     [10.4, 45.6],
     [12.0, 46.6],
