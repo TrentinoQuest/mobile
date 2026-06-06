@@ -288,7 +288,7 @@
   border-radius: var(--radius-full);
 
   &--running {
-    animation: xpFillRun 1800ms linear forwards;
+    animation: xpFillRun 1000ms linear forwards;
   }
 
   // Level up: reset istantaneo al 6% del nuovo livello

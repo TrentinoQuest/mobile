@@ -95,16 +95,31 @@ export class OnboardingPage implements OnDestroy {
     this.levelUpTimers = [];
     this.levelUpPhase.set(0);
 
-    // Avvia la corsa: barra parte veloce poi decelera progressivamente verso 100%
-    // Animazione keyframe CSS dura 2400ms
     this.levelUpTimers.push(setTimeout(() => this.levelUpPhase.set(1), 300));
 
-    // Haptic + level up appena la keyframe animation è conclusa (300 + 1800 + 100)
+    // Zip haptic: impatti ravvicinati all'inizio (barra veloce), si diradano
+    // man mano che la barra decelera — specchia visivamente il riempimento
+    // Offset assoluti = 300ms (start delay) + offset relativo all'animazione da 1000ms
+    const zip: [number, () => Promise<void>][] = [
+      [300 +  75, () => this.haptics.tapLight()],
+      [300 + 155, () => this.haptics.tapLight()],
+      [300 + 255, () => this.haptics.tapLight()],
+      [300 + 375, () => this.haptics.tapMedium()],
+      [300 + 515, () => this.haptics.tapMedium()],
+      [300 + 675, () => this.haptics.tapMedium()],
+      [300 + 825, () => this.haptics.tapHeavy()],
+      [300 + 960, () => this.haptics.tapHeavy()],
+    ];
+    zip.forEach(([ms, fn]) => {
+      this.levelUpTimers.push(setTimeout(() => void fn(), ms));
+    });
+
+    // Level up appena l'animazione finisce (300 + 1000 + 100)
     this.levelUpTimers.push(setTimeout(() => {
       void this.haptics.levelUp();
       this.audio.playLevelUp();
       this.levelUpPhase.set(2);
-    }, 2200));
+    }, 1400));
   }
 
   protected nextStep(): void {
