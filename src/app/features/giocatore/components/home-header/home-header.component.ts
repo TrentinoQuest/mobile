@@ -70,6 +70,7 @@ export class HomeHeaderComponent {
 
     const gamification: GamificationResult = {
       xpAwarded: 0,
+      coinsAwarded: 0,
       streakMultiplier: 1,
       currentStreak: p.currentStreak ?? 0,
       longestStreak: p.longestStreak ?? p.currentStreak ?? 0,

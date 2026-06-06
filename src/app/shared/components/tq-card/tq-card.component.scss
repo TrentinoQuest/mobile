@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.tq-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: var(--space-16);
+
+  &--elevated {
+    box-shadow: var(--shadow-md);
+  }
+
+  &--tappable {
+    cursor: pointer;
+    transition: transform 100ms ease-out;
+    -webkit-tap-highlight-color: transparent;
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}

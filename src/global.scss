@@ -734,3 +734,50 @@
     0 0 22px -2px rgba(200, 147, 15, 0.7),
     0 7px 16px -4px rgba(0, 0, 0, 0.55);
 }
+
+// =============================================================================
+// RESET IONIC — allineamento al design system
+// =============================================================================
+
+ion-card {
+  margin: 0;
+  box-shadow: none;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+ion-button {
+  --border-radius: var(--radius-md);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  height: 52px;
+}
+
+ion-content {
+  --background: var(--color-bg);
+  --padding-start: var(--space-24);
+  --padding-end: var(--space-24);
+  --padding-top: var(--space-16);
+  --padding-bottom: calc(var(--space-32) + 64px);
+}
+
+ion-input,
+ion-textarea {
+  --background: var(--color-surface-2);
+  --border-radius: var(--radius-md);
+  --padding-start: var(--space-16);
+  --color: var(--color-text-primary);
+  --placeholder-color: var(--color-text-disabled);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  height: 52px;
+
+  &.ion-focused {
+    border-color: var(--color-primary);
+  }
+
+  &.ion-invalid.ion-touched {
+    border-color: var(--color-error);
+  }
+}

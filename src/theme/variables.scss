@@ -14,6 +14,83 @@
 // Tipografia, spaziatura, raggi e timing: non dipendono dal colore.
 // Definiti una sola volta — nessuna duplicazione tra dark e light.
 // =============================================================================
+// =============================================================================
+// DESIGN SYSTEM — token indipendenti dal tema (Trentino Quest Redesign)
+// =============================================================================
+:root {
+  // Palette brand
+  --color-primary: #2d6a4f;
+  --color-primary-light: #52b788;
+  --color-primary-ultra: #d8f3dc;
+
+  --color-accent: #f4701b;
+  --color-accent-light: #ffb347;
+  --color-accent-ultra: #fff3e0;
+
+  // Neutrali
+  --color-bg: #fafaf8;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f2;
+  --color-border: #e8e8e4;
+
+  // Testo
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #6b7068;
+  --color-text-disabled: #b0b5ae;
+
+  // Semantici
+  --color-success: #40916c;
+  --color-error: #d62828;
+  --color-warning: #f4a261;
+  --color-xp: #7b2fbe;
+  --color-coins: #f4701b;
+
+  // Rarità collezionabili (immutabili)
+  --color-common: #bdc3c7;
+  --color-rare: #3498db;
+  --color-epic: #9b59b6;
+  --color-legendary: #e67e22;
+
+  // Tipografia
+  --font-display: 2rem;
+  --font-h1: 1.5rem;
+  --font-h2: 1.25rem;
+  --font-h3: 1rem;
+  --font-body: 0.9375rem;
+  --font-small: 0.8125rem;
+  --font-micro: 0.6875rem;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.7;
+
+  // Spaziatura (sistema 8pt)
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  // Border radius
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  // Elevazione
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+}
+
+// =============================================================================
+// TOKEN INDIPENDENTI DAL TEMA (legacy --tq-*)
+// =============================================================================
 :root {
   /* Famiglie tipografiche
    * NOTA: il serif e' Instrument Serif (caricato in index.html, solo italic).
