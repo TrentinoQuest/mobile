@@ -73,7 +73,8 @@
 .home__fabs {
   position: fixed;
   z-index: var(--tq-z-map-overlay);
-  bottom: calc(var(--tq-above-tab-bar) + var(--tq-space-4));
+  /* 64px sopra la tab bar: 56px obiettivo + 8px gap */
+  bottom: calc(var(--tq-above-tab-bar) + 64px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -145,8 +146,9 @@
 
 .filter-panel {
   position: fixed;
-  left: calc(var(--tq-safe-left) + var(--space-16));
-  bottom: calc(var(--tq-above-tab-bar) + 48px + 48px + var(--space-8) * 3);
+  /* A destra del gruppo FAB sinistro, allineato al FAB options (quello in basso) */
+  left: calc(var(--tq-safe-left) + var(--space-16) + 48px + var(--space-8));
+  bottom: calc(var(--tq-above-tab-bar) + 64px);
   z-index: var(--tq-z-map-overlay);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -154,11 +156,12 @@
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: filterPanelIn 150ms ease-out both;
+  transform-origin: bottom left;
 }
 
 @keyframes filterPanelIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 .filter-panel__item {
@@ -204,14 +207,13 @@
 
 /* ============================================================================
  * HUD OBIETTIVO — guida persistente "cosa fare ora"
- * Centrato tra i FAB (left/right indent = 16px + 48px FAB + 8px gap = 72px)
+ * Full-width sotto i FAB, che ora partono da 64px sopra la tab bar
  * ============================================================================ */
 .home__objective {
   position: fixed;
   bottom: var(--tq-above-tab-bar);
-  /* Indentato per stare tra i due gruppi di FAB */
-  left: calc(var(--tq-safe-left) + var(--space-16) + 48px + var(--space-8));
-  right: calc(var(--tq-safe-right) + var(--space-16) + 48px + var(--space-8));
+  left: var(--space-16);
+  right: var(--space-16);
   z-index: var(--tq-z-map-overlay);
 
   display: flex;
