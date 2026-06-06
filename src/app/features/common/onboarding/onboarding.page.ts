@@ -67,16 +67,23 @@ export class OnboardingPage implements OnDestroy {
 
   constructor() {
     addIcons({
-      arrowForwardOutline, arrowBackOutline, checkmarkCircle,
-      lockClosed, lockOpen, logoGoogle,
-      bookOutline, trophyOutline, albumsOutline, starOutline,
+      arrowForwardOutline,
+      arrowBackOutline,
+      checkmarkCircle,
+      lockClosed,
+      lockOpen,
+      logoGoogle,
+      bookOutline,
+      trophyOutline,
+      albumsOutline,
+      starOutline,
       qrCodeOutline,
     });
   }
 
   ngOnDestroy(): void {
     this.clearPressTimers();
-    this.levelUpTimers.forEach(t => clearTimeout(t));
+    this.levelUpTimers.forEach((t) => clearTimeout(t));
   }
 
   protected goToStep(index: number): void {
@@ -84,42 +91,58 @@ export class OnboardingPage implements OnDestroy {
     if (index === LEVEL_UP_STEP_INDEX) {
       this.startLevelUpAnimation();
     } else {
-      this.levelUpTimers.forEach(t => clearTimeout(t));
+      this.levelUpTimers.forEach((t) => clearTimeout(t));
       this.levelUpTimers = [];
       this.levelUpPhase.set(0);
     }
   }
 
   private startLevelUpAnimation(): void {
-    this.levelUpTimers.forEach(t => clearTimeout(t));
+    this.levelUpTimers.forEach((t) => clearTimeout(t));
     this.levelUpTimers = [];
     this.levelUpPhase.set(0);
 
     this.levelUpTimers.push(setTimeout(() => this.levelUpPhase.set(1), 300));
 
-    // Zip haptic: impatti ravvicinati all'inizio (barra veloce), si diradano
-    // man mano che la barra decelera — specchia visivamente il riempimento
-    // Offset assoluti = 300ms (start delay) + offset relativo all'animazione da 1000ms
+    // Zip haptic: 20 impatti con gap esponenziale (15ms → 116ms, ratio 1.12).
+    // Le prime 10 battute sono quasi un buzz continuo (bar 0→50%, fase veloce),
+    // le 6 medium allargano la sensazione (bar 50→80%), le 4 heavy chiudono
+    // pesanti (bar 80→100%). Specchia la decelerazione della barra CSS.
+    // Offset assoluti = 300ms (delay animazione) + offset relativo da 0ms
     const zip: [number, () => Promise<void>][] = [
-      [300 +  75, () => this.haptics.tapLight()],
-      [300 + 155, () => this.haptics.tapLight()],
-      [300 + 255, () => this.haptics.tapLight()],
-      [300 + 375, () => this.haptics.tapMedium()],
-      [300 + 515, () => this.haptics.tapMedium()],
-      [300 + 675, () => this.haptics.tapMedium()],
-      [300 + 825, () => this.haptics.tapHeavy()],
-      [300 + 960, () => this.haptics.tapHeavy()],
+      [300 + 0, () => this.haptics.tapLight()],
+      [300 + 15, () => this.haptics.tapLight()],
+      [300 + 32, () => this.haptics.tapLight()],
+      [300 + 51, () => this.haptics.tapLight()],
+      [300 + 72, () => this.haptics.tapLight()],
+      [300 + 96, () => this.haptics.tapLight()],
+      [300 + 123, () => this.haptics.tapLight()],
+      [300 + 153, () => this.haptics.tapLight()],
+      [300 + 187, () => this.haptics.tapLight()],
+      [300 + 225, () => this.haptics.tapLight()],
+      [300 + 267, () => this.haptics.tapMedium()],
+      [300 + 314, () => this.haptics.tapMedium()],
+      [300 + 367, () => this.haptics.tapMedium()],
+      [300 + 426, () => this.haptics.tapMedium()],
+      [300 + 492, () => this.haptics.tapMedium()],
+      [300 + 566, () => this.haptics.tapMedium()],
+      [300 + 649, () => this.haptics.tapHeavy()],
+      [300 + 742, () => this.haptics.tapHeavy()],
+      [300 + 846, () => this.haptics.tapHeavy()],
+      [300 + 962, () => this.haptics.tapHeavy()],
     ];
     zip.forEach(([ms, fn]) => {
       this.levelUpTimers.push(setTimeout(() => void fn(), ms));
     });
 
     // Level up appena l'animazione finisce (300 + 1000 + 100)
-    this.levelUpTimers.push(setTimeout(() => {
-      void this.haptics.levelUp();
-      this.audio.playLevelUp();
-      this.levelUpPhase.set(2);
-    }, 1400));
+    this.levelUpTimers.push(
+      setTimeout(() => {
+        void this.haptics.levelUp();
+        this.audio.playLevelUp();
+        this.levelUpPhase.set(2);
+      }, 1400),
+    );
   }
 
   protected nextStep(): void {
@@ -197,9 +220,18 @@ export class OnboardingPage implements OnDestroy {
   }
 
   private clearPressTimers(): void {
-    if (this.pressInterval) { clearInterval(this.pressInterval); this.pressInterval = null; }
-    if (this.pressTimer500) { clearTimeout(this.pressTimer500); this.pressTimer500 = null; }
-    if (this.pressTimer1000) { clearTimeout(this.pressTimer1000); this.pressTimer1000 = null; }
+    if (this.pressInterval) {
+      clearInterval(this.pressInterval);
+      this.pressInterval = null;
+    }
+    if (this.pressTimer500) {
+      clearTimeout(this.pressTimer500);
+      this.pressTimer500 = null;
+    }
+    if (this.pressTimer1000) {
+      clearTimeout(this.pressTimer1000);
+      this.pressTimer1000 = null;
+    }
   }
 
   protected async registerWithEmail(): Promise<void> {
@@ -220,7 +252,9 @@ export class OnboardingPage implements OnDestroy {
   protected async onRegistrationComplete(): Promise<void> {
     await Preferences.set({ key: 'onboardingDone', value: 'true' });
     this.http.post(`${environment.apiUrl}/onboarding/complete`, {}).subscribe({
-      error: () => { /* non bloccante */ },
+      error: () => {
+        /* non bloccante */
+      },
     });
     await this.router.navigate(['/giocatore/home']);
   }

@@ -25,9 +25,15 @@ export class TqButtonComponent {
   handleTap(): void {
     if (this.disabled || this.loading) return;
     switch (this.variant) {
-      case 'primary':   void this.haptics.tapHeavy();   break;
-      case 'secondary': void this.haptics.tapMedium();  break;
-      case 'ghost':     void this.haptics.tapLight();   break;
+      case 'primary':
+        void this.haptics.tapHeavy();
+        break;
+      case 'secondary':
+        void this.haptics.tapMedium();
+        break;
+      case 'ghost':
+        void this.haptics.tapLight();
+        break;
     }
     this.audio.playTap();
     this.tapped.emit();

@@ -791,3 +791,14 @@ ion-textarea {
   --backdrop-opacity: 0.3;
 }
 
+/* ─── Collectible Detail Modal — dialog centrato, sfondo surface ─── */
+
+.tq-collectible-detail-modal {
+  --width: 320px;
+  --height: 500px;
+  --background: var(--color-surface);
+  --border-radius: var(--radius-xl);
+  --backdrop-opacity: 0.55;
+  --box-shadow: var(--shadow-xl);
+}
+

@@ -26,11 +26,25 @@ export class AudioService {
   }
 
   // Metodi predisposti — no-op finché i file non esistono
-  playTap(): void { /* SFX_Click_Menu */ }
-  playSuccess(): void { /* SFX_Validazione_OK */ }
-  playError(): void { /* SFX_Errore_GPS */ }
-  playStamp(): void { /* SFX_Timbro_Stamp */ }
-  playCollectible(): void { /* SFX_Coriandoli_Jingle */ }
-  playLevelUp(): void { /* SFX_LevelUp */ }
-  playStreakMilestone(): void { /* SFX_Streak */ }
+  playTap(): void {
+    /* SFX_Click_Menu */
+  }
+  playSuccess(): void {
+    /* SFX_Validazione_OK */
+  }
+  playError(): void {
+    /* SFX_Errore_GPS */
+  }
+  playStamp(): void {
+    /* SFX_Timbro_Stamp */
+  }
+  playCollectible(): void {
+    /* SFX_Coriandoli_Jingle */
+  }
+  playLevelUp(): void {
+    /* SFX_LevelUp */
+  }
+  playStreakMilestone(): void {
+    /* SFX_Streak */
+  }
 }

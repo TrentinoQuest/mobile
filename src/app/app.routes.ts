@@ -119,6 +119,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/giocatore/amici/amici.page').then((m) => m.AmiciPage),
       },
+      // Tab 3b — Lega
+      {
+        path: 'lega',
+        loadComponent: () => import('./features/giocatore/lega/lega.page').then((m) => m.LegaPage),
+      },
       // Tab 4 — Profilo
       {
         path: 'profilo',

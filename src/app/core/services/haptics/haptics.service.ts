@@ -124,11 +124,17 @@ export class HapticsService {
   }
 
   // Alias backward-compat (usati dai componenti non ancora ridisegnati)
-  light(): void { void this.tapLight(); }
-  medium(): void { void this.tapMedium(); }
-  heavy(): void { void this.tapHeavy(); }
+  light(): void {
+    void this.tapLight();
+  }
+  medium(): void {
+    void this.tapMedium();
+  }
+  heavy(): void {
+    void this.tapHeavy();
+  }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
