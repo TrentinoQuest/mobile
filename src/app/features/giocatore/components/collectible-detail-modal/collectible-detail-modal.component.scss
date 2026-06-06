@@ -1,88 +1,108 @@
-/* ============================================================================
- * CollectibleDetailModalComponent
- * ============================================================================
- * Modale fullscreen per il dettaglio di un collezionabile.
- * La carta risponde al puntatore con un effetto tilt 3D (come una cartolina fisica).
- * ========================================================================== */
-
-ion-content.collectible-detail {
-  --background: var(--tq-bg);
+:host {
+  display: block;
+  width: 100%;
 }
 
-// ── Sheet ─────────────────────────────────────────────────────────────────────
+/* ─── Wrapper contenuto modal ─────────────────────────────────────────────── */
 
-.collectible-detail__sheet {
-  position: absolute;
-  inset: 0;
+.cdm {
+  padding: var(--space-12) var(--space-24) var(--space-24);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Padding parametrico: safe area in alto/basso su ogni telefono. */
-  padding: calc(var(--tq-safe-top) + var(--tq-space-2))
-    calc(var(--tq-safe-right) + var(--tq-space-6))
-    calc(var(--tq-safe-bottom) + var(--tq-space-6))
-    calc(var(--tq-safe-left) + var(--tq-space-6));
-  overflow-y: auto;
-  // Glow ocra di sfondo dietro la carta
-  background: radial-gradient(circle at 50% 38%, rgba(200, 147, 15, 0.14), transparent 58%);
-}
-
-.collectible-detail__handle {
-  width: 40px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(244, 235, 220, 0.18);
-  margin: var(--tq-space-2) auto 0;
-  flex-shrink: 0;
-}
-
-.collectible-detail__close {
-  align-self: flex-end;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(244, 235, 220, 0.08);
-  border: 1px solid rgba(244, 235, 220, 0.12);
-  color: var(--tq-bone);
-  font-size: 22px;
-  font-weight: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  line-height: 1;
-  margin: 8px 0 0;
-  flex-shrink: 0;
-}
-
-// ── Area carta 3D ─────────────────────────────────────────────────────────────
-
-.collectible-detail__card-wrap {
-  // Cattura tutti i pointer event (touch + mouse) per il tilt
-  touch-action: none;
-  cursor: pointer;
-  // margin-top auto + margin-bottom auto sull'info → carta+info centrate
-  // verticalmente nello spazio libero, su qualsiasi altezza schermo.
-  margin: auto 0 0;
-  flex-shrink: 0;
-}
-
-.collectible-detail__card {
+  gap: var(--space-12);
   position: relative;
-  width: 240px;
-  height: 300px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.65),
-    0 0 80px rgba(200, 147, 15, 0.28),
-    inset 0 1px 0 rgba(244, 235, 220, 0.07);
-  border: 1px solid rgba(200, 147, 15, 0.3);
-  // transform-style: preserve-3d non serve (no elementi 3D figli da preservare)
-  will-change: transform;
+
+  /* Bottone chiudi */
+  &__close {
+    align-self: flex-end;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    color: var(--color-text-secondary);
+    transition: background 120ms ease;
+
+    &:active { background: var(--color-border); }
+    ion-icon { font-size: 18px; }
+  }
+
+  /* Hint sotto la carta */
+  &__hint {
+    margin: 0;
+    font-size: var(--font-micro);
+    color: var(--color-text-disabled);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Scene: contiene la perspective + gestisce gli eventi puntatore */
+  &__scene {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    perspective: 1000px;
+    perspective-origin: center center;
+  }
+
+  /* Carta fisica — nessun preserve-3d, overflow:hidden per angoli puliti */
+  &__card {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.05s linear;
+
+    /* Varianti rarità: bordo + bagliore */
+    &--common   { border: 2px solid var(--color-common); }
+    &--rare     {
+      border: 2px solid var(--color-rare);
+      box-shadow: var(--shadow-lg), 0 0 18px rgba(52, 152, 219, 0.28);
+    }
+    &--epic     {
+      border: 2px solid var(--color-epic);
+      box-shadow: var(--shadow-lg), 0 0 18px rgba(155, 89, 182, 0.28);
+    }
+    &--legendary {
+      border: 2px solid var(--color-legendary);
+      box-shadow: var(--shadow-lg), 0 0 22px rgba(230, 126, 34, 0.36);
+    }
+
+    /* Flip: scaleX squish — si vede solo il "bordo" della carta poi compare la nuova faccia */
+    &--flip-out { animation: cdmFlipOut 200ms ease-in forwards; pointer-events: none; }
+    &--flip-in  { animation: cdmFlipIn  230ms ease-out forwards; pointer-events: none; }
+  }
 }
 
-.collectible-detail__card-media {
+@keyframes cdmFlipOut {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+@keyframes cdmFlipIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ─── Fronte ──────────────────────────────────────────────────────────────── */
+
+.cdm__front {
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface-2);
+}
+
+.cdm__front-img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -91,119 +111,79 @@ ion-content.collectible-detail {
   display: block;
 }
 
-// Riflesso olografico — background aggiornato via [style] binding
-.collectible-detail__card-shine {
+.cdm__front-shine {
   position: absolute;
   inset: 0;
-  border-radius: 16px;
   pointer-events: none;
-  mix-blend-mode: overlay;
+  z-index: 2;
 }
 
-// Sfumatura bassa per leggibilità del badge
-.collectible-detail__card-scrim {
+.cdm__front-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 50%);
-  pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, transparent 52%);
+  z-index: 1;
 }
 
-// Badge rarità sovrapposto alla carta
-.collectible-detail__card-rarity {
+.cdm__front-info {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  font-family: var(--tq-font-mono);
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  &.collectible-detail__card-rarity--common {
-    color: rgba(244, 235, 220, 0.6);
-    background: rgba(244, 235, 220, 0.06);
-  }
-
-  &.collectible-detail__card-rarity--uncommon {
-    color: var(--tq-forest);
-    background: rgba(107, 160, 70, 0.12);
-    border-color: rgba(107, 160, 70, 0.25);
-  }
-
-  &.collectible-detail__card-rarity--rare {
-    color: var(--tq-ocra);
-    background: rgba(200, 147, 15, 0.12);
-    border-color: rgba(200, 147, 15, 0.3);
-  }
-
-  &.collectible-detail__card-rarity--legendary {
-    color: var(--tq-rust);
-    background: rgba(196, 103, 58, 0.14);
-    border-color: rgba(196, 103, 58, 0.35);
-    box-shadow: 0 0 12px rgba(196, 103, 58, 0.25);
-  }
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  z-index: 3;
 }
 
-// ── Info ──────────────────────────────────────────────────────────────────────
+.cdm__front-name {
+  margin: 0;
+  font-size: var(--font-h2);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: var(--line-height-tight);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
 
-.collectible-detail__info {
-  width: 100%;
-  padding: 28px 0 0;
-  margin-bottom: auto;
+.cdm__front-quest {
+  margin: 0;
+  font-size: var(--font-micro);
+  color: rgba(255, 255, 255, 0.60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cdm__front-date {
+  margin: 0;
+  font-size: var(--font-micro);
+  color: rgba(255, 255, 255, 0.40);
+}
+
+/* ─── Retro ───────────────────────────────────────────────────────────────── */
+
+.cdm__back {
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: var(--space-16);
+  padding: var(--space-32) var(--space-24);
   text-align: center;
-  gap: 0;
 }
 
-.collectible-detail__name {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 30px;
-  color: var(--tq-bone);
-  line-height: 1.1;
-  margin: 0 0 12px;
-}
+.cdm__back-lore {
+  margin: 0;
+  font-size: var(--font-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-loose);
 
-.collectible-detail__quest-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  color: rgba(var(--tq-ocra-rgb), 0.75);
-  letter-spacing: 0.5px;
-  margin-bottom: 20px;
-}
-
-.collectible-detail__desc {
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(244, 235, 220, 0.6);
-  margin: 0 0 24px;
-  max-width: 320px;
-}
-
-.collectible-detail__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.collectible-detail__meta-label {
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  color: rgba(244, 235, 220, 0.35);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.collectible-detail__meta-value {
-  font-family: var(--tq-font-mono);
-  font-size: 11px;
-  color: rgba(244, 235, 220, 0.55);
+  &--mystery {
+    color: var(--color-text-disabled);
+    font-style: italic;
+  }
 }

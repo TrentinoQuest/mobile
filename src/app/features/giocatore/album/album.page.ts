@@ -169,16 +169,27 @@ export class AlbumPage implements OnInit, OnDestroy {
   protected readonly quizResult = signal<LoreAnswerResponse | null>(null);
   protected readonly quizAnswering = signal(false);
   protected readonly quizCountdown = signal('');
+  protected readonly quizError = signal('');
   private quizCountdownInterval: ReturnType<typeof setInterval> | null = null;
 
   protected readonly quizAnswered = computed(
     () => this.quizQuestion()?.alreadyAnswered === true || this.quizResult() !== null,
   );
 
+  // ── Locked sheet ────────────────────────────────────────────────────────────
+  protected readonly lockedSheetVisible = signal(false);
+
+  // ── Quiz reward animation ────────────────────────────────────────────────────
+  protected readonly quizRewardVisible = signal(false);
+  protected readonly quizRewardAmount = signal(0);
+
   // ── Missioni ────────────────────────────────────────────────────────────────
   protected readonly missionsLoading = signal(false);
   protected readonly missions = signal<DailyQuestItem[]>([]);
   protected readonly missionsCompleting = signal<Set<string>>(new Set());
+  // Missioni per cui il reward è già stato riscosso in questa sessione
+  protected readonly claimedMissions = signal<Set<string>>(new Set());
+  protected readonly missionRewardAnimating = signal<Set<string>>(new Set());
   protected readonly missionsCountdown = signal('');
   private missionsCountdownInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -243,9 +254,18 @@ export class AlbumPage implements OnInit, OnDestroy {
     }
   }
 
+  protected openLockedSheet(): void {
+    void this.haptics.tapLight();
+    this.lockedSheetVisible.set(true);
+  }
+
+  protected closeLockedSheet(): void {
+    this.lockedSheetVisible.set(false);
+  }
+
   protected async openDetail(card: AlbumCard): Promise<void> {
     if (card.locked || !card.entry) {
-      void this.haptics.tapLight();
+      this.openLockedSheet();
       return;
     }
     void this.haptics.tapMedium();
@@ -290,7 +310,6 @@ export class AlbumPage implements OnInit, OnDestroy {
 
     this.http
       .post<LoreAnswerResponse>(`${environment.apiUrl}/lore/answer`, {
-        questionId: question.id,
         optionIndex: index,
       })
       .subscribe({
@@ -300,6 +319,7 @@ export class AlbumPage implements OnInit, OnDestroy {
           if (res.correct) {
             void this.haptics.success();
             this.audio.playSuccess();
+            this.triggerQuizReward(res.coinsAwarded);
           } else {
             void this.haptics.error();
             this.audio.playError();
@@ -309,6 +329,8 @@ export class AlbumPage implements OnInit, OnDestroy {
         error: () => {
           this.quizAnswering.set(false);
           this.quizSelectedIndex.set(null);
+          this.quizError.set('Impossibile inviare la risposta. Riprova.');
+          setTimeout(() => this.quizError.set(''), 3000);
         },
       });
   }
@@ -385,19 +407,14 @@ export class AlbumPage implements OnInit, OnDestroy {
         next: (res) => {
           void this.haptics.success();
           this.audio.playSuccess();
-          // Aggiorna saldo locale e marca come completata
-          this.missions.update((quests) =>
-            quests.map((q) =>
-              q.type === type
-                ? { ...q, completed: true, completedAt: new Date().toISOString() }
-                : q,
-            ),
-          );
+          this.triggerMissionReward(type);
+          // Segna come riscosso localmente
+          const claimed = new Set(this.claimedMissions());
+          claimed.add(type);
+          this.claimedMissions.set(claimed);
           const done = new Set(this.missionsCompleting());
           done.delete(type);
           this.missionsCompleting.set(done);
-          // Aggiorna l'XP/coins nel profilo (best-effort: ricarica al prossimo focus)
-          void res;
         },
         error: () => {
           const done = new Set(this.missionsCompleting());
@@ -405,6 +422,23 @@ export class AlbumPage implements OnInit, OnDestroy {
           this.missionsCompleting.set(done);
         },
       });
+  }
+
+  private triggerQuizReward(amount: number): void {
+    this.quizRewardAmount.set(amount);
+    this.quizRewardVisible.set(true);
+    setTimeout(() => this.quizRewardVisible.set(false), 800);
+  }
+
+  private triggerMissionReward(type: string): void {
+    const animating = new Set(this.missionRewardAnimating());
+    animating.add(type);
+    this.missionRewardAnimating.set(animating);
+    setTimeout(() => {
+      const current = new Set(this.missionRewardAnimating());
+      current.delete(type);
+      this.missionRewardAnimating.set(current);
+    }, 800);
   }
 
   private startMissionsCountdown(): void {

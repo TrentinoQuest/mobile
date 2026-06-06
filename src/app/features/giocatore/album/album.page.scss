@@ -1,3 +1,8 @@
+:host {
+  display: block;
+  position: relative;
+}
+
 .taccuino {
   --background: var(--color-bg);
   --padding-start: 0;
@@ -285,21 +290,23 @@
   gap: var(--space-12);
   width: 100%;
   padding: var(--space-12) var(--space-16);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 2px solid var(--color-border);
   background: var(--color-surface);
   cursor: pointer;
   text-align: left;
   font-size: var(--font-body);
+  font-weight: 500;
   color: var(--color-text-primary);
   transition: border-color 150ms ease, background 150ms ease, opacity 150ms ease;
   -webkit-tap-highlight-color: transparent;
 
   &:active:not(:disabled) {
-    background: var(--color-surface-2);
+    background: var(--color-primary-ultra);
+    border-color: var(--color-primary-light);
   }
 
-  &--dimmed { opacity: 0.5; pointer-events: none; }
+  &--dimmed { opacity: 0.45; pointer-events: none; }
 
   &--correct {
     border-color: var(--color-success);
@@ -402,6 +409,23 @@
   color: var(--color-text-secondary);
 }
 
+.quiz-error {
+  margin: 0;
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-error-rgb), 0.08);
+  border: 1px solid rgba(var(--color-error-rgb), 0.2);
+  font-size: var(--font-small);
+  color: var(--color-error);
+  text-align: center;
+  animation: fadeIn 200ms ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* ─── Missioni ────────────────────────────────────────────────────────────── */
 
 .missions-list {
@@ -423,12 +447,16 @@
 
   &--completed {
     border-left-color: var(--color-success);
-    opacity: 0.75;
+    /* Nessuna opacity: la missione completata è pronta da riscuotere */
   }
 
   &--expired {
     border-left-color: var(--color-text-disabled);
     opacity: 0.6;
+  }
+
+  &--claimed {
+    opacity: 0.60;
   }
 }
 
@@ -437,13 +465,13 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: rgba(var(--color-primary-rgb), 0.1);
+  background: var(--color-primary-ultra);
   display: flex;
   align-items: center;
   justify-content: center;
 
   ion-icon {
-    font-size: 20px;
+    font-size: 22px;
     color: var(--color-primary);
   }
 }
@@ -492,4 +520,121 @@
   text-align: center;
   font-size: var(--font-small);
   color: var(--color-text-secondary);
+}
+
+/* ─── Wrapper animazione reward missione ──────────────────────────────────── */
+
+.mission-card-wrap {
+  position: relative;
+}
+
+.mission-reward-anim {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: #ffffff;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-small);
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(45, 106, 79, 0.55);
+  animation: rewardFloat 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Animazione reward quiz ──────────────────────────────────────────────── */
+
+.quiz-reward-anim {
+  align-self: center;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+  color: #ffffff;
+  padding: 5px 18px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-small);
+  font-weight: 700;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(244, 112, 27, 0.55);
+  animation: quizRewardFloat 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes quizRewardFloat {
+  0%   { opacity: 0; transform: scale(0.55) translateY(6px); }
+  18%  { opacity: 1; transform: scale(1.10) translateY(-3px); }
+  35%  { transform: scale(1) translateY(-6px); }
+  100% { opacity: 0; transform: scale(0.88) translateY(-52px); }
+}
+
+@keyframes rewardFloat {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.55) translateY(6px); }
+  18%  { opacity: 1; transform: translateX(-50%) scale(1.10) translateY(-3px); }
+  35%  { transform: translateX(-50%) scale(1) translateY(-6px); }
+  100% { opacity: 0; transform: translateX(-50%) scale(0.88) translateY(-52px); }
+}
+
+/* ─── Locked collectible sheet ────────────────────────────────────────────── */
+
+.locked-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    cursor: pointer;
+  }
+
+  &__panel {
+    position: relative;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-32) var(--space-24)
+      calc(var(--space-32) + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-12);
+    text-align: center;
+    animation: sheetEnter 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+}
+
+.locked-sheet__title {
+  margin: 0;
+  font-size: var(--font-h2);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.locked-sheet__text {
+  margin: 0;
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-loose);
+  max-width: 300px;
+}
+
+.locked-sheet__close {
+  margin-top: var(--space-8);
+  border: none;
+  background: none;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-8) var(--space-16);
+}
+
+@keyframes sheetEnter {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }

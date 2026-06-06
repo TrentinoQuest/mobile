@@ -1,88 +1,74 @@
-<ion-content [fullscreen]="true" class="collectible-detail">
+<div class="cdm">
 
-  <!-- Sheet principale -->
-  <div class="collectible-detail__sheet">
+  <button class="cdm__close" type="button" (click)="dismiss()" aria-label="Chiudi">
+    <ion-icon name="close-outline"></ion-icon>
+  </button>
 
-    <!-- Maniglia drag -->
-    <div class="collectible-detail__handle"></div>
+  <!-- ─── Carta ─── -->
+  <div class="cdm__scene"
+       (pointermove)="onPointerMove($event)"
+       (pointerleave)="onPointerLeave()"
+       (pointercancel)="onPointerLeave()"
+       (click)="flipCard()">
 
-    <!-- Chiudi -->
-    <button class="collectible-detail__close" (click)="dismiss()" type="button">×</button>
+    <div class="cdm__card"
+         [ngClass]="rarityClass()"
+         [class.cdm__card--flip-out]="phase() === 'out'"
+         [class.cdm__card--flip-in]="phase() === 'in'"
+         [style.transform]="tiltTransform()">
 
-    <!-- ── Area carta 3D ── -->
-    <div class="collectible-detail__card-wrap"
-         (pointermove)="onPointerMove($event)"
-         (pointerleave)="onPointerLeave()"
-         (pointercancel)="onPointerLeave()">
-
-      <div class="collectible-detail__card" [style]="cardStyle()">
-
-        <!-- Arte: immagine reale o paesaggio SVG generativo -->
-        @if (entry.collectible.imageUrl) {
-          <img class="collectible-detail__card-media"
-               [src]="entry.collectible.imageUrl"
-               [alt]="entry.collectible.name" />
-        } @else {
-          <svg class="collectible-detail__card-media" viewBox="0 0 240 300"
-               preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="cd-sky" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" [attr.stop-color]="palette.skyTop"/>
-                <stop offset="100%" [attr.stop-color]="palette.skyBot"/>
-              </linearGradient>
-            </defs>
-            <rect width="240" height="300" fill="url(#cd-sky)"/>
-            <path d="M0 200 L50 178 L110 194 L160 168 L210 184 L240 176 L240 300 L0 300 Z"
-                  [attr.fill]="palette.mid" opacity="0.9"/>
-            <path d="M0 235 L60 218 L130 230 L185 212 L240 222 L240 300 L0 300 Z"
-                  [attr.fill]="palette.fg"/>
-            <circle cx="182" cy="72" r="32" [attr.fill]="palette.sun" opacity="0.35"/>
-            <circle cx="182" cy="72" r="14" [attr.fill]="palette.sun"/>
-          </svg>
-        }
-
-        <!-- Riflesso olografico che segue il puntatore -->
-        <div class="collectible-detail__card-shine" [style]="shineStyle()"></div>
-
-        <!-- Sfumatura bassa per leggibilità -->
-        <div class="collectible-detail__card-scrim"></div>
-
-        <!-- Rarity badge -->
-        <span class="collectible-detail__card-rarity collectible-detail__card-rarity--{{ entry.collectible.rarity }}">
-          {{ entry.collectible.rarity | uppercase }}
-        </span>
-
-      </div>
-    </div>
-
-    <!-- ── Info ── -->
-    <div class="collectible-detail__info">
-
-      <h2 class="collectible-detail__name">{{ entry.collectible.name }}</h2>
-
-      @if (questName) {
-        <div class="collectible-detail__quest-tag">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1.8"
-               stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 8v4l3 3"/>
-          </svg>
-          {{ questName }}
+      @if (!showBack()) {
+        <!-- FRONTE -->
+        <div class="cdm__front">
+          @if (entry.collectible.imageUrl) {
+            <img class="cdm__front-img"
+                 [src]="entry.collectible.imageUrl"
+                 [alt]="entry.collectible.name"/>
+          } @else {
+            <svg class="cdm__front-img" viewBox="0 0 210 280"
+                 preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="210" height="280" [attr.fill]="palette.sky"/>
+              <path d="M0 185 L50 165 L105 180 L155 158 L210 170 L210 280 L0 280 Z"
+                    [attr.fill]="palette.mid" opacity="0.9"/>
+              <path d="M0 220 L60 202 L130 215 L185 196 L210 206 L210 280 L0 280 Z"
+                    [attr.fill]="palette.fg"/>
+            </svg>
+          }
+          <div class="cdm__front-shine" [style]="shineStyle()"></div>
+          <div class="cdm__front-scrim"></div>
+          <div class="cdm__front-info">
+            <tq-badge [color]="rarityBadgeColor()" size="sm">
+              {{ entry.collectible.rarity }}
+            </tq-badge>
+            <h2 class="cdm__front-name">{{ entry.collectible.name }}</h2>
+            @if (questName) {
+              <p class="cdm__front-quest">{{ questName }}</p>
+            }
+            <p class="cdm__front-date">{{ entry.unlockedAt | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
+      } @else {
+        <!-- RETRO -->
+        <div class="cdm__back">
+          @if (entry.collectible.lore) {
+            <p class="cdm__back-lore">{{ entry.collectible.lore }}</p>
+          } @else {
+            <p class="cdm__back-lore cdm__back-lore--mystery">
+              La storia di questo luogo è ancora avvolta nel mistero...
+            </p>
+          }
+          @if (entry.collectible.coordinates) {
+            <tq-button variant="secondary" iconStart="navigate-outline"
+                       (tapped)="navigateTo()">
+              Naviga verso questo luogo
+            </tq-button>
+          }
         </div>
       }
 
-      <p class="collectible-detail__desc">{{ entry.collectible.description }}</p>
+    </div><!-- /cdm__card -->
+  </div><!-- /cdm__scene -->
 
-      <div class="collectible-detail__meta">
-        <span class="collectible-detail__meta-label">Sbloccato il</span>
-        <span class="collectible-detail__meta-value">
-          {{ entry.unlockedAt | date:'dd/MM/yyyy' }}
-        </span>
-      </div>
+  <p class="cdm__hint">Tocca per girare</p>
 
-    </div>
-
-  </div>
-
-</ion-content>
+</div>

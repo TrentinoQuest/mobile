@@ -59,7 +59,7 @@
         @for (card of displayedCards(); track card.id; let i = $index) {
           @if (card.locked) {
             <div class="taccuino__card taccuino__card--locked"
-                 (click)="openDetail(card)" role="button" aria-label="Collezionabile non sbloccato">
+                 (click)="openLockedSheet()" role="button" aria-label="Collezionabile non sbloccato">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                 <rect x="5" y="11" width="14" height="9" rx="2"/>
@@ -125,53 +125,82 @@
 
             <p class="quiz-card__question">{{ q.text }}</p>
 
-            <!-- Opzioni risposta -->
-            <div class="quiz-options">
-              @for (opt of q.options; track $index) {
-                <button class="quiz-option"
-                        [class.quiz-option--selected]="quizSelectedIndex() === $index"
-                        [class.quiz-option--correct]="quizAnswered() && (quizResult()?.correctOptionIndex === $index || q.result?.correctOptionIndex === $index)"
-                        [class.quiz-option--wrong]="quizAnswered() && quizSelectedIndex() === $index && quizResult()?.correct === false"
-                        [class.quiz-option--dimmed]="quizAnswering()"
-                        [disabled]="quizAnswered() || quizAnswering()"
-                        type="button"
-                        (click)="answerQuiz($index)">
-                  <span class="quiz-option__letter">{{ ['A','B','C','D'][$index] }}</span>
-                  <span class="quiz-option__text">{{ opt }}</span>
-                  @if (quizAnswered() && (quizResult()?.correctOptionIndex === $index || q.result?.correctOptionIndex === $index)) {
-                    <ion-icon name="checkmark-circle" class="quiz-option__icon quiz-option__icon--ok"></ion-icon>
-                  } @else if (quizAnswered() && quizSelectedIndex() === $index && quizResult()?.correct === false) {
-                    <ion-icon name="close-circle" class="quiz-option__icon quiz-option__icon--err"></ion-icon>
-                  }
-                </button>
-              }
-            </div>
-
-            <!-- Spiegazione (dopo risposta) -->
-            @if (quizResult(); as res) {
-              <div class="quiz-explanation">
-                <p class="quiz-explanation__text">{{ res.explanation }}</p>
-                @if (res.correct) {
-                  <p class="quiz-explanation__reward">+{{ res.coinsAwarded }} monete</p>
-                }
-                @if (res.mapFragment) {
-                  <div class="quiz-fragment">
-                    <ion-icon name="map-outline" class="quiz-fragment__icon"></ion-icon>
-                    <p class="quiz-fragment__hint">{{ res.mapFragment.hint }}</p>
-                    <tq-button variant="ghost" (tapped)="saveMapFragment(res.mapFragment!.hint)">
-                      Ricorda questo indizio
-                    </tq-button>
+            <!-- Stato: già risposto — mostra opzioni in sola lettura con risposta corretta -->
+            @if (q.alreadyAnswered && !quizResult()) {
+              <div class="quiz-options">
+                @for (opt of q.options; track $index) {
+                  <div class="quiz-option"
+                       [class.quiz-option--correct]="q.result?.correctOptionIndex === $index">
+                    <span class="quiz-option__letter">{{ ['A','B','C','D'][$index] }}</span>
+                    <span class="quiz-option__text">{{ opt }}</span>
+                    @if (q.result?.correctOptionIndex === $index) {
+                      <ion-icon name="checkmark-circle" class="quiz-option__icon quiz-option__icon--ok"></ion-icon>
+                    }
                   </div>
                 }
               </div>
-            } @else if (q.alreadyAnswered && q.result) {
-              <div class="quiz-explanation">
-                <p class="quiz-explanation__text">{{ q.result.explanation }}</p>
+              @if (q.result?.explanation) {
+                <div class="quiz-explanation">
+                  <p class="quiz-explanation__text">{{ q.result!.explanation }}</p>
+                </div>
+              }
+
+            } @else {
+              <!-- Opzioni risposta (interattive) -->
+              <div class="quiz-options">
+                @for (opt of q.options; track $index) {
+                  <button class="quiz-option"
+                          [class.quiz-option--correct]="quizResult() !== null && quizResult()!.correctOptionIndex === $index"
+                          [class.quiz-option--wrong]="quizResult() !== null && quizSelectedIndex() === $index && !quizResult()!.correct"
+                          [class.quiz-option--dimmed]="quizAnswering()"
+                          [disabled]="quizResult() !== null || quizAnswering()"
+                          type="button"
+                          (click)="answerQuiz($index)">
+                    <span class="quiz-option__letter">{{ ['A','B','C','D'][$index] }}</span>
+                    <span class="quiz-option__text">{{ opt }}</span>
+                    @if (quizResult() !== null && quizResult()!.correctOptionIndex === $index) {
+                      <ion-icon name="checkmark-circle" class="quiz-option__icon quiz-option__icon--ok"></ion-icon>
+                    } @else if (quizResult() !== null && quizSelectedIndex() === $index && !quizResult()!.correct) {
+                      <ion-icon name="close-circle" class="quiz-option__icon quiz-option__icon--err"></ion-icon>
+                    }
+                  </button>
+                }
               </div>
+
+              <!-- Errore invio risposta -->
+              @if (quizError()) {
+                <p class="quiz-error">{{ quizError() }}</p>
+              }
+
+              <!-- Animazione reward monete (risposta corretta) -->
+              @if (quizRewardVisible()) {
+                <div class="quiz-reward-anim" aria-hidden="true">
+                  +{{ quizRewardAmount() }} monete
+                </div>
+              }
+
+              <!-- Spiegazione (dopo risposta) -->
+              @if (quizResult(); as res) {
+                <div class="quiz-explanation">
+                  <p class="quiz-explanation__text">{{ res.explanation }}</p>
+                  @if (res.correct) {
+                    <p class="quiz-explanation__reward">+{{ res.coinsAwarded }} monete</p>
+                  }
+                  @if (res.mapFragment) {
+                    <div class="quiz-fragment">
+                      <ion-icon name="map-outline" class="quiz-fragment__icon"></ion-icon>
+                      <p class="quiz-fragment__hint">{{ res.mapFragment.hint }}</p>
+                      <tq-button variant="ghost" (tapped)="saveMapFragment(res.mapFragment!.hint)">
+                        Ricorda questo indizio
+                      </tq-button>
+                    </div>
+                  }
+                </div>
+              }
             }
 
             <!-- Countdown prossima domanda -->
-            @if (quizAnswered() && quizCountdown()) {
+            @if ((quizResult() !== null || q.alreadyAnswered) && quizCountdown()) {
               <p class="quiz-countdown">Prossima domanda: {{ quizCountdown() }}</p>
             }
           </div>
@@ -193,28 +222,39 @@
 
         <div class="missions-list">
           @for (m of missions(); track m.type) {
-            <div class="mission-card" [ngClass]="missionBorderClass(m)">
-              <div class="mission-card__icon">
-                <ion-icon [name]="MISSION_ICONS[m.type]"></ion-icon>
-              </div>
-              <div class="mission-card__body">
-                <p class="mission-card__title">{{ m.title }}</p>
-                <p class="mission-card__desc">{{ m.description }}</p>
-              </div>
-              <div class="mission-card__right">
-                <div class="mission-card__rewards">
-                  <tq-badge color="xp" size="sm">+{{ m.xpReward }} XP</tq-badge>
-                  <tq-badge color="accent" size="sm">+{{ m.coinsReward }}</tq-badge>
+            <div class="mission-card-wrap">
+              <!-- Animazione reward (+N XP +N monete) -->
+              @if (missionRewardAnimating().has(m.type)) {
+                <span class="mission-reward-anim" aria-hidden="true">
+                  +{{ m.xpReward }} XP &nbsp;+{{ m.coinsReward }}
+                </span>
+              }
+
+              <div class="mission-card"
+                   [ngClass]="missionBorderClass(m)"
+                   [class.mission-card--claimed]="claimedMissions().has(m.type)">
+                <div class="mission-card__icon">
+                  <ion-icon [name]="MISSION_ICONS[m.type]"></ion-icon>
                 </div>
-                @if (m.completed) {
-                  <ion-icon name="checkmark-circle" class="mission-card__done"></ion-icon>
-                } @else {
-                  <tq-button variant="primary"
-                             [loading]="missionsCompleting().has(m.type)"
-                             (tapped)="claimMission(m.type)">
-                    Riscuoti
-                  </tq-button>
-                }
+                <div class="mission-card__body">
+                  <p class="mission-card__title">{{ m.title }}</p>
+                  <p class="mission-card__desc">{{ m.description }}</p>
+                </div>
+                <div class="mission-card__right">
+                  <div class="mission-card__rewards">
+                    <tq-badge color="xp" size="sm">+{{ m.xpReward }} XP</tq-badge>
+                    <tq-badge color="accent" size="sm">+{{ m.coinsReward }}</tq-badge>
+                  </div>
+                  @if (claimedMissions().has(m.type)) {
+                    <ion-icon name="checkmark-circle" class="mission-card__done"></ion-icon>
+                  } @else if (m.completed) {
+                    <tq-button variant="primary"
+                               [loading]="missionsCompleting().has(m.type)"
+                               (tapped)="claimMission(m.type)">
+                      Riscuoti
+                    </tq-button>
+                  }
+                </div>
               </div>
             </div>
           }
@@ -231,3 +271,25 @@
   }
 
 </ion-content>
+
+<!-- ══════════════════════════════════════════════════ LOCKED SHEET -->
+@if (lockedSheetVisible()) {
+  <div class="locked-sheet">
+    <button class="locked-sheet__backdrop" type="button"
+            (click)="closeLockedSheet()" aria-label="Chiudi"></button>
+    <div class="locked-sheet__panel">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+           stroke="var(--color-text-disabled)" stroke-width="1.5" stroke-linecap="round">
+        <rect x="5" y="11" width="14" height="9" rx="2"/>
+        <path d="M8 11V8a4 4 0 018 0v3"/>
+      </svg>
+      <h3 class="locked-sheet__title">Collezionabile misterioso</h3>
+      <p class="locked-sheet__text">
+        Esplora il Trentino e completa le quest principali per scoprire e sbloccare questo collezionabile.
+      </p>
+      <button class="locked-sheet__close" type="button" (click)="closeLockedSheet()">
+        Chiudi
+      </button>
+    </div>
+  </div>
+}
