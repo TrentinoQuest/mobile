@@ -119,16 +119,27 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/giocatore/amici/amici.page').then((m) => m.AmiciPage),
       },
-      // Tab 3b — Lega
+      // Tab 3 — Lega
       {
         path: 'lega',
         loadComponent: () => import('./features/giocatore/lega/lega.page').then((m) => m.LegaPage),
       },
-      // Tab 4 — Profilo
+      // Tab 4 — Shop
+      {
+        path: 'shop',
+        loadComponent: () => import('./features/giocatore/shop/shop.page').then((m) => m.ShopPage),
+      },
+      // Profilo (accessibile da header, non tab)
       {
         path: 'profilo',
         loadComponent: () =>
           import('./features/giocatore/profilo/profilo.page').then((m) => m.ProfiloPage),
+      },
+      // Social (accessibile da profilo, non tab)
+      {
+        path: 'social',
+        loadComponent: () =>
+          import('./features/giocatore/social/social.page').then((m) => m.SocialPage),
       },
       // Dettaglio quest (push da popup mappa / quest log)
       {
