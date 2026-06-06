@@ -98,21 +98,21 @@
           <rect x="81" y="107" width="3" height="3" rx="0.5" fill="#2d6a4f" opacity="0.5"/>
           <rect x="86" y="107" width="5" height="5" rx="0.5" fill="#2d6a4f"/>
           <!-- Raggio dal telefono al QR -->
-          <path d="M 172 84 Q 146 92 96 105"
+          <path d="M 165 82 Q 136 90 96 105"
                 stroke="#f4701b" stroke-dasharray="3 3" stroke-width="1.2"
                 opacity="0.5" fill="none"/>
-          <!-- ── Telefono (destra, compatto) ── -->
-          <rect x="172" y="44" width="48" height="80" rx="8" fill="#1a1a18"/>
-          <rect x="176" y="50" width="40" height="66" rx="5" fill="#2d6a4f" opacity="0.1"/>
+          <!-- ── Telefono (destra, leggermente più grande) ── -->
+          <rect x="165" y="22" width="80" height="133" rx="11" fill="#1a1a18"/>
+          <rect x="170" y="29" width="70" height="119" rx="7" fill="#2d6a4f" opacity="0.1"/>
           <!-- Frame di scansione — angoli -->
-          <path d="M 182 64 L 182 57 L 189 57" stroke="#f4701b" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M 212 64 L 212 57 L 205 57" stroke="#f4701b" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M 182 86 L 182 93 L 189 93" stroke="#f4701b" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-          <path d="M 212 86 L 212 93 L 205 93" stroke="#f4701b" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M 178 62 L 178 54 L 187 54" stroke="#f4701b" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M 232 62 L 232 54 L 223 54" stroke="#f4701b" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M 178 102 L 178 110 L 187 110" stroke="#f4701b" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M 232 102 L 232 110 L 223 110" stroke="#f4701b" stroke-width="2" stroke-linecap="round" fill="none"/>
           <!-- Linea di scansione animata -->
-          <rect class="step-2__scan-line" x="184" y="74" width="26" height="2" rx="1" fill="#f4701b"/>
+          <rect class="step-2__scan-line" x="180" y="82" width="50" height="2" rx="1" fill="#f4701b"/>
           <!-- Home indicator -->
-          <rect x="189" y="117" width="16" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+          <rect x="192" y="148" width="18" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
         </svg>
       </div>
       <div class="step-n__text">
@@ -284,6 +284,9 @@
         <tq-button variant="primary" [disabled]="!notebookUnlocked()" (tapped)="nextStep()">
           Avanti
         </tq-button>
+        @if (!notebookUnlocked()) {
+          <tq-button variant="ghost" (tapped)="skip()">Salta</tq-button>
+        }
       </div>
     </div>
 
