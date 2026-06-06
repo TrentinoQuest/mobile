@@ -1,254 +1,152 @@
-/* ============================================================================
- * HomeHeaderComponent — HUD identità giocatore con ring XP.
- * ============================================================================
- * Riga singola sopra la mappa:
- *   [avatar+ring | username / Lv·Titolo]  [🔥 streak]  [X/Y luoghi]
- *
- * pointer-events: none sullo :host; auto solo sui chip interattivi.
- * ========================================================================== */
-
 :host {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: calc(var(--space-16) + env(safe-area-inset-top));
+  left: var(--space-16);
+  right: var(--space-16);
   z-index: var(--tq-z-map-overlay);
   display: block;
   pointer-events: none;
-
-  background: linear-gradient(
-    to bottom,
-    rgba(var(--tq-bg-rgb), 0.72) 0%,
-    rgba(var(--tq-bg-rgb), 0.0) 100%
-  );
 }
 
-/* ── Contenitore ─────────────────────────────────────────────────────────── */
-
-.home-hud {
-  padding: calc(var(--tq-safe-top) + var(--tq-space-3)) var(--tq-space-4) var(--tq-space-3);
-  padding-right: calc(var(--tq-safe-right) + var(--tq-space-4));
-  padding-left: calc(var(--tq-safe-left) + var(--tq-space-4));
-}
-
-/* ── Riga principale ─────────────────────────────────────────────────────── */
-
-.home-hud__row {
+.hud {
   display: flex;
   align-items: center;
-  gap: var(--tq-space-2);
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-16);
+  background: rgba(250, 250, 248, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
   pointer-events: auto;
 }
 
-.home-hud__spacer {
+.hud__spacer {
   flex: 1;
 }
 
-/* ── Glass mixin locale ─────────────────────────────────────────────────── */
+/* Bottone identità: avatar + ring + badge + username */
 
-%glass {
-  background: rgba(var(--tq-bg-rgb), 0.82);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid var(--tq-hairline-strong);
-  box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
-}
-
-/* ── Card identità ───────────────────────────────────────────────────────── */
-
-.home-hud__identity {
-  @extend %glass;
+.hud__identity {
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-radius: var(--tq-radius-lg);
-  padding: 6px 12px 6px 6px;
-  outline: none;
-  text-align: left;
-  min-width: 0;
+  gap: var(--space-8);
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s;
+  min-width: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 120ms ease-out;
 
   &:active {
-    opacity: 0.78;
-    transform: scale(0.97);
+    opacity: 0.72;
   }
 }
 
-/* ── Ring XP attorno all'avatar ─────────────────────────────────────────── */
+/* Ring XP + avatar */
 
-.home-hud__ring-wrap {
+.hud__ring-wrap {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 
-.home-hud__ring-svg {
+.hud__ring-svg {
   position: absolute;
   inset: 0;
-  width: 44px;
-  height: 44px;
-  // Il cerchio SVG parte da "ore 3"; ruoto di -90° per partire da "ore 12"
+  width: 32px;
+  height: 32px;
   transform: rotate(-90deg);
 }
 
-.home-hud__ring-bg {
+.hud__ring-bg {
   fill: none;
-  stroke: rgba(var(--tq-ocra-rgb), 0.14);
+  stroke: rgba(45, 106, 79, 0.15);
   stroke-width: 2.5;
 }
 
-.home-hud__ring-fill {
+.hud__ring-fill {
   fill: none;
-  stroke: var(--tq-ocra);
+  stroke: var(--color-primary);
   stroke-width: 2.5;
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--tq-duration-slow) var(--tq-ease-out);
-  filter: drop-shadow(0 0 3px rgba(var(--tq-ocra-rgb), 0.55));
+  transition: stroke-dashoffset 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.home-hud__avatar {
+.hud__avatar {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--tq-ocra), rgba(var(--tq-ocra-rgb), 0.45));
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1a1815;
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-/* ── Testi identità ─────────────────────────────────────────────────────── */
-
-.home-hud__id-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.home-hud__username {
-  font-family: var(--tq-font-sans);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: #ffffff;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--tq-bone);
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
-}
-
-.home-hud__level-info {
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  color: var(--tq-text-secondary);
-  line-height: 1;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
-}
-
-/* ── Streak ──────────────────────────────────────────────────────────────── */
-
-.home-hud__streak {
-  @extend %glass;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: var(--tq-radius-lg);
-  padding: 7px 11px;
-  color: rgba(244, 235, 220, 0.25);
-  outline: none;
-  cursor: pointer;
-  transition: color 0.3s, border-color 0.3s, background 0.3s;
-
-  &--active {
-    color: #FF8C00;
-    background: rgba(255, 140, 0, 0.14);
-    border-color: rgba(255, 140, 0, 0.35);
-    box-shadow: 0 0 14px rgba(255, 140, 0, 0.2), 0 4px 14px -6px rgba(0, 0, 0, 0.4);
-  }
-
-  &--shielded {
-    color: #5A9BE8;
-    background: rgba(90, 155, 232, 0.12);
-    border-color: rgba(90, 155, 232, 0.35);
-  }
-
-  &:active {
-    opacity: 0.78;
-    transform: scale(0.95);
-  }
-}
-
-.home-hud__streak-flame {
-  width: 16px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.home-hud__streak-count {
-  font-family: var(--tq-font-mono);
-  font-size: 15px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
-/* ── Luoghi ──────────────────────────────────────────────────────────────── */
+/* Username */
 
-.home-hud__quests {
-  @extend %glass;
+.hud__username {
+  font-size: var(--font-small);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 96px;
+}
+
+/* Chip generici (streak, coins) */
+
+.hud__chip {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  border-radius: var(--tq-radius-lg);
-  padding: 6px 11px;
-  gap: 1px;
-}
+  gap: var(--space-4);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 
-.home-hud__quests-count {
-  font-family: var(--tq-font-mono);
-  font-size: 13px;
-  color: var(--tq-text-secondary);
-  line-height: 1;
-
-  strong {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--tq-bone);
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
   }
 }
 
-.home-hud__quests-label {
-  font-family: var(--tq-font-sans);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--tq-text-muted);
+.hud__chip-value {
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
 }
 
-.home-hud__skeleton {
-  color: var(--tq-text-disabled);
-  animation: hud-skeleton 1.5s ease-in-out infinite;
+/* Streak: accento arancio quando attiva */
+
+.hud__chip--streak {
+  cursor: pointer;
+  transition: opacity 120ms ease-out;
+
+  ion-icon { color: var(--color-text-disabled); }
+
+  &:active { opacity: 0.72; }
+
+  &.hud__chip--streak-active {
+    ion-icon { color: var(--color-accent); }
+    .hud__chip-value { color: var(--color-accent); }
+  }
 }
 
-/* ── Skeleton ────────────────────────────────────────────────────────────── */
+/* Monete: accento coins (stesso del accent) */
 
-@keyframes hud-skeleton {
-  0%, 100% { opacity: 0.4; }
-  50%       { opacity: 0.7; }
+.hud__chip--coins {
+  ion-icon { color: var(--color-coins); }
 }

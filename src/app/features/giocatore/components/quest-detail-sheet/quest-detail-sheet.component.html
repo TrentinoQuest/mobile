@@ -1,0 +1,85 @@
+<div class="quest-sheet">
+  <div class="quest-sheet__handle" aria-hidden="true"></div>
+
+  <!-- Sezione compatta (visibile a 0.38) -->
+  <div class="quest-sheet__compact">
+    <div class="quest-sheet__header">
+      <h2 class="quest-sheet__name">{{ quest?.name }}</h2>
+      <tq-badge [color]="isPrimary ? 'primary' : 'accent'" size="sm">
+        {{ isPrimary ? 'Principale' : 'Secondaria' }}
+      </tq-badge>
+    </div>
+
+    <!-- Indicatore prossimità (solo quest principale nella search area) -->
+    @if (showProximity()) {
+      <div class="quest-sheet__proximity"
+           [class.quest-sheet__proximity--warm]="proximityZone() === 'warm'"
+           [class.quest-sheet__proximity--hot]="proximityZone() === 'hot'"
+           [class.quest-sheet__proximity--burning]="proximityZone() === 'burning'">
+        @if (proximityZone() === 'warm') {
+          <ion-icon name="compass-outline" class="quest-sheet__prox-icon"></ion-icon>
+          <span>Stai andando nella direzione giusta</span>
+        }
+        @if (proximityZone() === 'hot') {
+          <ion-icon name="flame-outline" class="quest-sheet__prox-icon quest-sheet__prox-icon--pulse"></ion-icon>
+          <span>Sei vicino!</span>
+        }
+        @if (proximityZone() === 'burning') {
+          <ion-icon name="flame" class="quest-sheet__prox-icon quest-sheet__prox-icon--shake"></ion-icon>
+          <span>È qui! Cerca attorno a te!</span>
+        }
+      </div>
+    } @else {
+      <!-- Distanza in tempo reale -->
+      <div class="quest-sheet__distance">
+        <ion-icon name="navigate-outline"></ion-icon>
+        <span>{{ distanceLabel() }}</span>
+      </div>
+    }
+
+    <!-- CTA -->
+    @if (status === 'available') {
+      @if (checkInState() === 'idle') {
+        <tq-button variant="primary" (tapped)="doAction()">
+          {{ isPrimary ? 'Scansiona QR' : 'Completa Quest' }}
+        </tq-button>
+      } @else if (checkInState() === 'loading') {
+        <tq-button variant="primary" [loading]="true">Verifica…</tq-button>
+      } @else if (checkInState() === 'error') {
+        <p class="quest-sheet__error">{{ checkInError() }}</p>
+        <tq-button variant="secondary" (tapped)="retryCheckIn()">Riprova</tq-button>
+      }
+    } @else {
+      <tq-button variant="secondary" [disabled]="true">
+        {{ status === 'discovered' ? 'Completata' : 'Non disponibile' }}
+      </tq-button>
+    }
+  </div>
+
+  <!-- Sezione espansa (visibile a 0.65) -->
+  <div class="quest-sheet__expanded">
+    @if (quest?.description) {
+      <p class="quest-sheet__desc">{{ quest!.description }}</p>
+    }
+
+    <div class="quest-sheet__rewards">
+      <div class="quest-sheet__reward">
+        <ion-icon name="flash-outline"></ion-icon>
+        <span>{{ quest?.basePoints }} XP</span>
+      </div>
+      @if (isPrimary) {
+        <div class="quest-sheet__reward">
+          <ion-icon name="albums-outline"></ion-icon>
+          <span>Collezionabile</span>
+        </div>
+      }
+    </div>
+
+    @if (isPrimary && searchRadius) {
+      <div class="quest-sheet__zone-info">
+        <ion-icon name="locate-outline"></ion-icon>
+        <span>Zona di ricerca: {{ searchRadius }} m di raggio</span>
+      </div>
+    }
+  </div>
+</div>

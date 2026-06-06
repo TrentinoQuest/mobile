@@ -781,3 +781,13 @@ ion-textarea {
     border-color: var(--color-error);
   }
 }
+
+/* ─── Quest Detail Sheet (bottom sheet modale) ─── */
+
+.tq-quest-sheet {
+  --background: var(--color-surface);
+  --border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  --box-shadow: var(--shadow-xl);
+  --backdrop-opacity: 0.3;
+}
+

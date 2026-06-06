@@ -66,150 +66,140 @@
 }
 
 /* ============================================================================
- * CLUSTER CONTROLLI MAPPA
- * ============================================================================
- * Stack verticale a destra, sopra l'HUD obiettivo. Vetro smerigliato.
+ * MAP FAB — bottoni floating sulla mappa
+ * Spec CLAUDE.md Task 2: 48×48, border-radius full, surface bg, shadow-md.
  * ========================================================================== */
-.home__controls {
-  position: fixed;
-  right: calc(var(--tq-safe-right) + var(--tq-space-4));
-  /* Sopra l'HUD obiettivo (che sta a --tq-above-tab-bar). */
-  bottom: calc(var(--tq-above-tab-bar) + 78px);
-  z-index: var(--tq-z-map-overlay);
 
+.home__fabs {
+  position: fixed;
+  z-index: var(--tq-z-map-overlay);
+  bottom: calc(var(--tq-above-tab-bar) + var(--tq-space-4));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--tq-space-3);
+  gap: var(--space-8);
+
+  &--left {
+    left: calc(var(--tq-safe-left) + var(--space-16));
+  }
+
+  &--right {
+    right: calc(var(--tq-safe-right) + var(--space-16));
+  }
 }
 
-%home-glass-control {
-  background: rgba(var(--tq-bg-rgb), 0.82);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid var(--tq-hairline-strong);
-  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.5);
-}
-
-.home__ctrl {
-  @extend %home-glass-control;
-
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  color: var(--tq-bone);
+.map-fab {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.12s var(--tq-ease-out),
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
 
-  svg {
-    transition: transform 0.3s var(--tq-ease-out);
+  ion-icon, svg {
+    font-size: 22px;
+    color: var(--color-text-primary);
+    overflow: visible;
   }
 
   &:active {
-    transform: scale(0.9);
-    background: rgba(var(--tq-ocra-rgb), 0.18);
-    border-color: rgba(var(--tq-ocra-rgb), 0.4);
-    color: var(--tq-ocra);
-  }
-}
-
-/* Bussola: la lancetta nord (rust) ruota col bearing via [style.transform]. */
-.home__ctrl--compass svg {
-  overflow: visible;
-}
-
-/* Locate: accento ocra di default (azione primaria della navigazione). */
-.home__ctrl--locate {
-  color: var(--tq-ocra);
-  border-color: rgba(var(--tq-ocra-rgb), 0.35);
-}
-
-/* Quest log: badge col numero di quest ancora da fare. */
-.home__ctrl--log {
-  position: relative;
-  overflow: visible;
-}
-
-.home__ctrl-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--tq-radius-pill);
-  background: var(--tq-ocra);
-  color: #0d0d0d;
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  border: 1.5px solid var(--tq-bg);
-  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.5);
-}
-
-/* ============================================================================
- * FILTRI QUEST — chip riga sotto l'HUD superiore
- * ============================================================================ */
-.home__filters {
-  position: fixed;
-  top: calc(var(--tq-safe-top) + 62px);
-  left: calc(var(--tq-safe-left) + var(--tq-space-4));
-  right: calc(var(--tq-safe-right) + var(--tq-space-4));
-  z-index: var(--tq-z-map-overlay);
-
-  display: flex;
-  gap: var(--tq-space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.home__filter {
-  flex-shrink: 0;
-  padding: 6px 14px;
-  border-radius: var(--tq-radius-pill);
-  font-family: var(--tq-font-sans);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-
-  background: rgba(var(--tq-bg-rgb), 0.78);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid var(--tq-hairline-strong);
-  color: var(--tq-text-secondary);
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.5);
-  transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.1s ease;
-
-  &:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
+    box-shadow: var(--shadow-sm);
   }
 
   &--active {
-    background: var(--tq-ocra);
-    border-color: var(--tq-ocra);
-    color: #0d0d0d;
+    background: var(--color-primary-ultra);
+    border-color: var(--color-primary-light);
+
+    ion-icon { color: var(--color-primary); }
   }
+}
+
+.map-fab__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  border: 1.5px solid var(--color-surface);
+}
+
+/* ============================================================================
+ * PANNELLO FILTRI
+ * ========================================================================== */
+
+.filter-panel {
+  position: fixed;
+  left: calc(var(--tq-safe-left) + var(--space-16));
+  bottom: calc(var(--tq-above-tab-bar) + 48px + 48px + var(--space-8) * 3);
+  z-index: var(--tq-z-map-overlay);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: filterPanelIn 150ms ease-out both;
+}
+
+@keyframes filterPanelIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.filter-panel__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  padding: var(--space-12) var(--space-16);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 100ms ease;
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+
+  &:active {
+    background: var(--color-surface-2);
+  }
+
+  &--active {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+}
+
+.filter-panel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+
+  &--primary   { background: var(--color-primary); }
+  &--secondary { background: var(--color-accent); }
+  &--completed { background: var(--color-success); }
 }
 
 /* ============================================================================
