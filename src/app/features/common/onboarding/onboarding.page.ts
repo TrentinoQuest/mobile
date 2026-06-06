@@ -99,12 +99,12 @@ export class OnboardingPage implements OnDestroy {
     // Animazione keyframe CSS dura 2400ms
     this.levelUpTimers.push(setTimeout(() => this.levelUpPhase.set(1), 300));
 
-    // Haptic + level up appena la keyframe animation è conclusa (300 + 2400 + 100)
+    // Haptic + level up appena la keyframe animation è conclusa (300 + 1600 + 100)
     this.levelUpTimers.push(setTimeout(() => {
       void this.haptics.levelUp();
       this.audio.playLevelUp();
       this.levelUpPhase.set(2);
-    }, 2800));
+    }, 2000));
   }
 
   protected nextStep(): void {
