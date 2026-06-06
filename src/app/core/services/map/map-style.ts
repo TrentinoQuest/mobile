@@ -36,44 +36,51 @@ interface MapPalette {
   placeMinorLabel: string;
 }
 
-/** Carta geografica calda — allineata al design system brand (#fafaf8 / #2d6a4f). */
+/**
+ * Carta alpina — ispirata direttamente al design system:
+ * sfondo #fafaf8, boschi derivati da --color-primary-ultra (#d8f3dc),
+ * acqua alpina, strade bianche su carta calda.
+ */
 const LIGHT_PALETTE: MapPalette = {
-  background: '#f0ebe0',
-  water: '#a8d4ec',
-  waterLabel: '#3d6b80',
-  waterLabelHalo: '#e8f4fa',
-  wood: '#c8e0c8',
-  grass: '#d8e8cc',
-  park: '#c2ddb8',
-  landuse: '#e8e2d4',
-  buildingFlat: '#d8d0c0',
+  background: '#f5f2eb',
+  water: '#b8ddf4',
+  waterLabel: '#2e6a8a',
+  waterLabelHalo: '#edf6fc',
+  wood: '#c2e4c8', // derivato da --color-primary-ultra (#d8f3dc), leggermente più saturo
+  grass: '#ceeace',
+  park: '#b8dfc0',
+  landuse: '#ece6d8',
+  buildingFlat: '#ddd5c3',
   roadMajor: '#ffffff',
-  roadMinor: '#ede6d8',
-  roadPath: '#dfd6c4',
-  boundary: '#c0b099',
-  placeLabel: '#1a1a18',
-  placeLabelHalo: '#f0ebe0',
-  placeMinorLabel: '#6b7068',
+  roadMinor: '#f0e9dc',
+  roadPath: '#e4dbc8',
+  boundary: '#c6b49a',
+  placeLabel: '#1a1a18', // --color-text-primary esatto
+  placeLabelHalo: '#f5f2eb',
+  placeMinorLabel: '#6b7068', // --color-text-secondary esatto
 };
 
-/** Sera alpina — toni profondi, verde foresta e accenti caldi. */
+/**
+ * Sera alpina — tonalità scure con dominante verde foresta (#2d6a4f)
+ * che ricorda il primary del design system.
+ */
 const DARK_PALETTE: MapPalette = {
-  background: '#12181a',
-  water: '#0d1e2e',
-  waterLabel: '#3a5a70',
-  waterLabelHalo: '#0a1218',
-  wood: '#162a1e',
-  grass: '#182e20',
-  park: '#162c1c',
-  landuse: '#161c1e',
-  buildingFlat: '#1e2428',
-  roadMajor: '#2e3830',
-  roadMinor: '#1c2422',
-  roadPath: '#263020',
-  boundary: '#283030',
-  placeLabel: '#e8e4dc',
-  placeLabelHalo: '#0c1214',
-  placeMinorLabel: '#7a8480',
+  background: '#111814', // quasi nero con cast verde
+  water: '#0c1a28',
+  waterLabel: '#3a6a82',
+  waterLabelHalo: '#0a1210',
+  wood: '#1a2e20', // foresta scura, discendente di #2d6a4f
+  grass: '#1c3022',
+  park: '#182c1e',
+  landuse: '#171c18',
+  buildingFlat: '#222c24',
+  roadMajor: '#3c4e40', // verde muschio per le strade principali
+  roadMinor: '#222e24',
+  roadPath: '#2c3a22',
+  boundary: '#2e3e30',
+  placeLabel: '#eae6de',
+  placeLabelHalo: '#0d1210',
+  placeMinorLabel: '#7a8c7c', // verde-grigio muted
 };
 
 /** Preferisce il nome italiano, poi latino, poi quello di default del dato. */
@@ -244,7 +251,7 @@ export function buildGameMapStyle(mode: MapMode = 'light'): StyleSpecification {
         paint: {
           'fill-color': p.buildingFlat,
           'fill-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14.5, 0.85],
-          'fill-outline-color': mode === 'light' ? 'rgba(180,168,148,0.4)' : 'rgba(40,52,56,0.6)',
+          'fill-outline-color': mode === 'light' ? 'rgba(168,155,130,0.45)' : 'rgba(34,46,36,0.7)',
         },
       },
       // Label acqua

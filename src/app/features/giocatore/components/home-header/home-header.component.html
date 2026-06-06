@@ -29,7 +29,11 @@
 
   <!-- Monete -->
   <div class="hud__chip hud__chip--coins" aria-label="{{ coins() }} monete">
-    <ion-icon name="diamond-outline" aria-hidden="true"></ion-icon>
+    <svg class="hud__gem" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <polygon points="4.5,1.5 11.5,1.5 14.5,5.5 8,14.5 1.5,5.5" fill="currentColor"/>
+      <polyline points="1.5,5.5 14.5,5.5" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" fill="none"/>
+      <polyline points="4.5,1.5 6.5,5.5 8,1.5 9.5,5.5 11.5,1.5" stroke="rgba(255,255,255,0.25)" stroke-width="0.7" fill="none"/>
+    </svg>
     <span class="hud__chip-value">{{ coins() }}</span>
   </div>
 

@@ -204,16 +204,14 @@
 
 /* ============================================================================
  * HUD OBIETTIVO — guida persistente "cosa fare ora"
- * Posizionato SOPRA i FAB (2× 48px + gap 8px = 104px dal bordo FAB)
+ * Centrato tra i FAB (left/right indent = 16px + 48px FAB + 8px gap = 72px)
  * ============================================================================ */
 .home__objective {
   position: fixed;
-  /* FABs bottom edge: --tq-above-tab-bar + --tq-space-4 (16px).
-     FABs height: 48 + 8 (gap) + 48 = 104px.
-     Obiettivo: sopra i FAB con 8px di respiro. */
-  bottom: calc(var(--tq-above-tab-bar) + var(--tq-space-4) + 104px + var(--space-8));
-  left: var(--space-16);
-  right: var(--space-16);
+  bottom: var(--tq-above-tab-bar);
+  /* Indentato per stare tra i due gruppi di FAB */
+  left: calc(var(--tq-safe-left) + var(--space-16) + 48px + var(--space-8));
+  right: calc(var(--tq-safe-right) + var(--space-16) + 48px + var(--space-8));
   z-index: var(--tq-z-map-overlay);
 
   display: flex;

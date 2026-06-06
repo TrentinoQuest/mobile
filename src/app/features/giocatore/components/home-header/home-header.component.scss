@@ -148,5 +148,13 @@
 /* Monete: accento coins (stesso del accent) */
 
 .hud__chip--coins {
-  ion-icon { color: var(--color-coins); }
+  color: var(--color-coins);
+
+  .hud__chip-value { color: var(--color-coins); }
+}
+
+.hud__gem {
+  flex-shrink: 0;
+  display: block;
+  overflow: visible;
 }
