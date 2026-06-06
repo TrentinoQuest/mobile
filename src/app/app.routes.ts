@@ -3,6 +3,8 @@ import { UserRole } from '@trentino-quest/shared-types';
 import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
 import { businessStatusGuard } from './core/guards/business-status.guard';
+import { onboardingGuard } from './core/guards/onboarding.guard';
+import { landingGuard } from './core/guards/landing.guard';
 
 /**
  * Mappa di navigazione di Trentino Quest Mobile.
@@ -34,13 +36,23 @@ import { businessStatusGuard } from './core/guards/business-status.guard';
  */
 export const routes: Routes = [
   // ============================================================
+  // Onboarding — primo avvio, utente non autenticato senza onboardingDone
+  // ============================================================
+  {
+    path: 'onboarding',
+    loadComponent: () =>
+      import('./features/common/onboarding/onboarding.page').then((m) => m.OnboardingPage),
+    canActivate: [onboardingGuard],
+  },
+
+  // ============================================================
   // Landing page (default, pubblica)
   // ============================================================
   {
     path: '',
     loadComponent: () =>
       import('./features/common/landing/landing.page').then((m) => m.LandingPage),
-    canActivate: [guestGuard],
+    canActivate: [landingGuard],
   },
 
   // ============================================================

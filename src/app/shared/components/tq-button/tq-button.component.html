@@ -1,6 +1,7 @@
 <button
   class="tq-btn"
   [class]="'tq-btn--' + variant"
+  [class.tq-btn--inverted]="inverted"
   [class.tq-btn--disabled]="disabled || loading"
   [disabled]="disabled || loading"
   (click)="handleTap()"

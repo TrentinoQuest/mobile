@@ -14,6 +14,7 @@ export class TqButtonComponent {
   @Input() variant: 'primary' | 'secondary' | 'ghost' = 'primary';
   @Input() disabled = false;
   @Input() loading = false;
+  @Input() inverted = false; // bottone bianco su sfondo scuro
   @Input() iconStart?: string;
   @Input() iconEnd?: string;
   @Output() tapped = new EventEmitter<void>();
