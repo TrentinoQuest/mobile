@@ -9,69 +9,38 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { IonContent, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { RegisterPlayerRequest } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { HapticsService } from '../../../core/services/haptics/haptics.service';
+import { AudioService } from '../../../core/services/audio.service';
 
-/**
- * RegisterPlayerPage — Registrazione di un nuovo Giocatore.
- *
- * Form con 4 campi: email, username, password, conferma password.
- * Al submit chiama AuthService.registerPlayer() che salva token e user
- * in Preferences. Su successo naviga a /giocatore/home.
- *
- * Gestione errori:
- * - 409 con code EMAIL_ALREADY_EXISTS: errore inline sotto email
- * - 409 con code USERNAME_ALREADY_TAKEN: errore inline sotto username
- * - 400 e altri: toast generico
- * - Network error: gestito globalmente da errorInterceptor (naviga a /offline)
- */
 @Component({
   selector: 'app-register-player',
   templateUrl: './register-player.page.html',
   styleUrls: ['./register-player.page.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IonContent, IonSpinner],
+  imports: [ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner],
 })
 export class RegisterPlayerPage {
-  // ===========================================================================
-  // Costanti — codici errore del backend
-  // ===========================================================================
-
   private static readonly ERROR_CODE_EMAIL_EXISTS = 'EMAIL_ALREADY_EXISTS';
   private static readonly ERROR_CODE_USERNAME_TAKEN = 'USERNAME_ALREADY_TAKEN';
-
-  // ===========================================================================
-  // Dependencies
-  // ===========================================================================
 
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly haptics = inject(HapticsService);
+  private readonly audio = inject(AudioService);
 
-  // ===========================================================================
-  // Stato
-  // ===========================================================================
-
-  /** True durante il submit, blocca il bottone. */
   readonly submitting = signal(false);
-
-  /** Toggle visibilita password. */
   readonly passwordVisible = signal(false);
-
-  /** Toggle visibilita conferma password. */
   readonly confirmPasswordVisible = signal(false);
-
-  /** Errore "email gia in uso" dal backend (mostrato inline). */
   readonly emailAlreadyExists = signal(false);
-
-  /** Errore "username gia in uso" dal backend (mostrato inline). */
   readonly usernameAlreadyTaken = signal(false);
-
-  // ===========================================================================
-  // Form
-  // ===========================================================================
+  readonly shakeForm = signal(false);
 
   readonly form: FormGroup = this.fb.group(
     {
@@ -83,13 +52,8 @@ export class RegisterPlayerPage {
     { validators: passwordsMatchValidator },
   );
 
-  // ===========================================================================
-  // Lifecycle
-  // ===========================================================================
-
   constructor() {
-    // Quando l'utente modifica un campo che aveva errore inline dal backend,
-    // resettiamo l'errore: ha potenzialmente sistemato il problema.
+    addIcons({ arrowBackOutline, eyeOutline, eyeOffOutline });
     this.form.get('email')?.valueChanges.subscribe(() => {
       if (this.emailAlreadyExists()) this.emailAlreadyExists.set(false);
     });
@@ -97,10 +61,6 @@ export class RegisterPlayerPage {
       if (this.usernameAlreadyTaken()) this.usernameAlreadyTaken.set(false);
     });
   }
-
-  // ===========================================================================
-  // Azioni
-  // ===========================================================================
 
   goBack(): void {
     void this.router.navigate(['/']);
@@ -114,17 +74,16 @@ export class RegisterPlayerPage {
     this.confirmPasswordVisible.update((v) => !v);
   }
 
-  /**
-   * Submit del form. Valida, chiama il servizio, gestisce esito.
-   */
   async submit(): Promise<void> {
-    // Marca tutti i campi come touched per mostrare gli errori
     this.form.markAllAsTouched();
 
     if (this.form.invalid || this.submitting()) {
+      if (this.form.invalid) void this.haptics.error();
       return;
     }
 
+    void this.haptics.tapHeavy();
+    this.audio.playTap();
     this.submitting.set(true);
     this.emailAlreadyExists.set(false);
     this.usernameAlreadyTaken.set(false);
@@ -137,7 +96,8 @@ export class RegisterPlayerPage {
 
     this.authService.registerPlayer(request).subscribe({
       next: () => {
-        // Token salvati automaticamente da AuthService
+        void this.haptics.success();
+        this.audio.playSuccess();
         void this.router.navigate(['/giocatore/home']);
       },
       error: (err: HttpErrorResponse) => {
@@ -146,10 +106,6 @@ export class RegisterPlayerPage {
       },
     });
   }
-
-  // ===========================================================================
-  // Gestione errori
-  // ===========================================================================
 
   private async handleRegistrationError(err: HttpErrorResponse): Promise<void> {
     const code = err.error?.code as string | undefined;
@@ -163,18 +119,20 @@ export class RegisterPlayerPage {
         this.usernameAlreadyTaken.set(true);
         return;
       }
-      // 409 con codice non noto: toast generico
-      await this.showErrorToast('Email o username gia in uso.');
+      await this.showErrorToast('Email o username già in uso.');
       return;
     }
+
+    void this.haptics.error();
+    this.audio.playError();
+    this.shakeForm.set(true);
+    setTimeout(() => this.shakeForm.set(false), 400);
 
     if (err.status === 400) {
       await this.showErrorToast('Dati non validi. Controlla i campi.');
       return;
     }
-
-    // Errore generico server o non gestito
-    await this.showErrorToast('Si e verificato un errore. Riprova piu tardi.');
+    await this.showErrorToast('Si è verificato un errore. Riprova più tardi.');
   }
 
   private async showErrorToast(message: string): Promise<void> {
@@ -187,51 +145,19 @@ export class RegisterPlayerPage {
     await toast.present();
   }
 
-  // ===========================================================================
-  // Helper per template
-  // ===========================================================================
+  get email(): AbstractControl { return this.form.get('email')!; }
+  get username(): AbstractControl { return this.form.get('username')!; }
+  get password(): AbstractControl { return this.form.get('password')!; }
+  get confirmPassword(): AbstractControl { return this.form.get('confirmPassword')!; }
 
-  /** Espone i FormControl al template per accesso pulito. */
-  get email(): AbstractControl {
-    return this.form.get('email')!;
-  }
-
-  get username(): AbstractControl {
-    return this.form.get('username')!;
-  }
-
-  get password(): AbstractControl {
-    return this.form.get('password')!;
-  }
-
-  get confirmPassword(): AbstractControl {
-    return this.form.get('confirmPassword')!;
-  }
-
-  /**
-   * True se le password non coincidono e il campo confirmPassword e' stato
-   * toccato. Usato per mostrare l'errore solo dopo che l'utente ha provato.
-   */
   get passwordsMismatch(): boolean {
     return this.form.errors?.['passwordsMismatch'] === true && this.confirmPassword.touched;
   }
 }
 
-// =============================================================================
-// Validatore custom: password e conferma devono coincidere
-// =============================================================================
-
-/**
- * Validatore di gruppo: aggiunge un errore `passwordsMismatch` al FormGroup
- * se i campi `password` e `confirmPassword` non coincidono.
- */
 function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirmPassword = group.get('confirmPassword')?.value;
-
-  if (!password || !confirmPassword) {
-    return null;
-  }
-
+  if (!password || !confirmPassword) return null;
   return password === confirmPassword ? null : { passwordsMismatch: true };
 }
