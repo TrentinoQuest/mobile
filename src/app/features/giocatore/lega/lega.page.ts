@@ -1,23 +1,65 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
+import {
+  IonContent,
+  IonIcon,
+  ActionSheetController,
+  ToastController,
+} from '@ionic/angular/standalone';
 import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { diamondOutline, diamond, flameOutline, flame, star, personOutline } from 'ionicons/icons';
+import {
+  diamondOutline,
+  diamond,
+  flameOutline,
+  flame,
+  star,
+  personOutline,
+  personAddOutline,
+  peopleOutline,
+  closeOutline,
+  checkmarkOutline,
+  searchOutline,
+  trashOutline,
+  trophyOutline,
+  chevronForward,
+} from 'ionicons/icons';
 import { LeagueTier } from '@trentino-quest/shared-types';
 import type {
   LeagueCurrentView,
-  LeagueHistoryEntry,
   LeagueMemberView,
 } from '@trentino-quest/shared-types';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
-import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
-import type { BadgeColor } from '../../../shared/components/tq-badge/tq-badge.component';
+import { AudioService } from '../../../core/services/audio.service';
+import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { environment } from '../../../../environments/environment';
 
-type LeagaTab = 'classifica' | 'storico';
+// ─── Tipi ─────────────────────────────────────────────────────────────────────
 
-// Mappa tier → icona Ionicons
+type LegaTab = 'classifica' | 'amici';
+
+interface Friend {
+  friendshipId: string;
+  playerId: string;
+  username: string;
+}
+
+interface FriendRequest {
+  friendshipId: string;
+  requesterId: string;
+  username: string;
+  createdAt: string;
+}
+
+interface PlayerSearchResult {
+  playerId: string;
+  username: string;
+}
+
+// ─── Costanti ─────────────────────────────────────────────────────────────────
+
 const TIER_ICONS: Record<LeagueTier, string> = {
   [LeagueTier.PORFIDO]: 'diamond-outline',
   [LeagueTier.MARMO]: 'diamond',
@@ -26,7 +68,6 @@ const TIER_ICONS: Record<LeagueTier, string> = {
   [LeagueTier.DOLOMITI]: 'star',
 };
 
-// Mappa tier → colore tema testuale
 const TIER_LABEL: Record<LeagueTier, string> = {
   [LeagueTier.PORFIDO]: 'Lega Porfido',
   [LeagueTier.MARMO]: 'Lega Marmo',
@@ -35,7 +76,6 @@ const TIER_LABEL: Record<LeagueTier, string> = {
   [LeagueTier.DOLOMITI]: 'Lega Dolomiti',
 };
 
-// Gradienti avatar deterministici
 const AVATAR_GRADIENTS = [
   'linear-gradient(135deg,#5A8A3A,#2F4A1F)',
   'linear-gradient(135deg,#8E6314,#4A3416)',
@@ -47,18 +87,8 @@ const AVATAR_GRADIENTS = [
 
 const SHORT_DAYS = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 const SHORT_MONTHS = [
-  'Gen',
-  'Feb',
-  'Mar',
-  'Apr',
-  'Mag',
-  'Giu',
-  'Lug',
-  'Ago',
-  'Set',
-  'Ott',
-  'Nov',
-  'Dic',
+  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+  'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic',
 ];
 
 @Component({
@@ -66,85 +96,230 @@ const SHORT_MONTHS = [
   templateUrl: './lega.page.html',
   styleUrls: ['./lega.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, NgClass, TqBadgeComponent],
+  imports: [IonContent, IonIcon, NgClass, FormsModule, TqButtonComponent],
 })
 export class LegaPage implements OnInit {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly haptics = inject(HapticsService);
+  private readonly audio = inject(AudioService);
+  private readonly actionSheet = inject(ActionSheetController);
+  private readonly toastCtrl = inject(ToastController);
 
   protected readonly LeagueTier = LeagueTier;
   protected readonly TIER_ICONS = TIER_ICONS;
   protected readonly TIER_LABEL = TIER_LABEL;
 
-  protected readonly activeTab = signal<LeagaTab>('classifica');
-  protected readonly loading = signal(false);
-  protected readonly historyLoading = signal(false);
+  // ── Tab ───────────────────────────────────────────────────────────────────
+  protected readonly activeTab = signal<LegaTab>('classifica');
 
+  // ── Lega ──────────────────────────────────────────────────────────────────
+  protected readonly leagueLoading = signal(false);
   protected readonly current = signal<LeagueCurrentView | null>(null);
-  protected readonly history = signal<LeagueHistoryEntry[]>([]);
-  protected readonly historyLoaded = signal(false);
+
+  // ── Amici ─────────────────────────────────────────────────────────────────
+  protected readonly friendsLoading = signal(false);
+  protected readonly requestsLoading = signal(false);
+  protected readonly friends = signal<Friend[]>([]);
+  protected readonly requests = signal<FriendRequest[]>([]);
+  protected readonly requestsBadge = computed(() => this.requests().length);
+
+  // ── Ricerca amici ─────────────────────────────────────────────────────────
+  protected readonly addFriendOpen = signal(false);
+  protected readonly searchQuery = signal('');
+  protected readonly searchResults = signal<PlayerSearchResult[]>([]);
+  protected readonly searchLoading = signal(false);
+  protected readonly sentRequests = signal<Set<string>>(new Set());
+
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    addIcons({ diamondOutline, diamond, flameOutline, flame, star, personOutline });
+    addIcons({
+      diamondOutline, diamond, flameOutline, flame, star,
+      personOutline, personAddOutline, peopleOutline,
+      closeOutline, checkmarkOutline, searchOutline, trashOutline, trophyOutline, chevronForward,
+    });
   }
 
   ngOnInit(): void {
     this.loadCurrent();
+    this.loadFriends();
+    this.loadRequests();
   }
 
-  protected setTab(tab: LeagaTab): void {
+  // ══════════════════════════════════════════════════════════════════════════
+  // TAB
+  // ══════════════════════════════════════════════════════════════════════════
+
+  protected setTab(tab: LegaTab): void {
     if (this.activeTab() === tab) return;
     void this.haptics.tapLight();
     this.activeTab.set(tab);
-    if (tab === 'storico' && !this.historyLoaded()) {
-      this.loadHistory();
-    }
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LEGA
+  // ══════════════════════════════════════════════════════════════════════════
 
   private loadCurrent(): void {
-    this.loading.set(true);
+    this.leagueLoading.set(true);
     this.http.get<LeagueCurrentView>(`${environment.apiUrl}/leagues/current`).subscribe({
-      next: (data) => {
-        this.current.set(data);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
+      next: (data) => { this.current.set(data); this.leagueLoading.set(false); },
+      error: () => this.leagueLoading.set(false),
     });
   }
 
-  private loadHistory(): void {
-    this.historyLoading.set(true);
-    this.http.get<LeagueHistoryEntry[]>(`${environment.apiUrl}/leagues/history`).subscribe({
-      next: (data) => {
-        this.history.set(data);
-        this.historyLoading.set(false);
-        this.historyLoaded.set(true);
-      },
-      error: () => this.historyLoading.set(false),
+  // ══════════════════════════════════════════════════════════════════════════
+  // AMICI
+  // ══════════════════════════════════════════════════════════════════════════
+
+  private loadFriends(): void {
+    this.friendsLoading.set(true);
+    this.http.get<Friend[]>(`${environment.apiUrl}/social/friends`).subscribe({
+      next: (data) => { this.friends.set(data); this.friendsLoading.set(false); },
+      error: () => this.friendsLoading.set(false),
     });
   }
 
-  // Formatta "2024-06-03" → "Lun 3 Giu"
+  private loadRequests(): void {
+    this.requestsLoading.set(true);
+    this.http.get<FriendRequest[]>(`${environment.apiUrl}/social/friends/requests`).subscribe({
+      next: (data) => { this.requests.set(data); this.requestsLoading.set(false); },
+      error: () => this.requestsLoading.set(false),
+    });
+  }
+
+  protected acceptRequest(req: FriendRequest): void {
+    void this.haptics.success();
+    this.http.post(`${environment.apiUrl}/social/friends/${req.friendshipId}/accept`, {}).subscribe({
+      next: async () => {
+        this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
+        this.loadFriends();
+        const t = await this.toastCtrl.create({
+          message: 'Amicizia accettata!', duration: 2500, position: 'bottom', cssClass: 'tq-toast',
+        });
+        await t.present();
+      },
+      error: () => {},
+    });
+  }
+
+  protected rejectRequest(req: FriendRequest): void {
+    void this.haptics.dismiss();
+    this.http.post(`${environment.apiUrl}/social/friends/${req.friendshipId}/reject`, {}).subscribe({
+      next: () => {
+        this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
+      },
+      error: () => {},
+    });
+  }
+
+  protected async friendTap(friend: Friend): Promise<void> {
+    void this.haptics.tapLight();
+    const sheet = await this.actionSheet.create({
+      header: friend.username,
+      buttons: [
+        {
+          text: 'Sfida co-op',
+          icon: 'trophy-outline',
+          handler: () => {
+            void this.router.navigate(['/giocatore/coop'], {
+              state: { partnerId: friend.playerId, partnerUsername: friend.username },
+            });
+          },
+        },
+        {
+          text: 'Rimuovi amico',
+          role: 'destructive',
+          icon: 'trash-outline',
+          handler: () => {
+            void this.haptics.dismiss();
+            this.http.delete(`${environment.apiUrl}/social/friends/${friend.friendshipId}`).subscribe({
+              next: async () => {
+                this.friends.update((list) => list.filter((f) => f.friendshipId !== friend.friendshipId));
+                const t = await this.toastCtrl.create({
+                  message: `${friend.username} rimosso dagli amici`,
+                  duration: 2500, position: 'bottom', cssClass: 'tq-toast',
+                });
+                await t.present();
+              },
+              error: () => {},
+            });
+          },
+        },
+        { text: 'Annulla', role: 'cancel' },
+      ],
+    });
+    await sheet.present();
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // RICERCA AMICI
+  // ══════════════════════════════════════════════════════════════════════════
+
+  protected openAddFriend(): void {
+    void this.haptics.tapMedium();
+    this.addFriendOpen.set(true);
+    this.searchQuery.set('');
+    this.searchResults.set([]);
+  }
+
+  protected closeAddFriend(): void {
+    void this.haptics.tapLight();
+    this.addFriendOpen.set(false);
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+  }
+
+  protected onSearchInput(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    const q = this.searchQuery().trim();
+    if (!q) { this.searchResults.set([]); return; }
+    this.searchTimer = setTimeout(() => this.doSearch(q), 400);
+  }
+
+  private doSearch(username: string): void {
+    this.searchLoading.set(true);
+    // Ricerca case-insensitive: query in minuscolo
+    const q = username.toLowerCase();
+    this.http
+      .get<PlayerSearchResult[]>(`${environment.apiUrl}/players?username=${encodeURIComponent(q)}`)
+      .subscribe({
+        next: (data) => { this.searchResults.set(data); this.searchLoading.set(false); },
+        error: () => { this.searchResults.set([]); this.searchLoading.set(false); },
+      });
+  }
+
+  protected sendFriendRequest(player: PlayerSearchResult): void {
+    void this.haptics.tapMedium();
+    this.sentRequests.update((s) => new Set(s).add(player.playerId));
+    this.http
+      .post(`${environment.apiUrl}/social/friends/request`, { recipientId: player.playerId })
+      .subscribe({
+        error: () => {
+          this.sentRequests.update((s) => { const n = new Set(s); n.delete(player.playerId); return n; });
+        },
+      });
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // HELPER TEMPLATE
+  // ══════════════════════════════════════════════════════════════════════════
+
   protected formatDate(iso: string): string {
     const d = new Date(iso);
     return `${SHORT_DAYS[d.getDay()]} ${d.getDate()} ${SHORT_MONTHS[d.getMonth()]}`;
   }
 
-  // Gradiente avatar deterministico da playerId
-  protected avatarGradient(playerId: string): string {
+  protected avatarGradient(id: string): string {
     let seed = 0;
-    for (let i = 0; i < playerId.length; i++) {
-      seed = (seed * 31 + playerId.charCodeAt(i)) & 0xffffffff;
-    }
+    for (let i = 0; i < id.length; i++) seed = (seed * 31 + id.charCodeAt(i)) & 0xffffffff;
     return AVATAR_GRADIENTS[Math.abs(seed) % AVATAR_GRADIENTS.length];
   }
 
-  // Iniziale username per avatar
   protected avatarInitial(username: string): string {
     return username.charAt(0).toUpperCase();
   }
 
-  // Classi CSS per ogni riga classifica
   protected rowClasses(m: LeagueMemberView): Record<string, boolean> {
     return {
       'league-row': true,
@@ -152,18 +327,5 @@ export class LegaPage implements OnInit {
       'league-row--promotion': m.rank >= 1 && m.rank <= 5,
       'league-row--relegation': m.rank >= 26,
     };
-  }
-
-  // Colore badge storico
-  protected historyBadgeColor(entry: LeagueHistoryEntry): BadgeColor {
-    if (entry.promoted) return 'success';
-    if (entry.relegated) return 'error';
-    return 'primary';
-  }
-
-  protected historyBadgeLabel(entry: LeagueHistoryEntry): string {
-    if (entry.promoted) return 'Promosso';
-    if (entry.relegated) return 'Retrocesso';
-    return 'Mantenuto';
   }
 }

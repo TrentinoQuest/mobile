@@ -6,66 +6,51 @@
   --padding-bottom: 0;
 }
 
-/* ─── Header ──────────────────────────────────────────────────────────────── */
+/* ─── Header ─────────────────────────────────────────────────────────────── */
 
 .lega__header {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: calc(var(--space-16) + env(safe-area-inset-top)) var(--space-24) var(--space-8);
-  background: rgba(var(--color-bg-rgb), 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: calc(var(--space-16) + env(safe-area-inset-top)) var(--space-24) var(--space-12);
+  background: rgba(250, 250, 248, 0.94);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--color-border);
 }
 
-.lega__tier-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  margin-bottom: var(--space-4);
-}
-
-.lega__tier-icon {
-  font-size: 22px;
-  color: var(--color-primary);
-}
-
-.lega__tier-name {
-  margin: 0;
-  font-size: var(--font-h2);
-  font-weight: 600;
+.lega__title {
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-h1);
+  font-weight: 700;
   color: var(--color-text-primary);
 }
 
-.lega__week {
-  margin: 0 0 var(--space-12);
-  font-size: var(--font-small);
-  color: var(--color-text-secondary);
-}
-
-/* ─── Segment control ─────────────────────────────────────────────────────── */
+/* ─── Segment ────────────────────────────────────────────────────────────── */
 
 .lega__segment {
   display: flex;
   background: var(--color-surface-2);
   border-radius: var(--radius-full);
   padding: 3px;
+  gap: 2px;
 }
 
 .lega__seg-btn {
   flex: 1;
   border: none;
-  background: none;
+  background: transparent;
   border-radius: var(--radius-full);
-  padding: var(--space-8) var(--space-16);
+  padding: 8px 12px;
   font-size: var(--font-small);
   font-weight: 500;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 200ms ease-out;
+  transition: all 180ms ease-out;
   -webkit-tap-highlight-color: transparent;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
 
   &--active {
     background: var(--color-surface);
@@ -75,259 +60,490 @@
   }
 }
 
-/* ─── Body scrollabile ────────────────────────────────────────────────────── */
-
-.lega__body {
-  padding: var(--space-16) var(--space-16) calc(var(--space-32) + 64px);
-}
-
-/* ─── Spinner ─────────────────────────────────────────────────────────────── */
-
-.lega__spinner {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2.5px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  animation: spin 0.8s linear infinite;
-  margin: var(--space-48) auto;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Card stats personali ────────────────────────────────────────────────── */
-
-.lega__my-stats {
+.lega__seg-badge {
+  min-width: 18px;
+  height: 18px;
+  background: var(--color-error);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: var(--space-16);
-  padding: var(--space-12) var(--space-16);
-  margin-bottom: var(--space-16);
-  background: var(--color-primary-ultra);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  justify-content: center;
+  padding: 0 4px;
 }
 
-.lega__my-rank {
-  font-size: var(--font-h1);
-  font-weight: 700;
-  color: var(--color-primary);
-  line-height: 1;
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+
+.lega__body {
+  padding: var(--space-16) var(--space-24) calc(var(--space-32) + 80px);
+}
+
+/* ─── Spinner ────────────────────────────────────────────────────────────── */
+
+.lega__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: legaSpin 700ms linear infinite;
+  margin: var(--space-48) auto 0;
+}
+
+@keyframes legaSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Empty state ────────────────────────────────────────────────────────── */
+
+.lega__empty {
+  text-align: center;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  padding: var(--space-32) 0;
+}
+
+.lega__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-48) var(--space-24);
+  text-align: center;
+}
+
+.lega__empty-icon { font-size: 56px; color: var(--color-text-disabled); }
+.lega__empty-title { margin: 0; font-size: var(--font-h3); font-weight: 600; color: var(--color-text-primary); }
+.lega__empty-sub { margin: 0; font-size: var(--font-small); color: var(--color-text-secondary); line-height: var(--line-height-loose); }
+
+/* ─── Info card lega ─────────────────────────────────────────────────────── */
+
+.lega__info-card {
+  background: var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-16);
+  margin-bottom: var(--space-16);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
+.lega__info-tier {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.lega__info-icon { font-size: 28px; color: rgba(255, 255, 255, 0.9); flex-shrink: 0; }
+.lega__info-name { margin: 0 0 2px; font-size: var(--font-h3); font-weight: 700; color: #fff; }
+.lega__info-week { margin: 0; font-size: var(--font-micro); color: rgba(255, 255, 255, 0.7); }
+
+.lega__info-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   flex-shrink: 0;
 }
 
-.lega__my-xp-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.lega__info-rank { font-size: var(--font-h1); font-weight: 800; color: #fff; line-height: 1; }
+.lega__info-xp { font-size: var(--font-micro); color: rgba(255, 255, 255, 0.7); }
 
-.lega__my-xp-label {
-  font-size: var(--font-micro);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
+/* ─── Classifica ─────────────────────────────────────────────────────────── */
 
-.lega__my-xp-value {
-  font-size: var(--font-h3);
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-/* ─── Lista classifica ────────────────────────────────────────────────────── */
-
-.lega__list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* ─── Separatori zone ─────────────────────────────────────────────────────── */
+.lega__list { display: flex; flex-direction: column; gap: var(--space-4); }
 
 .lega__separator {
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  padding: var(--space-8) var(--space-8);
+  padding: var(--space-8) 0 var(--space-4);
   font-size: var(--font-micro);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 
-  &::before, &::after {
-    content: '';
-    flex: 1;
-    height: 2px;
-    border-radius: var(--radius-full);
-  }
-
-  &--promotion {
-    color: var(--color-success);
-    &::before, &::after { background: var(--color-success); }
-  }
-
-  &--relegation {
-    color: var(--color-error);
-    &::before, &::after { background: var(--color-error); }
-  }
+  &--promotion { color: var(--color-success); }
+  &--relegation { color: var(--color-error); }
 }
 
-/* ─── Riga classifica ─────────────────────────────────────────────────────── */
+.lega__separator-line {
+  flex: 1;
+  height: 1.5px;
+  border-radius: var(--radius-full);
+
+  .lega__separator--promotion & { background: var(--color-success); opacity: 0.4; }
+  .lega__separator--relegation & { background: var(--color-error); opacity: 0.4; }
+}
 
 .league-row {
   display: flex;
   align-items: center;
-  gap: var(--space-12);
-  padding: var(--space-12) var(--space-8);
+  padding: var(--space-12);
   border-radius: var(--radius-md);
-  border-left: 3px solid transparent;
-  transition: background 150ms ease;
+  gap: var(--space-12);
+  background: var(--color-surface);
+  border: 1px solid transparent;
+  transition: background 120ms ease;
 
   &--me {
     background: var(--color-primary-ultra);
-    border-left-color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
   }
 
-  &--promotion:not(&--me) {
-    background: rgba(var(--color-success-rgb), 0.05);
-    border-left-color: var(--color-success);
+  &--promotion {
+    background: rgba(64, 145, 108, 0.07);
+    border-color: rgba(64, 145, 108, 0.2);
   }
 
-  &--relegation:not(&--me) {
-    background: rgba(var(--color-error-rgb), 0.04);
-    border-left-color: var(--color-error);
+  &--relegation {
+    background: rgba(214, 40, 40, 0.05);
+    border-color: rgba(214, 40, 40, 0.15);
   }
 
   &__rank {
-    flex-shrink: 0;
     width: 28px;
     font-size: var(--font-small);
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-weight: 700;
+    color: var(--color-text-disabled);
     text-align: center;
+    flex-shrink: 0;
 
-    &--top {
-      color: var(--color-accent);
-      font-weight: 700;
-    }
+    &--top { color: var(--color-accent); font-size: var(--font-body); }
   }
 
   &__avatar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-full);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-micro);
+    font-size: var(--font-small);
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    color: #fff;
   }
 
   &__info {
     flex: 1;
-    min-width: 0;
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    overflow: hidden;
+    min-width: 0;
   }
 
   &__username {
-    font-size: var(--font-small);
-    font-weight: 500;
+    font-size: var(--font-body);
+    font-weight: 600;
     color: var(--color-text-primary);
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
-  &__friend-icon {
-    flex-shrink: 0;
-    font-size: 12px;
-    color: var(--color-text-disabled);
-  }
+  &__friend-icon { font-size: 14px; color: var(--color-primary-light); flex-shrink: 0; }
+  &__xp { font-size: var(--font-small); font-weight: 700; color: var(--color-primary); flex-shrink: 0; }
+}
 
-  &__xp {
-    flex-shrink: 0;
-    font-size: var(--font-small);
-    font-weight: 600;
-    color: var(--color-text-secondary);
+/* ─── Bottone aggiungi amico ─────────────────────────────────────────────── */
+
+.add-friend-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  width: 100%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px var(--space-24);
+  font-size: var(--font-h3);
+  font-weight: 600;
+  box-shadow: 0 4px 0 #1b4d38;
+  cursor: pointer;
+  margin-bottom: var(--space-16);
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+
+  ion-icon { font-size: 20px; }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #1b4d38;
   }
 }
 
-/* ─── Messaggio vuoto ─────────────────────────────────────────────────────── */
+/* ─── Richiesta in arrivo (inline nella lista) ───────────────────────────── */
 
-.lega__empty {
-  text-align: center;
-  padding: var(--space-48) var(--space-16);
-  font-size: var(--font-body);
-  color: var(--color-text-disabled);
-}
-
-/* ─── Storico stagioni ────────────────────────────────────────────────────── */
-
-.history-list {
+.request-inline-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-primary-light);
+  box-shadow: var(--shadow-sm), 0 0 0 2px rgba(82, 183, 136, 0.12);
+  padding: var(--space-16);
+  margin-bottom: var(--space-8);
   display: flex;
   flex-direction: column;
   gap: var(--space-12);
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+  }
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-body);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__username {
+    font-size: var(--font-body);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__sub { font-size: var(--font-micro); color: var(--color-text-secondary); }
+
+  &__actions { display: flex; gap: var(--space-8); }
 }
 
-.history-card {
+.request-inline-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px var(--space-16);
+  font-size: var(--font-small);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+
+  &--accept {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 3px 0 #1b4d38;
+
+    &:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1b4d38;
+    }
+  }
+
+  &--reject {
+    background: rgba(214, 40, 40, 0.08);
+    color: var(--color-error);
+    border: 1.5px solid rgba(214, 40, 40, 0.3);
+
+    &:active { background: rgba(214, 40, 40, 0.15); }
+  }
+}
+
+/* ─── Lista amici ────────────────────────────────────────────────────────── */
+
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  padding: var(--space-12) var(--space-16);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease;
+
+  &:active { background: var(--color-surface-2); }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-small);
+    font-weight: 700;
+    color: #fff;
+  }
+
+  &__username {
+    font-size: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    flex: 1;
+  }
+
+  &__chevron {
+    font-size: 16px;
+    color: var(--color-text-disabled);
+    flex-shrink: 0;
+  }
+}
+
+/* ─── Modal ricerca amici ────────────────────────────────────────────────── */
+
+.add-friend-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+    cursor: default;
+  }
+
+  &__panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-24) var(--space-24) calc(var(--space-32) + env(safe-area-inset-bottom));
+    max-height: 80dvh;
+    display: flex;
+    flex-direction: column;
+    animation: legaPanelUp 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes legaPanelUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-12) var(--space-16);
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    margin-bottom: var(--space-16);
   }
 
-  &__tier-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-8);
-  }
-
-  &__tier-icon {
-    font-size: 18px;
-    color: var(--color-text-secondary);
-
-    &--dolomiti {
-      color: var(--color-accent);
-    }
-  }
-
-  &__tier-name {
-    font-size: var(--font-h3);
-    font-weight: 600;
+  &__title {
+    margin: 0;
+    font-size: var(--font-h2);
+    font-weight: 700;
     color: var(--color-text-primary);
   }
 
-  &__body {
+  &__close {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--space-12) var(--space-16);
-  }
-
-  &__period {
-    font-size: var(--font-small);
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     color: var(--color-text-secondary);
+    flex-shrink: 0;
+
+    ion-icon { font-size: 18px; }
   }
 
-  &__rank {
-    font-size: var(--font-h2);
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-16);
+    height: 52px;
+    margin-bottom: var(--space-16);
+
+    &:focus-within { border-color: var(--color-primary); }
+  }
+
+  &__search-icon { font-size: 18px; color: var(--color-text-disabled); flex-shrink: 0; }
+
+  &__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: var(--font-body);
+    color: var(--color-text-primary);
+    outline: none;
+
+    &::placeholder { color: var(--color-text-disabled); }
+  }
+
+  &__results { flex: 1; overflow-y: auto; min-height: 120px; }
+  &__empty { text-align: center; font-size: var(--font-small); color: var(--color-text-secondary); padding: var(--space-24) 0; }
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child { border-bottom: none; }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-small);
     font-weight: 700;
-    color: var(--color-primary);
+    color: #fff;
+  }
+
+  &__username { font-size: var(--font-body); font-weight: 600; color: var(--color-text-primary); flex: 1; }
+
+  &__sent {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--font-small);
+    font-weight: 600;
+    color: var(--color-success);
+    flex-shrink: 0;
+
+    ion-icon { font-size: 16px; }
   }
 }

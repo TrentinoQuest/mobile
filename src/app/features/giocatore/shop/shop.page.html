@@ -25,11 +25,7 @@
       } @else if (offersError()) {
         <p class="shop__empty">{{ offersError() }}</p>
       } @else if (offers().length === 0) {
-        <div class="shop__empty-state">
-          <ion-icon name="bag-outline" class="shop__empty-icon"></ion-icon>
-          <p class="shop__empty-title">Nessuna offerta</p>
-          <p class="shop__empty-sub">Le offerte dei partner locali appariranno qui.</p>
-        </div>
+        <p class="shop__empty">Non ci sono offerte disponibili al momento.</p>
       } @else {
 
         <!-- Burst animazione acquisto completato -->

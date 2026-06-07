@@ -1,0 +1,190 @@
+<ion-content [fullscreen]="true" class="coop">
+
+  <!-- ════════════════════════════════════════════════════════════ HEADER -->
+  <div class="coop__header">
+    <button class="coop__back-btn" type="button" (click)="goBack()" aria-label="Indietro">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </button>
+    <h1 class="coop__title">Sfide Co-op</h1>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ CONTENUTO -->
+  @if (loading()) {
+
+    <div class="coop__loading">
+      <ion-spinner name="crescent" class="coop__spinner"></ion-spinner>
+    </div>
+
+  } @else if (challenges().length === 0) {
+
+    <div class="coop__empty">
+      <ion-icon name="people-outline" class="coop__empty-icon"></ion-icon>
+      <h2 class="coop__empty-title">Nessuna sfida attiva</h2>
+      <p class="coop__empty-sub">Lancia una sfida con un amico e esplorate insieme il Trentino.</p>
+    </div>
+
+  } @else {
+
+    <div class="coop__list">
+      @for (c of challenges(); track c.id) {
+
+        <div class="coop-card"
+             [class.coop-card--completed]="c.status === 'completed'"
+             [class.coop-card--expired]="c.status === 'expired'">
+
+          <!-- Partner header -->
+          <div class="coop-card__header">
+            <div class="coop-card__avatar"
+                 [style.background]="avatarGradient(getPartnerId(c))"
+                 aria-hidden="true">
+              {{ avatarInitial(partnerUsername(c)) }}
+            </div>
+            <span class="coop-card__partner">{{ partnerUsername(c) }}</span>
+            <span class="coop-card__expires">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ expiresLabel(c) }}
+            </span>
+          </div>
+
+          <!-- Tipo sfida -->
+          <div class="coop-card__type-row">
+            <ion-icon [name]="CHALLENGE_INFO[c.type].icon" class="coop-card__type-icon"></ion-icon>
+            <span class="coop-card__type-label">{{ CHALLENGE_INFO[c.type].label }}</span>
+          </div>
+
+          <!-- Barra progresso doppia -->
+          <div class="coop-card__progress-track"
+               role="progressbar"
+               [attr.aria-valuenow]="c.totalPercentage"
+               aria-valuemin="0"
+               aria-valuemax="100">
+            <div class="coop-card__progress-mine"
+                 [style.width.%]="myPercent(c)"></div>
+            <div class="coop-card__progress-partner"
+                 [style.width.%]="partnerPercent(c)"></div>
+          </div>
+
+          <!-- Percentuale totale -->
+          <p class="coop-card__percent">{{ c.totalPercentage }}%</p>
+
+          <!-- Nudge -->
+          @if (c.status === 'active' && isPartnerInactive(c) && canNudge(getPartnerId(c))) {
+            <button class="coop-card__nudge-btn" type="button" (click)="sendNudge(c)">
+              <ion-icon name="alarm-outline"></ion-icon>
+              Dai la sveglia
+            </button>
+          }
+
+          <!-- Overlay completamento -->
+          @if (c.status === 'completed') {
+            <div class="coop-card__overlay coop-card__overlay--done">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Missione completata!</span>
+              @if (c.rewardCollectibleId) {
+                <span class="coop-card__overlay-sub">Collezionabile esclusivo sbloccato</span>
+              }
+            </div>
+          }
+
+          <!-- Overlay scaduta -->
+          @if (c.status === 'expired') {
+            <div class="coop-card__overlay coop-card__overlay--expired">
+              <span>Sfida scaduta</span>
+            </div>
+          }
+
+        </div>
+
+      }
+    </div>
+
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════ FAB -->
+  <button class="coop__fab" type="button" (click)="openCreateSheet()" aria-label="Nuova sfida">
+    <ion-icon name="add-outline"></ion-icon>
+  </button>
+
+  <!-- ═══════════════════════════════════════════════════════ CREATE SHEET -->
+  @if (showCreateSheet()) {
+
+    <button class="coop-sheet__backdrop" type="button"
+            (click)="closeCreateSheet()" aria-label="Chiudi"></button>
+
+    <div class="coop-sheet" role="dialog" aria-modal="true" aria-label="Nuova sfida co-op">
+
+      <div class="coop-sheet__handle"></div>
+
+      <div class="coop-sheet__titlebar">
+        <h2 class="coop-sheet__title">Nuova sfida co-op</h2>
+        <button class="coop-sheet__close-btn" type="button"
+                (click)="closeCreateSheet()" aria-label="Chiudi">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="coop-sheet__body">
+
+        <!-- Tipi di sfida -->
+        <p class="coop-sheet__section-label">Tipo di sfida</p>
+        <div class="coop-sheet__types">
+          @for (type of CHALLENGE_TYPES; track type) {
+            <button
+              class="coop-type-card"
+              [class.coop-type-card--selected]="selectedType() === type"
+              type="button"
+              (click)="selectType(type)"
+            >
+              <ion-icon [name]="CHALLENGE_INFO[type].icon" class="coop-type-card__icon"></ion-icon>
+              <span class="coop-type-card__label">{{ CHALLENGE_INFO[type].label }}</span>
+              <span class="coop-type-card__desc">{{ CHALLENGE_INFO[type].desc }}</span>
+            </button>
+          }
+        </div>
+
+        <!-- Partner -->
+        <p class="coop-sheet__section-label">Scegli partner</p>
+
+        @if (friends().length === 0) {
+          <p class="coop-sheet__no-friends">Aggiungi amici dalla sezione Lega per lanciare sfide.</p>
+        } @else {
+          <div class="coop-sheet__friends">
+            @for (f of friends(); track f.playerId) {
+              <button
+                class="coop-friend-row"
+                [class.coop-friend-row--selected]="selectedPartnerId() === f.playerId"
+                type="button"
+                (click)="selectPartner(f.playerId)"
+              >
+                <div class="coop-friend-row__avatar"
+                     [style.background]="avatarGradient(f.playerId)"
+                     aria-hidden="true">
+                  {{ avatarInitial(f.username) }}
+                </div>
+                <span class="coop-friend-row__name">{{ f.username }}</span>
+                @if (selectedPartnerId() === f.playerId) {
+                  <ion-icon name="checkmark-circle" class="coop-friend-row__check"></ion-icon>
+                }
+              </button>
+            }
+          </div>
+        }
+
+      </div>
+
+      <!-- Footer -->
+      <div class="coop-sheet__footer">
+        <tq-button
+          variant="primary"
+          [disabled]="!canCreate()"
+          [loading]="creating()"
+          iconStart="trophy-outline"
+          (tapped)="createChallenge()"
+        >Lancia sfida</tq-button>
+      </div>
+
+    </div>
+
+  }
+
+</ion-content>
