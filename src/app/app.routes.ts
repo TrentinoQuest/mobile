@@ -144,8 +144,7 @@ export const routes: Routes = [
       // Co-op (accessibile da profilo, non tab)
       {
         path: 'coop',
-        loadComponent: () =>
-          import('./features/giocatore/coop/coop.page').then((m) => m.CoopPage),
+        loadComponent: () => import('./features/giocatore/coop/coop.page').then((m) => m.CoopPage),
       },
       // Dettaglio quest (push da popup mappa / quest log)
       {

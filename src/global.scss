@@ -787,7 +787,7 @@ ion-textarea {
 .tq-quest-sheet {
   --background: var(--color-surface);
   --border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  --box-shadow: var(--shadow-xl);
+  --box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.10);
   --backdrop-opacity: 0.3;
 }
 
@@ -799,7 +799,7 @@ ion-textarea {
   --background: var(--color-surface);
   --border-radius: var(--radius-xl);
   --backdrop-opacity: 0.55;
-  --box-shadow: var(--shadow-xl);
+  --box-shadow: 0 8px 0 rgba(0, 0, 0, 0.14);
 }
 
 /* ─── Toast notifiche push in-app ─── */
@@ -808,7 +808,7 @@ ion-textarea {
   --background: var(--color-surface);
   --color: var(--color-text-primary);
   --border-radius: var(--radius-lg);
-  --box-shadow: var(--shadow-lg);
+  --box-shadow: 0 4px 0 rgba(0, 0, 0, 0.10);
   --max-width: calc(100vw - var(--space-32));
   --start: var(--space-16);
 }

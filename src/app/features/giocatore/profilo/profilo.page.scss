@@ -88,7 +88,7 @@
 .profilo__stats-card {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
   margin: -24px var(--space-24) 0;
   padding: var(--space-16);
   display: flex;
@@ -156,7 +156,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   padding: var(--space-16);
 }
 
@@ -272,7 +272,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 

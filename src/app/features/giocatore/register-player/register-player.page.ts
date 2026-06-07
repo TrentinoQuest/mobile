@@ -145,10 +145,18 @@ export class RegisterPlayerPage {
     await toast.present();
   }
 
-  get email(): AbstractControl { return this.form.get('email')!; }
-  get username(): AbstractControl { return this.form.get('username')!; }
-  get password(): AbstractControl { return this.form.get('password')!; }
-  get confirmPassword(): AbstractControl { return this.form.get('confirmPassword')!; }
+  get email(): AbstractControl {
+    return this.form.get('email')!;
+  }
+  get username(): AbstractControl {
+    return this.form.get('username')!;
+  }
+  get password(): AbstractControl {
+    return this.form.get('password')!;
+  }
+  get confirmPassword(): AbstractControl {
+    return this.form.get('confirmPassword')!;
+  }
 
   get passwordsMismatch(): boolean {
     return this.form.errors?.['passwordsMismatch'] === true && this.confirmPassword.touched;

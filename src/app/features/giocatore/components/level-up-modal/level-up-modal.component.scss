@@ -64,7 +64,7 @@ ion-content.levelup-modal {
 
 .levelup-modal__close {
   position: absolute;
-  top: calc(var(--tq-safe-top) + 12px);
+  top: calc(env(safe-area-inset-top) + 12px);
   right: 20px;
   z-index: 30;
   width: 38px;
@@ -139,7 +139,6 @@ ion-content.levelup-modal {
 /* ── "LEVEL UP!" ────────────────────────────────────────────────────────── */
 
 .levelup-modal__headline {
-  font-family: var(--tq-font-mono);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
@@ -151,10 +150,8 @@ ion-content.levelup-modal {
 /* ── Numero livello ─────────────────────────────────────────────────────── */
 
 .levelup-modal__level-num {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
   font-size: 100px;
-  font-weight: 600;
+  font-weight: 700;
   color: #FFB020;
   line-height: 0.95;
   letter-spacing: -3px;
@@ -170,7 +167,6 @@ ion-content.levelup-modal {
 /* ── Titolo livello ─────────────────────────────────────────────────────── */
 
 .levelup-modal__level-title {
-  font-family: var(--tq-font-mono);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 2.5px;
@@ -195,14 +191,12 @@ ion-content.levelup-modal {
 }
 
 .levelup-modal__xp-plus {
-  font-family: var(--tq-font-mono);
   font-size: 18px;
   font-weight: 700;
   color: rgba(var(--color-accent-rgb), 0.7);
 }
 
 .levelup-modal__xp-value {
-  font-family: var(--tq-font-mono);
   font-size: 26px;
   font-weight: 700;
   color: var(--color-accent);
@@ -211,7 +205,6 @@ ion-content.levelup-modal {
 }
 
 .levelup-modal__xp-unit {
-  font-family: var(--tq-font-mono);
   font-size: 15px;
   color: rgba(var(--color-accent-rgb), 0.6);
 }
@@ -241,7 +234,6 @@ ion-content.levelup-modal {
   border-radius: var(--radius-md);
   font-size: var(--font-h3);
   font-weight: 700;
-  font-family: var(--tq-font-sans);
   cursor: pointer;
   box-shadow: 0 4px 0 #cc5a14;
   letter-spacing: 0.01em;

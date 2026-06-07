@@ -91,12 +91,12 @@
 
 .map-fab {
   position: relative;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--radius-full);
   background: var(--color-surface);
-  box-shadow: var(--shadow-md), 0 4px 0 rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -105,14 +105,14 @@
   transition: transform 80ms ease-out, box-shadow 80ms ease-out;
 
   ion-icon, svg {
-    font-size: 22px;
+    font-size: 24px;
     color: var(--color-text-primary);
     overflow: visible;
   }
 
   &:active {
-    transform: translateY(3px);
-    box-shadow: var(--shadow-md), 0 1px 0 rgba(0, 0, 0, 0.12);
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.18);
   }
 
   &--active {
@@ -147,13 +147,13 @@
 .filter-panel {
   position: fixed;
   /* A destra del gruppo FAB sinistro, allineato al FAB options (quello in basso) */
-  left: calc(var(--tq-safe-left) + var(--space-16) + 48px + var(--space-8));
+  left: calc(var(--tq-safe-left) + var(--space-16) + 52px + var(--space-8));
   bottom: calc(var(--tq-above-tab-bar) + 80px);
   z-index: var(--tq-z-map-overlay);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
   overflow: hidden;
   animation: filterPanelIn 150ms ease-out both;
   transform-origin: bottom left;
@@ -219,33 +219,31 @@
   display: flex;
   align-items: center;
   gap: var(--space-12);
-  padding: var(--space-12) var(--space-12);
-  border-radius: var(--radius-lg);
+  padding: var(--space-14) var(--space-16);
+  border-radius: var(--radius-xl);
   text-align: left;
   appearance: none;
   cursor: pointer;
 
-  background: rgba(var(--color-bg-rgb), 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md), 0 4px 0 rgba(0, 0, 0, 0.08);
+  background: var(--color-surface);
+  border: none;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
 
   -webkit-tap-highlight-color: transparent;
   animation: objectiveEnter 300ms ease-out both;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, border-color 200ms ease;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background 200ms ease;
 
   &:active {
-    transform: translateY(3px);
-    box-shadow: var(--shadow-md), 0 1px 0 rgba(0, 0, 0, 0.08);
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.12);
   }
 
   &--inrange {
-    border-color: rgba(var(--color-success-rgb), 0.5);
-    box-shadow: var(--shadow-md), 0 4px 0 rgba(var(--color-success-rgb), 0.3);
+    background: var(--color-primary-ultra);
+    box-shadow: 0 4px 0 rgba(var(--color-success-rgb), 0.4);
 
     &:active {
-      box-shadow: var(--shadow-md), 0 1px 0 rgba(var(--color-success-rgb), 0.3);
+      box-shadow: 0 0px 0 rgba(var(--color-success-rgb), 0.4);
     }
   }
 
@@ -261,25 +259,25 @@
 
 .home__objective__icon {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--color-accent-rgb), 0.12);
-  border: 1px solid rgba(var(--color-accent-rgb), 0.24);
+  background: var(--color-accent-ultra);
+  border: none;
   color: var(--color-accent);
 
+  ion-icon { font-size: 22px; }
+
   .home__objective--inrange & {
-    background: rgba(var(--color-success-rgb), 0.12);
-    border-color: rgba(var(--color-success-rgb), 0.28);
+    background: rgba(var(--color-success-rgb), 0.18);
     color: var(--color-success);
   }
 
   .home__objective--empty & {
     background: var(--color-surface-2);
-    border-color: var(--color-border);
     color: var(--color-text-disabled);
   }
 }
@@ -339,10 +337,11 @@
 .home__objective__action {
   font-size: var(--font-micro);
   font-weight: 700;
-  color: var(--color-success);
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: rgba(var(--color-success-rgb), 0.12);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  box-shadow: 0 2px 0 #2d6a4f;
 }
 
 .home__objective__arrow {
@@ -365,21 +364,19 @@
   padding: var(--space-12) var(--space-16);
   border-radius: var(--radius-lg);
 
-  background: rgba(var(--color-bg-rgb), 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
+  background: var(--color-surface);
+  border: none;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
 
   animation: objectiveEnter 300ms ease-out both;
 
   &--inrange {
-    border-color: rgba(var(--color-success-rgb), 0.4);
-    box-shadow: var(--shadow-lg), 0 0 16px -4px rgba(var(--color-success-rgb), 0.25);
+    background: var(--color-primary-ultra);
+    box-shadow: 0 4px 0 rgba(var(--color-success-rgb), 0.35);
 
     .home__proximity-toast__icon {
-      background: rgba(var(--color-success-rgb), 0.12);
-      border-color: rgba(var(--color-success-rgb), 0.28);
+      background: rgba(var(--color-success-rgb), 0.18);
+      border: none;
       color: var(--color-success);
     }
 

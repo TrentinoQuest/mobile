@@ -60,22 +60,22 @@
     border-radius: var(--radius-xl);
     overflow: hidden;
     position: relative;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.14);
     transition: transform 0.05s linear;
 
     /* Varianti rarità: bordo + bagliore */
     &--common   { border: 2px solid var(--color-common); }
     &--rare     {
       border: 2px solid var(--color-rare);
-      box-shadow: var(--shadow-lg), 0 0 18px rgba(52, 152, 219, 0.28);
+      box-shadow: 0 5px 0 rgba(52, 152, 219, 0.5), 0 0 18px rgba(52, 152, 219, 0.28);
     }
     &--epic     {
       border: 2px solid var(--color-epic);
-      box-shadow: var(--shadow-lg), 0 0 18px rgba(155, 89, 182, 0.28);
+      box-shadow: 0 5px 0 rgba(155, 89, 182, 0.5), 0 0 18px rgba(155, 89, 182, 0.28);
     }
     &--legendary {
       border: 2px solid var(--color-legendary);
-      box-shadow: var(--shadow-lg), 0 0 22px rgba(230, 126, 34, 0.36);
+      box-shadow: 0 5px 0 rgba(230, 126, 34, 0.5), 0 0 22px rgba(230, 126, 34, 0.36);
     }
 
     /* Flip: scaleX squish — si vede solo il "bordo" della carta poi compare la nuova faccia */

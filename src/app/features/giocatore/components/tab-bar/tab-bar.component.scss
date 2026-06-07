@@ -43,7 +43,7 @@
   }
 
   &__icon {
-    font-size: 22px;
+    font-size: 24px;
     line-height: 1;
   }
 
@@ -65,17 +65,23 @@
     &::before {
       content: '';
       position: absolute;
-      top: 0;
+      bottom: 3px;
+      top: auto;
       left: 50%;
       transform: translateX(-50%);
-      width: 24px;
-      height: 3px;
+      width: 20px;
+      height: 4px;
       background: var(--color-primary);
-      border-radius: 0 0 4px 4px;
+      border-radius: var(--radius-full);
     }
 
     .tab-bar__icon {
-      animation: tab-icon-bounce 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+      font-size: 26px;
+      animation: tab-icon-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    .tab-bar__label {
+      font-weight: 700;
     }
   }
 

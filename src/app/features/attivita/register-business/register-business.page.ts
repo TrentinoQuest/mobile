@@ -11,7 +11,13 @@ import {
 import { HttpErrorResponse } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, eyeOutline, eyeOffOutline, locateOutline, checkmarkCircle } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  eyeOutline,
+  eyeOffOutline,
+  locateOutline,
+  checkmarkCircle,
+} from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import {
   BusinessType,
@@ -182,12 +188,24 @@ export class RegisterBusinessPage {
     await toast.present();
   }
 
-  get email(): AbstractControl { return this.form.get('email')!; }
-  get businessName(): AbstractControl { return this.form.get('businessName')!; }
-  get businessType(): AbstractControl { return this.form.get('businessType')!; }
-  get address(): AbstractControl { return this.form.get('address')!; }
-  get password(): AbstractControl { return this.form.get('password')!; }
-  get confirmPassword(): AbstractControl { return this.form.get('confirmPassword')!; }
+  get email(): AbstractControl {
+    return this.form.get('email')!;
+  }
+  get businessName(): AbstractControl {
+    return this.form.get('businessName')!;
+  }
+  get businessType(): AbstractControl {
+    return this.form.get('businessType')!;
+  }
+  get address(): AbstractControl {
+    return this.form.get('address')!;
+  }
+  get password(): AbstractControl {
+    return this.form.get('password')!;
+  }
+  get confirmPassword(): AbstractControl {
+    return this.form.get('confirmPassword')!;
+  }
   get passwordsMismatch(): boolean {
     return this.form.errors?.['passwordsMismatch'] === true && this.confirmPassword.touched;
   }

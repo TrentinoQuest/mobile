@@ -128,9 +128,17 @@ export class CoopPage implements OnInit {
 
   constructor() {
     addIcons({
-      arrowBackOutline, addOutline, walkOutline, checkmarkDoneOutline,
-      starOutline, alarmOutline, trophyOutline, checkmarkCircle,
-      closeOutline, peopleOutline, timeOutline,
+      arrowBackOutline,
+      addOutline,
+      walkOutline,
+      checkmarkDoneOutline,
+      starOutline,
+      alarmOutline,
+      trophyOutline,
+      checkmarkCircle,
+      closeOutline,
+      peopleOutline,
+      timeOutline,
     });
   }
 
@@ -157,7 +165,10 @@ export class CoopPage implements OnInit {
         challengesDone = true;
         if (friendsDone) this.finishLoad(loadedChallenges);
       },
-      error: () => { challengesDone = true; if (friendsDone) this.loading.set(false); },
+      error: () => {
+        challengesDone = true;
+        if (friendsDone) this.loading.set(false);
+      },
     });
 
     this.http.get<Friend[]>(`${environment.apiUrl}/social/friends`).subscribe({
@@ -167,15 +178,16 @@ export class CoopPage implements OnInit {
         friendsDone = true;
         if (challengesDone) this.finishLoad(loadedChallenges);
       },
-      error: () => { friendsDone = true; if (challengesDone) this.loading.set(false); },
+      error: () => {
+        friendsDone = true;
+        if (challengesDone) this.loading.set(false);
+      },
     });
   }
 
   private finishLoad(challenges: CoopChallengeView[]): void {
     this.loading.set(false);
-    const unseen = challenges.find(
-      (c) => c.status === 'completed' && !this.celebrateSeen(c.id),
-    );
+    const unseen = challenges.find((c) => c.status === 'completed' && !this.celebrateSeen(c.id));
     if (unseen) {
       void this.haptics.collectibleUnlock();
       this.audio.playCollectible();

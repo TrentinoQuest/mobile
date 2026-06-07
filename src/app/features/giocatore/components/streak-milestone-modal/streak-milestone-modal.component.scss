@@ -63,7 +63,7 @@ ion-content.streak-modal {
 
 .streak-modal__close {
   position: absolute;
-  top: calc(var(--tq-safe-top) + 12px);
+  top: calc(env(safe-area-inset-top) + 12px);
   right: 20px;
   z-index: 30;
   width: 38px;
@@ -138,10 +138,8 @@ ion-content.streak-modal {
 /* ── Contatore ─────────────────────────────────────────────────────────── */
 
 .streak-modal__count {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
   font-size: 84px;
-  font-weight: 600;
+  font-weight: 700;
   color: #FF8C00;
   line-height: 1;
   letter-spacing: -2px;
@@ -150,7 +148,6 @@ ion-content.streak-modal {
 }
 
 .streak-modal__label {
-  font-family: var(--tq-font-mono);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2.5px;
@@ -221,7 +218,6 @@ ion-content.streak-modal {
 }
 
 .streak-modal__day-label {
-  font-family: var(--tq-font-mono);
   font-size: 10px;
   letter-spacing: 0.5px;
   color: var(--color-text-disabled);
@@ -255,7 +251,6 @@ ion-content.streak-modal {
   border: 1px solid rgba(255, 140, 0, 0.3);
   border-radius: 24px;
   padding: 8px 16px;
-  font-family: var(--tq-font-mono);
   font-size: 11px;
   color: var(--color-accent);
   letter-spacing: 0.06em;
@@ -276,7 +271,6 @@ ion-content.streak-modal {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--tq-font-mono);
   font-size: 11px;
   color: var(--color-primary);
   letter-spacing: 0.06em;
@@ -307,7 +301,6 @@ ion-content.streak-modal {
   border-radius: var(--radius-md);
   font-size: var(--font-h3);
   font-weight: 700;
-  font-family: var(--tq-font-sans);
   cursor: pointer;
   box-shadow: 0 4px 0 #cc5a14;
   letter-spacing: 0.01em;

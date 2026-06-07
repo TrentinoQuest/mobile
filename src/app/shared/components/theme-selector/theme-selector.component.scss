@@ -2,12 +2,12 @@
   display: block;
 
   ion-segment {
-    --background: var(--tq-panel-2);
+    --background: var(--color-surface-2);
   }
 
   ion-segment-button {
-    --color: var(--tq-text-muted);
-    --color-checked: var(--tq-text-primary);
-    --indicator-color: var(--tq-ocra);
+    --color: var(--color-text-disabled);
+    --color-checked: var(--color-text-primary);
+    --indicator-color: var(--color-accent);
   }
 }

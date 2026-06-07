@@ -1,11 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -101,7 +94,9 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   protected readonly levelTitle = computed(() => this.player()?.levelTitle ?? '');
   protected readonly currentStreak = computed(() => this.player()?.currentStreak ?? 0);
   protected readonly longestStreak = computed(() => this.player()?.longestStreak ?? 0);
-  protected readonly streakShieldActive = computed(() => this.player()?.streakShieldActive ?? false);
+  protected readonly streakShieldActive = computed(
+    () => this.player()?.streakShieldActive ?? false,
+  );
 
   protected readonly xpToNextLevel = computed<number | null>(() => {
     const lvl = this.level();
@@ -129,10 +124,23 @@ export class ProfiloPage implements OnInit, AfterViewInit {
 
   constructor() {
     addIcons({
-      peopleOutline, flashOutline, trendingUpOutline, flame, albumsOutline,
-      trophy, shieldCheckmarkOutline, logOutOutline, trashOutline,
-      personOutline, notificationsOutline, volumeMediumOutline, mapOutline,
-      lockClosedOutline, languageOutline, informationCircleOutline, chevronForward,
+      peopleOutline,
+      flashOutline,
+      trendingUpOutline,
+      flame,
+      albumsOutline,
+      trophy,
+      shieldCheckmarkOutline,
+      logOutOutline,
+      trashOutline,
+      personOutline,
+      notificationsOutline,
+      volumeMediumOutline,
+      mapOutline,
+      lockClosedOutline,
+      languageOutline,
+      informationCircleOutline,
+      chevronForward,
     });
   }
 
@@ -253,7 +261,9 @@ export class ProfiloPage implements OnInit, AfterViewInit {
         {
           text: 'Cambia password',
           icon: 'lock-closed-outline',
-          handler: () => { void this.openCambiaPassword(); },
+          handler: () => {
+            void this.openCambiaPassword();
+          },
         },
         { text: 'Annulla', role: 'cancel' },
       ],
@@ -264,7 +274,8 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   private async openCambiaPassword(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Cambia password',
-      message: "Ti invieremo un link per reimpostare la password all'indirizzo email associato al tuo account.",
+      message:
+        "Ti invieremo un link per reimpostare la password all'indirizzo email associato al tuo account.",
       buttons: [
         { text: 'Annulla', role: 'cancel' },
         { text: 'Invia email', handler: () => {} },
@@ -304,10 +315,17 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   private async confirmEliminaAccount(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Elimina account',
-      message: 'Questa azione è irreversibile. Tutti i tuoi progressi e collezionabili andranno persi.',
+      message:
+        'Questa azione è irreversibile. Tutti i tuoi progressi e collezionabili andranno persi.',
       buttons: [
         { text: 'Annulla', role: 'cancel' },
-        { text: 'Elimina', role: 'destructive', handler: () => { this.logout(); } },
+        {
+          text: 'Elimina',
+          role: 'destructive',
+          handler: () => {
+            this.logout();
+          },
+        },
       ],
     });
     await alert.present();

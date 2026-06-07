@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--tq-bg);
+  background: var(--color-bg);
 }
 
 .attivita-shell__outlet {
@@ -11,16 +11,14 @@
   position: relative;
 }
 
-// Tab bar inferiore
 .attivita-tab-bar {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: var(--tq-panel);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-surface);
+  border-top: 2px solid var(--color-border);
   padding-bottom: env(safe-area-inset-bottom, 0);
-  height: calc(60px + env(safe-area-inset-bottom, 0px));
-  z-index: var(--tq-z-tab-bar);
+  height: calc(62px + env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
 
   &__item {
@@ -29,21 +27,19 @@
     align-items: center;
     gap: 3px;
     padding: 8px 20px;
-    color: var(--tq-bone);
-    opacity: 0.5;
+    color: var(--color-text-disabled);
     text-decoration: none;
-    font-family: 'Geist', sans-serif;
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    transition: opacity 0.15s ease;
+    font-size: var(--font-micro);
+    font-weight: 500;
+    transition: color 150ms ease-out;
 
-    ion-icon {
-      font-size: 22px;
-    }
+    ion-icon { font-size: 24px; }
 
     &--active {
-      opacity: 1;
-      color: var(--tq-ocra);
+      color: var(--color-primary);
+      font-weight: 700;
+
+      ion-icon { font-size: 26px; }
     }
   }
 }

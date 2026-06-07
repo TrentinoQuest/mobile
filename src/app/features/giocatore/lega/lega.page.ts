@@ -27,10 +27,7 @@ import {
   chevronForward,
 } from 'ionicons/icons';
 import { LeagueTier } from '@trentino-quest/shared-types';
-import type {
-  LeagueCurrentView,
-  LeagueMemberView,
-} from '@trentino-quest/shared-types';
+import type { LeagueCurrentView, LeagueMemberView } from '@trentino-quest/shared-types';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
@@ -87,8 +84,18 @@ const AVATAR_GRADIENTS = [
 
 const SHORT_DAYS = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
 const SHORT_MONTHS = [
-  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
-  'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic',
+  'Gen',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mag',
+  'Giu',
+  'Lug',
+  'Ago',
+  'Set',
+  'Ott',
+  'Nov',
+  'Dic',
 ];
 
 @Component({
@@ -135,9 +142,20 @@ export class LegaPage implements OnInit {
 
   constructor() {
     addIcons({
-      diamondOutline, diamond, flameOutline, flame, star,
-      personOutline, personAddOutline, peopleOutline,
-      closeOutline, checkmarkOutline, searchOutline, trashOutline, trophyOutline, chevronForward,
+      diamondOutline,
+      diamond,
+      flameOutline,
+      flame,
+      star,
+      personOutline,
+      personAddOutline,
+      peopleOutline,
+      closeOutline,
+      checkmarkOutline,
+      searchOutline,
+      trashOutline,
+      trophyOutline,
+      chevronForward,
     });
   }
 
@@ -164,7 +182,10 @@ export class LegaPage implements OnInit {
   private loadCurrent(): void {
     this.leagueLoading.set(true);
     this.http.get<LeagueCurrentView>(`${environment.apiUrl}/leagues/current`).subscribe({
-      next: (data) => { this.current.set(data); this.leagueLoading.set(false); },
+      next: (data) => {
+        this.current.set(data);
+        this.leagueLoading.set(false);
+      },
       error: () => this.leagueLoading.set(false),
     });
   }
@@ -176,7 +197,10 @@ export class LegaPage implements OnInit {
   private loadFriends(): void {
     this.friendsLoading.set(true);
     this.http.get<Friend[]>(`${environment.apiUrl}/social/friends`).subscribe({
-      next: (data) => { this.friends.set(data); this.friendsLoading.set(false); },
+      next: (data) => {
+        this.friends.set(data);
+        this.friendsLoading.set(false);
+      },
       error: () => this.friendsLoading.set(false),
     });
   }
@@ -184,34 +208,44 @@ export class LegaPage implements OnInit {
   private loadRequests(): void {
     this.requestsLoading.set(true);
     this.http.get<FriendRequest[]>(`${environment.apiUrl}/social/friends/requests`).subscribe({
-      next: (data) => { this.requests.set(data); this.requestsLoading.set(false); },
+      next: (data) => {
+        this.requests.set(data);
+        this.requestsLoading.set(false);
+      },
       error: () => this.requestsLoading.set(false),
     });
   }
 
   protected acceptRequest(req: FriendRequest): void {
     void this.haptics.success();
-    this.http.post(`${environment.apiUrl}/social/friends/${req.friendshipId}/accept`, {}).subscribe({
-      next: async () => {
-        this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
-        this.loadFriends();
-        const t = await this.toastCtrl.create({
-          message: 'Amicizia accettata!', duration: 2500, position: 'bottom', cssClass: 'tq-toast',
-        });
-        await t.present();
-      },
-      error: () => {},
-    });
+    this.http
+      .post(`${environment.apiUrl}/social/friends/${req.friendshipId}/accept`, {})
+      .subscribe({
+        next: async () => {
+          this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
+          this.loadFriends();
+          const t = await this.toastCtrl.create({
+            message: 'Amicizia accettata!',
+            duration: 2500,
+            position: 'bottom',
+            cssClass: 'tq-toast',
+          });
+          await t.present();
+        },
+        error: () => {},
+      });
   }
 
   protected rejectRequest(req: FriendRequest): void {
     void this.haptics.dismiss();
-    this.http.post(`${environment.apiUrl}/social/friends/${req.friendshipId}/reject`, {}).subscribe({
-      next: () => {
-        this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
-      },
-      error: () => {},
-    });
+    this.http
+      .post(`${environment.apiUrl}/social/friends/${req.friendshipId}/reject`, {})
+      .subscribe({
+        next: () => {
+          this.requests.update((list) => list.filter((r) => r.friendshipId !== req.friendshipId));
+        },
+        error: () => {},
+      });
   }
 
   protected async friendTap(friend: Friend): Promise<void> {
@@ -234,17 +268,23 @@ export class LegaPage implements OnInit {
           icon: 'trash-outline',
           handler: () => {
             void this.haptics.dismiss();
-            this.http.delete(`${environment.apiUrl}/social/friends/${friend.friendshipId}`).subscribe({
-              next: async () => {
-                this.friends.update((list) => list.filter((f) => f.friendshipId !== friend.friendshipId));
-                const t = await this.toastCtrl.create({
-                  message: `${friend.username} rimosso dagli amici`,
-                  duration: 2500, position: 'bottom', cssClass: 'tq-toast',
-                });
-                await t.present();
-              },
-              error: () => {},
-            });
+            this.http
+              .delete(`${environment.apiUrl}/social/friends/${friend.friendshipId}`)
+              .subscribe({
+                next: async () => {
+                  this.friends.update((list) =>
+                    list.filter((f) => f.friendshipId !== friend.friendshipId),
+                  );
+                  const t = await this.toastCtrl.create({
+                    message: `${friend.username} rimosso dagli amici`,
+                    duration: 2500,
+                    position: 'bottom',
+                    cssClass: 'tq-toast',
+                  });
+                  await t.present();
+                },
+                error: () => {},
+              });
           },
         },
         { text: 'Annulla', role: 'cancel' },
@@ -273,7 +313,10 @@ export class LegaPage implements OnInit {
   protected onSearchInput(): void {
     if (this.searchTimer) clearTimeout(this.searchTimer);
     const q = this.searchQuery().trim();
-    if (!q) { this.searchResults.set([]); return; }
+    if (!q) {
+      this.searchResults.set([]);
+      return;
+    }
     this.searchTimer = setTimeout(() => this.doSearch(q), 400);
   }
 
@@ -284,8 +327,14 @@ export class LegaPage implements OnInit {
     this.http
       .get<PlayerSearchResult[]>(`${environment.apiUrl}/players?username=${encodeURIComponent(q)}`)
       .subscribe({
-        next: (data) => { this.searchResults.set(data); this.searchLoading.set(false); },
-        error: () => { this.searchResults.set([]); this.searchLoading.set(false); },
+        next: (data) => {
+          this.searchResults.set(data);
+          this.searchLoading.set(false);
+        },
+        error: () => {
+          this.searchResults.set([]);
+          this.searchLoading.set(false);
+        },
       });
   }
 
@@ -296,7 +345,11 @@ export class LegaPage implements OnInit {
       .post(`${environment.apiUrl}/social/friends/request`, { recipientId: player.playerId })
       .subscribe({
         error: () => {
-          this.sentRequests.update((s) => { const n = new Set(s); n.delete(player.playerId); return n; });
+          this.sentRequests.update((s) => {
+            const n = new Set(s);
+            n.delete(player.playerId);
+            return n;
+          });
         },
       });
   }

@@ -13,12 +13,10 @@
   align-items: center;
   gap: var(--space-8);
   padding: var(--space-12) var(--space-16);
-  background: rgba(250, 250, 248, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--color-surface);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  border: none;
   pointer-events: auto;
 }
 

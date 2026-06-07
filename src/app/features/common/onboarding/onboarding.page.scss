@@ -244,7 +244,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-md);
   padding: var(--space-16);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;

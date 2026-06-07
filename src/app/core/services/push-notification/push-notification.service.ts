@@ -32,9 +32,12 @@ export class PushNotificationService {
       this.auth.saveDeviceToken(value);
     });
 
-    PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-      void this.handleForeground(notification);
-    });
+    PushNotifications.addListener(
+      'pushNotificationReceived',
+      (notification: PushNotificationSchema) => {
+        void this.handleForeground(notification);
+      },
+    );
 
     PushNotifications.addListener('pushNotificationActionPerformed', (action: ActionPerformed) => {
       this.handleDeepLink(action);

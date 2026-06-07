@@ -32,6 +32,6 @@
   &__tab-bar {
     /* La tab bar si posiziona internamente in fixed.
        Qui esponiamo solo lo z-index gerarchico tramite il token globale. */
-    z-index: var(--tq-z-tab-bar);
+    z-index: 100;
   }
 }
