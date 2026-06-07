@@ -242,7 +242,7 @@
   padding: 14px var(--space-24);
   font-size: var(--font-h3);
   font-weight: 600;
-  box-shadow: 0 4px 0 #1b4d38;
+  box-shadow: 0 5px 0 var(--color-primary-shadow);
   cursor: pointer;
   margin-bottom: var(--space-16);
   transition: transform 80ms ease-out, box-shadow 80ms ease-out;
@@ -251,8 +251,8 @@
   ion-icon { font-size: 20px; }
 
   &:active {
-    transform: translateY(3px);
-    box-shadow: 0 1px 0 #1b4d38;
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--color-primary-shadow);
   }
 }
 

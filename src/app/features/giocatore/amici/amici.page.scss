@@ -109,6 +109,7 @@
 .amici__activity {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   padding: var(--space-12) var(--space-16);
   display: flex;

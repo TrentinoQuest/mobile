@@ -69,18 +69,18 @@
   padding: 10px var(--space-16);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: #ffffff;
   font-size: var(--font-small);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 0 #c45a12;
+  box-shadow: 0 4px 0 var(--color-primary-shadow);
   transition: transform 80ms ease-out, box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
   &:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #c45a12;
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-primary-shadow);
   }
 }
 
@@ -111,18 +111,18 @@
   padding: 10px var(--space-16);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: #ffffff;
   font-size: var(--font-small);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 0 #c45a12;
+  box-shadow: 0 4px 0 var(--color-primary-shadow);
   transition: transform 80ms ease-out, box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
   &:active:not(:disabled) {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #c45a12;
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-primary-shadow);
   }
 
   &.quest-popup__checkin-btn--disabled {

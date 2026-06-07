@@ -270,7 +270,7 @@
   border-radius: var(--radius-full);
   background: var(--color-primary);
   border: none;
-  box-shadow: 0 4px 0 #1b4d38;
+  box-shadow: 0 5px 0 var(--color-primary-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,7 +286,7 @@
 
   &:active {
     transform: translateY(4px);
-    box-shadow: 0 0px 0 #1b4d38;
+    box-shadow: 0 1px 0 var(--color-primary-shadow);
   }
 }
 

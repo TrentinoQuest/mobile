@@ -71,35 +71,38 @@
                  [class.taccuino__card--uncommon]="card.rarity === CollectibleRarity.UNCOMMON"
                  [class.taccuino__card--rare]="card.rarity === CollectibleRarity.RARE"
                  [class.taccuino__card--legendary]="card.rarity === CollectibleRarity.LEGENDARY"
-                 [style.background]="card.imageUrl ? '#111' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'"
                  [style.animation-delay.ms]="(i % 12) * 45"
                  (click)="openDetail(card)"
                  role="button"
                  [attr.aria-label]="'Dettaglio ' + card.name">
 
-              @if (card.imageUrl) {
-                <img class="taccuino__card-img" [src]="card.imageUrl"
-                     [alt]="card.name" loading="lazy"/>
-              } @else {
-                <svg class="taccuino__card-art" viewBox="0 0 100 146"
-                     preserveAspectRatio="xMidYMid slice">
-                  <path [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
-                        [attr.fill]="palette(card.paletteSeed).mid" opacity="0.7"/>
-                  <path [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
-                        [attr.fill]="palette(card.paletteSeed).fg" opacity="0.55"/>
-                </svg>
-              }
+              <!-- Faccia: immagine o illustrazione generativa -->
+              <div class="taccuino__card-face"
+                   [style.background]="card.imageUrl ? '#0a0a0a' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'">
+                @if (card.imageUrl) {
+                  <img class="taccuino__card-img" [src]="card.imageUrl"
+                       [alt]="card.name" loading="lazy"/>
+                } @else {
+                  <svg class="taccuino__card-art" viewBox="0 0 100 146"
+                       preserveAspectRatio="xMidYMid slice">
+                    <path [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
+                          [attr.fill]="palette(card.paletteSeed).mid" opacity="0.7"/>
+                    <path [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
+                          [attr.fill]="palette(card.paletteSeed).fg" opacity="0.55"/>
+                  </svg>
+                }
+              </div>
 
-              <div class="taccuino__card-scrim"></div>
-
-              @if (card.rarity) {
-                <tq-badge class="taccuino__card-badge"
-                          [color]="rarityColor(card.rarity)" size="sm">
-                  {{ card.rarity }}
-                </tq-badge>
-              }
-
-              <span class="taccuino__card-name">{{ card.name }}</span>
+              <!-- Targhetta: badge rarità + nome, sfondo solido -->
+              <div class="taccuino__card-plate">
+                @if (card.rarity) {
+                  <tq-badge class="taccuino__card-badge"
+                            [color]="rarityColor(card.rarity)" size="sm">
+                    {{ card.rarity }}
+                  </tq-badge>
+                }
+                <span class="taccuino__card-name">{{ card.name }}</span>
+              </div>
             </div>
           }
         }

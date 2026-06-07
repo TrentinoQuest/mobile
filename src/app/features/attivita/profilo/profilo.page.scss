@@ -65,7 +65,7 @@
     --background: var(--color-primary);
     --color: #ffffff;
     --border-radius: var(--radius-md);
-    --box-shadow: 0 4px 0 #1b4d38;
+    --box-shadow: 0 5px 0 var(--color-primary-shadow);
     margin-top: var(--space-8);
   }
 
