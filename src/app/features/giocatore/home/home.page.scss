@@ -116,10 +116,10 @@
   }
 
   &--active {
-    background: var(--color-primary-ultra);
-    border-color: var(--color-primary-light);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
 
-    ion-icon { color: var(--color-primary); }
+    ion-icon, svg { color: #ffffff; }
   }
 }
 
@@ -219,31 +219,33 @@
   display: flex;
   align-items: center;
   gap: var(--space-12);
-  padding: var(--space-14) var(--space-16);
-  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-lg);
   text-align: left;
   appearance: none;
   cursor: pointer;
 
   background: var(--color-surface);
-  border: none;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.10);
 
   -webkit-tap-highlight-color: transparent;
   animation: objectiveEnter 300ms ease-out both;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background 200ms ease;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background 200ms ease, border-color 200ms ease;
 
   &:active {
     transform: translateY(4px);
-    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
   }
 
   &--inrange {
-    background: var(--color-primary-ultra);
-    box-shadow: 0 4px 0 rgba(var(--color-success-rgb), 0.4);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 0 var(--color-primary-shadow);
+    padding: 14px var(--space-16);
 
     &:active {
-      box-shadow: 0 0px 0 rgba(var(--color-success-rgb), 0.4);
+      box-shadow: 0 1px 0 var(--color-primary-shadow);
     }
   }
 
@@ -253,31 +255,33 @@
 }
 
 @keyframes objectiveEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; translate: 0 8px; }
+  to   { opacity: 1; translate: 0 0px; }
 }
 
 .home__objective__icon {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--color-accent-ultra);
-  border: none;
+  border: 1.5px solid rgba(var(--color-accent-rgb), 0.2);
   color: var(--color-accent);
 
-  ion-icon { font-size: 22px; }
+  ion-icon { font-size: 20px; }
 
   .home__objective--inrange & {
-    background: rgba(var(--color-success-rgb), 0.18);
-    color: var(--color-success);
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
   }
 
   .home__objective--empty & {
     background: var(--color-surface-2);
+    border-color: var(--color-border);
     color: var(--color-text-disabled);
   }
 }
@@ -298,7 +302,7 @@
   color: var(--color-accent);
 
   .home__objective--inrange & {
-    color: var(--color-success);
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .home__objective--empty & {
@@ -313,6 +317,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  .home__objective--inrange & {
+    color: #ffffff;
+  }
 
   .home__objective--empty & {
     white-space: normal;
@@ -332,20 +340,20 @@
   font-size: var(--font-small);
   font-weight: 500;
   color: var(--color-text-secondary);
+
+  .home__objective--inrange & { color: rgba(255, 255, 255, 0.75); }
 }
 
 .home__objective__action {
-  font-size: var(--font-micro);
+  font-size: var(--font-small);
   font-weight: 700;
-  color: #ffffff;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  background: var(--color-success);
-  box-shadow: 0 2px 0 #2d6a4f;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .home__objective__arrow {
   color: var(--color-text-disabled);
+
+  .home__objective--inrange & { color: rgba(255, 255, 255, 0.6); }
 }
 
 /* ============================================================================
@@ -371,17 +379,21 @@
   animation: objectiveEnter 300ms ease-out both;
 
   &--inrange {
-    background: var(--color-primary-ultra);
-    box-shadow: 0 4px 0 rgba(var(--color-success-rgb), 0.35);
+    background: var(--color-primary);
+    box-shadow: 0 4px 0 var(--color-primary-shadow);
 
     .home__proximity-toast__icon {
-      background: rgba(var(--color-success-rgb), 0.18);
+      background: rgba(255, 255, 255, 0.22);
       border: none;
-      color: var(--color-success);
+      color: #ffffff;
     }
 
     .home__proximity-toast__label {
-      color: var(--color-success);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .home__proximity-toast__name {
+      color: #ffffff;
     }
   }
 
@@ -544,24 +556,35 @@
   padding: var(--space-12);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 100ms ease, background 100ms ease;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
 
   &:active {
-    transform: scale(0.985);
-    background: var(--color-surface-2);
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.08);
   }
 
   &--available {
-    border-color: rgba(var(--color-accent-rgb), 0.3);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 0 var(--color-primary-shadow);
+
+    &:active {
+      box-shadow: 0 0px 0 var(--color-primary-shadow);
+    }
+
+    .nearby__row-name { color: #ffffff; }
+    .nearby__row-meta { color: rgba(255, 255, 255, 0.85); }
+    .nearby__row-dist { color: #ffffff; font-weight: 700; }
 
     .nearby__row-icon {
-      background: rgba(var(--color-accent-rgb), 0.1);
-      border-color: rgba(var(--color-accent-rgb), 0.25);
-      color: var(--color-accent);
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
     }
   }
 
