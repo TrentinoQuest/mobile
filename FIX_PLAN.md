@@ -75,4 +75,6 @@
 <!-- Aggiungere riga per ogni commit fatto -->
 | # | Fix | Commit hash | Note |
 |---|-----|-------------|------|
-| - | - | - | - |
+| 1 | Fix #5 + home header press + nearby rows press | 0ca3bf6 | Bug translate vs transform animation fill-mode |
+| 2 | Fix #6 + #7 + #8/#9 — taccuino hero, card plate, quiz, missioni | 1e1b64d | |
+| 3 | Fix #10 — profilo social btn glass -> Flat 2.0, icone filled | 94a2ac8 | |
