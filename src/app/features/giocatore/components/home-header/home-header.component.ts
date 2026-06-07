@@ -12,8 +12,8 @@ import { StreakMilestoneModalComponent } from '../streak-milestone-modal/streak-
 
 const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 12000, 18000];
 
-// Circonferenza cerchio XP ring (r=17, viewBox 44x44)
-const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 17;
+// Circonferenza cerchio XP ring (r=23, viewBox 50x50)
+const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 23;
 
 @Component({
   selector: 'app-home-header',

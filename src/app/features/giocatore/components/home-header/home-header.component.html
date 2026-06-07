@@ -1,18 +1,20 @@
 <!-- HUD identità giocatore: floating card con avatar, livello, streak e monete. -->
 <div class="hud">
 
-  <!-- Identità (avatar + ring XP + badge livello + username) → naviga al profilo -->
+  <!-- Identità: colonna avatar+livello + username → naviga al profilo -->
   <button class="hud__identity" (click)="openProfile()" aria-label="Vai al profilo">
-    <div class="hud__ring-wrap" aria-hidden="true">
-      <svg class="hud__ring-svg" viewBox="0 0 44 44" fill="none">
-        <circle class="hud__ring-bg" cx="22" cy="22" r="17"/>
-        <circle class="hud__ring-fill" cx="22" cy="22" r="17"
-                [style.stroke-dasharray]="ringCircumference"
-                [style.stroke-dashoffset]="xpRingOffset()"/>
-      </svg>
-      <div class="hud__avatar">{{ (username() || '?').charAt(0).toUpperCase() }}</div>
+    <div class="hud__avatar-col">
+      <div class="hud__ring-wrap" aria-hidden="true">
+        <svg class="hud__ring-svg" viewBox="0 0 50 50" fill="none">
+          <circle class="hud__ring-bg" cx="25" cy="25" r="23"/>
+          <circle class="hud__ring-fill" cx="25" cy="25" r="23"
+                  [style.stroke-dasharray]="ringCircumference"
+                  [style.stroke-dashoffset]="xpRingOffset()"/>
+        </svg>
+        <div class="hud__avatar">{{ (username() || '?').charAt(0).toUpperCase() }}</div>
+      </div>
+      <span class="hud__level">Lv.{{ level() }}</span>
     </div>
-    <tq-badge color="primary" size="sm">Lv.{{ level() }}</tq-badge>
     <span class="hud__username">{{ username() }}</span>
   </button>
 
@@ -27,12 +29,12 @@
     <span class="hud__chip-value">{{ currentStreak() }}</span>
   </button>
 
-  <!-- Monete -->
+  <!-- Monete: moneta circolare dorata -->
   <div class="hud__chip hud__chip--coins" aria-label="{{ coins() }} monete">
-    <svg class="hud__gem" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-      <polygon points="4.5,1.5 11.5,1.5 14.5,5.5 8,14.5 1.5,5.5" fill="currentColor"/>
-      <polyline points="1.5,5.5 14.5,5.5" stroke="rgba(255,255,255,0.4)" stroke-width="0.9" fill="none"/>
-      <polyline points="4.5,1.5 6.5,5.5 8,1.5 9.5,5.5 11.5,1.5" stroke="rgba(255,255,255,0.25)" stroke-width="0.7" fill="none"/>
+    <svg class="hud__gem" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="9" fill="currentColor"/>
+      <circle cx="10" cy="10" r="6" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+      <circle cx="10" cy="10" r="2.5" fill="rgba(255,255,255,0.55)"/>
     </svg>
     <span class="hud__chip-value">{{ coins() }}</span>
   </div>
