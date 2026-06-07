@@ -802,3 +802,14 @@ ion-textarea {
   --box-shadow: var(--shadow-xl);
 }
 
+/* ─── Toast notifiche push in-app ─── */
+
+.tq-toast {
+  --background: var(--color-surface);
+  --color: var(--color-text-primary);
+  --border-radius: var(--radius-lg);
+  --box-shadow: var(--shadow-lg);
+  --max-width: calc(100vw - var(--space-32));
+  --start: var(--space-16);
+}
+

@@ -198,6 +198,16 @@ export class AuthService {
   }
 
   /**
+   * Invia il token dispositivo al backend per le notifiche push.
+   * Fire-and-forget: eventuali errori di rete vengono ignorati silenziosamente.
+   */
+  saveDeviceToken(token: string): void {
+    this.http
+      .post<void>(`${environment.apiUrl}/auth/device-token`, { token })
+      .subscribe({ error: () => {} });
+  }
+
+  /**
    * Avvia il flusso di recupero password.
    * Il backend risponde sempre con 202 per non rivelare quali email sono
    * registrate.

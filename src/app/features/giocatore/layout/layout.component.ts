@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TabBarComponent } from '../components/tab-bar/tab-bar.component';
+import { PushNotificationService } from '../../../core/services/push-notification/push-notification.service';
 /**
  * Layout shell della sezione Giocatore.
  *
@@ -44,12 +45,10 @@ import { TabBarComponent } from '../components/tab-bar/tab-bar.component';
   standalone: true,
   imports: [RouterOutlet, TabBarComponent],
 })
-export class LayoutComponent {
-  // Lo shell e' volutamente passivo: tutta la logica di navigazione e
-  // gestione tab attiva vive in PlayerTabBarComponent, che legge router.url
-  // tramite signal interno.
-  //
-  // TODO: quando integreremo la modal di scansione QR, valutare se
-  // intercettare qui eventuali side-effect post-scan (es. mostrare toast
-  // di benvenuto nel collectible sbloccato, refresh dati home).
+export class LayoutComponent implements OnInit {
+  private readonly push = inject(PushNotificationService);
+
+  ngOnInit(): void {
+    void this.push.init();
+  }
 }
