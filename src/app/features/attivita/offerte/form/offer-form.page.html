@@ -3,7 +3,8 @@
 
     <header class="offer-form-page__header">
       <button class="offer-form-page__back" (click)="goBack()" type="button">
-        ← Offerte
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Offerte
       </button>
       <h1 class="offer-form-page__title">
         {{ isEditMode() ? 'Modifica offerta' : 'Nuova offerta' }}
@@ -58,14 +59,9 @@
         ></ion-input>
       </div>
 
-      <ion-button
-        class="offer-form-page__submit-btn"
-        expand="block"
-        type="submit"
-        [disabled]="saving()"
-      >
-        {{ saving() ? 'Salvataggio...' : (isEditMode() ? 'Aggiorna offerta' : 'Crea offerta') }}
-      </ion-button>
+      <tq-button [loading]="saving()" (tapped)="submit()">
+        {{ isEditMode() ? 'Aggiorna offerta' : 'Crea offerta' }}
+      </tq-button>
 
     </form>
 

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { addIcons } from 'ionicons';
 import { closeCircleOutline, logOutOutline } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth/auth.service';
@@ -16,7 +17,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
   templateUrl: './rejected.page.html',
   styleUrls: ['./rejected.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButton, IonIcon],
+  imports: [IonContent, IonIcon, TqButtonComponent],
 })
 export class RejectedPage {
   private readonly authService = inject(AuthService);

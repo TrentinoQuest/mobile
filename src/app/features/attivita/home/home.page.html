@@ -48,15 +48,9 @@
     }
 
     <!-- CTA Offerte -->
-    <ion-button
-      class="business-home__cta"
-      expand="block"
-      (click)="navigateToOfferte()"
-    >
-      <ion-icon slot="start" name="pricetags-outline"></ion-icon>
+    <tq-button iconStart="pricetags-outline" iconEnd="arrow-forward-outline" (tapped)="navigateToOfferte()">
       Gestisci offerte
-      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
-    </ion-button>
+    </tq-button>
 
   </div>
 </ion-content>

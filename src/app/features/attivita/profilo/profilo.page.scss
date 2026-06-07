@@ -72,12 +72,9 @@
   }
 
   &__logout-section {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  &__logout-btn {
-    --border-radius: 12px;
+    margin-top: var(--space-32);
+    padding-top: var(--space-24);
+    border-top: 1px solid var(--color-border);
+    --color-primary: var(--color-error);
   }
 }

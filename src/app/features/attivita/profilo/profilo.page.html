@@ -54,27 +54,16 @@
         <p class="profilo-page__error">{{ businessService.error() }}</p>
       }
 
-      <ion-button
-        class="profilo-page__save-btn"
-        expand="block"
-        type="submit"
-        [disabled]="saving()"
-      >
-        {{ saving() ? 'Salvataggio...' : 'Salva modifiche' }}
-      </ion-button>
+      <tq-button [loading]="saving()" (tapped)="save()">
+        Salva modifiche
+      </tq-button>
 
     </form>
 
     <div class="profilo-page__logout-section">
-      <ion-button
-        class="profilo-page__logout-btn"
-        expand="block"
-        fill="outline"
-        color="danger"
-        (click)="logout()"
-      >
+      <tq-button variant="secondary" iconStart="log-out-outline" (tapped)="logout()">
         Esci dall'account
-      </ion-button>
+      </tq-button>
     </div>
 
   </div>

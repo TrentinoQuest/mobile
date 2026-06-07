@@ -16,14 +16,10 @@
       support&#64;trentinoquest.it
     </p>
 
-    <ion-button
-      class="rejected-page__logout-btn"
-      fill="outline"
-      expand="block"
-      (click)="logout()"
-    >
-      <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      Esci dall'account
-    </ion-button>
+    <div class="rejected-page__logout-wrap">
+      <tq-button variant="secondary" iconStart="log-out-outline" (tapped)="logout()">
+        Esci dall'account
+      </tq-button>
+    </div>
   </div>
 </ion-content>

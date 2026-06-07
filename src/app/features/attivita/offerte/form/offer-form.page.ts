@@ -3,11 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent,
-  IonButton,
+  IonIcon,
   IonInput,
   IonTextarea,
   ToastController,
 } from '@ionic/angular/standalone';
+import { TqButtonComponent } from '../../../../shared/components/tq-button/tq-button.component';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline } from 'ionicons/icons';
 import { BusinessService } from '../../../../core/services/business/business.service';
 
 /**
@@ -23,7 +26,7 @@ import { BusinessService } from '../../../../core/services/business/business.ser
   templateUrl: './offer-form.page.html',
   styleUrls: ['./offer-form.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonContent, IonButton, IonInput, IonTextarea],
+  imports: [FormsModule, IonContent, IonIcon, IonInput, IonTextarea, TqButtonComponent],
 })
 export class OfferFormPage implements OnInit {
   private readonly businessService = inject(BusinessService);
@@ -39,6 +42,10 @@ export class OfferFormPage implements OnInit {
   protected title = signal('');
   protected description = signal('');
   protected pointsCost = signal<number>(1);
+
+  constructor() {
+    addIcons({ arrowBackOutline });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

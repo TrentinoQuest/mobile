@@ -1,16 +1,10 @@
-// =============================================================================
-// Offline page styles (dark theme)
-// =============================================================================
-
 :host {
-  --offline-padding-x: 1.5rem;
-  --offline-icon-size: 5rem;
-  --offline-title-size: 1.75rem;
-  --offline-message-size: 1rem;
+  display: block;
+  height: 100%;
 }
 
 .offline-content {
-  // Eredita --ion-background-color (#121212) dal tema globale.
+  --background: var(--color-bg);
 
   &::part(scroll) {
     display: flex;
@@ -25,49 +19,40 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 2rem var(--offline-padding-x);
+  padding: var(--space-32) var(--space-24);
   max-width: 400px;
   width: 100%;
 }
 
 .offline-icon {
-  font-size: var(--offline-icon-size);
-  color: var(--ion-color-medium); // grigio chiaro su scuro
-  margin-bottom: 1.25rem;
+  font-size: 64px;
+  color: var(--color-text-disabled);
+  margin-bottom: var(--space-24);
 }
 
 .offline-title {
-  margin: 0 0 0.75rem;
-  font-size: var(--offline-title-size);
-  font-weight: 800;
-  color: var(--ion-text-color); // bianco-attenuato su scuro
-  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .offline-message {
-  margin: 0 0 2rem;
-  font-size: var(--offline-message-size);
-  line-height: 1.5;
-  color: var(--ion-color-medium); // grigio chiaro su scuro
+  margin: 0 0 var(--space-32);
+  font-size: var(--font-body);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
 }
 
 .offline-retry {
-  margin: 0 0 1.5rem;
-  min-width: 180px;
-  --border-radius: 0.75rem;
-  font-weight: 600;
-
-  ion-spinner {
-    margin-right: 0.5rem;
-    width: 1.1rem;
-    height: 1.1rem;
-  }
+  width: 100%;
+  margin-bottom: var(--space-24);
 }
 
 .offline-hint {
   margin: 0;
-  font-size: 0.85rem;
-  color: var(--ion-color-medium);
-  line-height: 1.4;
+  font-size: var(--font-small);
+  color: var(--color-text-disabled);
+  line-height: var(--line-height-normal);
   font-style: italic;
 }

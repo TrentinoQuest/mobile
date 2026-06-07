@@ -2,16 +2,18 @@ import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent,
-  IonButton,
   IonInput,
   IonSelect,
   IonSelectOption,
   ToastController,
 } from '@ionic/angular/standalone';
+import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { BusinessService } from '../../../core/services/business/business.service';
 import { BusinessType, BUSINESS_TYPE_LABEL } from '../../../core/services/business/business.types';
+import { addIcons } from 'ionicons';
+import { logOutOutline } from 'ionicons/icons';
 
 /**
  * ProfiloPage — form di modifica del profilo aziendale.
@@ -24,7 +26,7 @@ import { BusinessType, BUSINESS_TYPE_LABEL } from '../../../core/services/busine
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [FormsModule, IonContent, IonButton, IonInput, IonSelect, IonSelectOption],
+  imports: [FormsModule, IonContent, IonInput, IonSelect, IonSelectOption, TqButtonComponent],
 })
 export class AttivitaProfiloPage implements OnInit {
   protected readonly businessService = inject(BusinessService);
@@ -44,6 +46,7 @@ export class AttivitaProfiloPage implements OnInit {
   ).map(([value, label]) => ({ value: value as BusinessType, label }));
 
   constructor() {
+    addIcons({ logOutOutline });
     // Prepopola il form appena il profilo è disponibile
     effect(() => {
       const profile = this.businessService.profile();

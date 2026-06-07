@@ -16,14 +16,10 @@
       Di solito il processo richiede 1–2 giorni lavorativi.
     </p>
 
-    <ion-button
-      class="pending-page__logout-btn"
-      fill="outline"
-      expand="block"
-      (click)="logout()"
-    >
-      <ion-icon slot="start" name="log-out-outline"></ion-icon>
-      Esci dall'account
-    </ion-button>
+    <div class="pending-page__logout-wrap">
+      <tq-button variant="secondary" iconStart="log-out-outline" (tapped)="logout()">
+        Esci dall'account
+      </tq-button>
+    </div>
   </div>
 </ion-content>

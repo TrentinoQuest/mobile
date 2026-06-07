@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { from, interval, Subject, switchMap, takeUntil } from 'rxjs';
-import { IonButton, IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { cloudOfflineOutline } from 'ionicons/icons';
@@ -27,7 +28,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
   templateUrl: './offline.page.html',
   styleUrls: ['./offline.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonButton, IonSpinner],
+  imports: [IonContent, IonIcon, TqButtonComponent],
 })
 export class OfflinePage implements ViewWillEnter, ViewWillLeave {
   // ===========================================================================

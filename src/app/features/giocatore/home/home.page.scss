@@ -95,14 +95,14 @@
   height: 48px;
   border-radius: var(--radius-full);
   background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 4px 0 rgba(0, 0, 0, 0.12);
   border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
 
   ion-icon, svg {
     font-size: 22px;
@@ -111,8 +111,8 @@
   }
 
   &:active {
-    transform: scale(0.92);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(3px);
+    box-shadow: var(--shadow-sm), 0 1px 0 rgba(0, 0, 0, 0.12);
   }
 
   &--active {
@@ -229,19 +229,24 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), 0 4px 0 rgba(0, 0, 0, 0.08);
 
   -webkit-tap-highlight-color: transparent;
   animation: objectiveEnter 300ms ease-out both;
-  transition: transform 120ms ease-out, border-color 200ms ease;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, border-color 200ms ease;
 
   &:active {
-    transform: scale(0.985);
+    transform: translateY(3px);
+    box-shadow: var(--shadow-sm), 0 1px 0 rgba(0, 0, 0, 0.08);
   }
 
   &--inrange {
     border-color: rgba(var(--color-success-rgb), 0.5);
-    box-shadow: var(--shadow-md), 0 0 16px -4px rgba(var(--color-success-rgb), 0.3);
+    box-shadow: var(--shadow-md), 0 4px 0 rgba(var(--color-success-rgb), 0.3);
+
+    &:active {
+      box-shadow: var(--shadow-sm), 0 1px 0 rgba(var(--color-success-rgb), 0.3);
+    }
   }
 
   &--empty {
