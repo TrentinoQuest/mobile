@@ -1,201 +1,227 @@
 <ion-content [fullscreen]="true" class="profilo">
 
+  <!-- ═══════════════════════════════════════════════════════ HEADER GRADIENT -->
+  <div class="profilo__header">
+
+    <!-- Navigazione social (top-right) -->
+    <button class="profilo__social-btn" type="button"
+            (click)="navigateSocial()" aria-label="Amici e lega">
+      <ion-icon name="people-outline"></ion-icon>
+    </button>
+
+    <!-- Avatar deterministico -->
+    <div class="profilo__avatar"
+         [style.background]="avatarGradient(playerId())"
+         aria-hidden="true">
+      {{ avatarInitial(username()) }}
+    </div>
+
+    <!-- Identità -->
+    <h1 class="profilo__username">{{ username() }}</h1>
+    <p class="profilo__level-title">{{ levelTitle() }}</p>
+
+    <!-- Badge lega corrente -->
+    @if (currentLeagueTier(); as tier) {
+      <tq-badge color="primary" size="sm">{{ TIER_LABEL[tier] }}</tq-badge>
+    }
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ STATS FLOATING -->
+  <div class="profilo__stats-card">
+
+    <div class="profilo__stat">
+      <div class="profilo__stat-top">
+        <ion-icon name="flash-outline" class="profilo__stat-icon"></ion-icon>
+        <span class="profilo__stat-number">{{ xp() | number:'1.0-0' }}</span>
+      </div>
+      <span class="profilo__stat-label">XP</span>
+    </div>
+
+    <div class="profilo__stat-divider"></div>
+
+    <div class="profilo__stat">
+      <div class="profilo__stat-top">
+        <ion-icon name="trending-up-outline" class="profilo__stat-icon"></ion-icon>
+        <span class="profilo__stat-number">{{ level() }}</span>
+      </div>
+      <span class="profilo__stat-label">Livello</span>
+    </div>
+
+    <div class="profilo__stat-divider"></div>
+
+    <div class="profilo__stat">
+      <div class="profilo__stat-top">
+        <ion-icon name="flame" class="profilo__stat-icon profilo__stat-icon--accent"></ion-icon>
+        <span class="profilo__stat-number">{{ currentStreak() }}</span>
+      </div>
+      <span class="profilo__stat-label">Streak</span>
+    </div>
+
+    <div class="profilo__stat-divider"></div>
+
+    <div class="profilo__stat">
+      <div class="profilo__stat-top">
+        <ion-icon name="albums-outline" class="profilo__stat-icon"></ion-icon>
+        <span class="profilo__stat-number">{{ unlockedCount() }}</span>
+      </div>
+      <span class="profilo__stat-label">Collezione</span>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ CONTENUTO -->
   <div class="profilo__body">
 
-    <!-- Gear icon (impostazioni) -->
-    <div class="profilo__topbar">
-      <button class="profilo__gear-btn" type="button" aria-label="Impostazioni" (click)="scrollToSettings()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 01-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 01-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.8L4.2 7a2 2 0 012.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 012.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/>
-        </svg>
-      </button>
+    <!-- ─ Card progressione XP ─ -->
+    <div class="profilo__card">
+      <div class="profilo__xp-header">
+        <span class="profilo__card-title">Progressione XP</span>
+        <span class="profilo__xp-percent">{{ xpProgress() }}%</span>
+      </div>
+
+      <div class="profilo__xp-track" role="progressbar"
+           [attr.aria-valuenow]="xpProgress()" aria-valuemin="0" aria-valuemax="100">
+        <div class="profilo__xp-fill" [style.width.%]="animatedXpProgress()"></div>
+      </div>
+
+      @if (xpToNextLevel() !== null) {
+        <p class="profilo__xp-sub">
+          {{ xpToNextLevel() | number:'1.0-0' }} XP al prossimo livello · Lv.{{ level() + 1 }} – {{ levelTitle() }}
+        </p>
+      } @else {
+        <p class="profilo__xp-sub profilo__xp-sub--max">
+          <ion-icon name="trophy"></ion-icon>
+          Livello massimo
+        </p>
+      }
     </div>
 
-    <!-- Avatar + identità -->
-    <div class="profilo__identity">
-      <div class="profilo__avatar">
-        {{ username().charAt(0).toUpperCase() }}
+    <!-- ─ Card streak ─ -->
+    <div class="profilo__card profilo__streak-card">
+      <div class="profilo__streak-left">
+        <ion-icon name="flame" class="profilo__streak-flame"></ion-icon>
+        <span class="profilo__streak-count">{{ currentStreak() }}</span>
+        <span class="profilo__streak-label">giorni</span>
       </div>
-      <div class="profilo__username">{{ username() }}</div>
-      <div class="profilo__since">Esploratore da {{ registrationSince() }}</div>
-      <div class="profilo__level-badge">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
-          <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4M10 13v3M14 13v3"/>
-        </svg>
-        <span>LV {{ level() }} · {{ levelTitle() }}</span>
-      </div>
-    </div>
-
-    <!-- QR code identità giocatore -->
-    @if (playerId()) {
-      <div class="profilo__qr-wrap">
-        <app-player-qr-card [playerId]="playerId()" />
-      </div>
-    }
-
-    <!-- Griglia statistiche (solo dati reali). -->
-    <div class="profilo__stats">
-      <div class="profilo__stat-card">
-        <div class="profilo__stat-big">{{ unlockedCount() }} / {{ totalCount() }}</div>
-        <div class="profilo__stat-label">LUOGHI SCOPERTI</div>
-        <div class="profilo__stat-hint">continua a esplorare</div>
-      </div>
-      <div class="profilo__stat-card">
-        <div class="profilo__stat-big">{{ xp() | number:'1.0-0' }}</div>
-        <div class="profilo__stat-label">XP TOTALI</div>
-        <div class="profilo__stat-hint">
-          @if (xpToNextLevel() !== null) {
-            {{ xpToNextLevel() | number:'1.0-0' }} al livello {{ level() + 1 }}
-          } @else {
-            livello massimo
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Barra progresso XP -->
-    <div class="profilo__xp-section">
-      <div class="profilo__xp-bar-wrap">
-        <div class="profilo__xp-bar"
-             role="progressbar"
-             [attr.aria-valuenow]="xpProgress()"
-             aria-valuemin="0"
-             aria-valuemax="100">
-          <div class="profilo__xp-bar-fill" [style.width.%]="xpProgress()"></div>
-        </div>
-        <div class="profilo__xp-labels">
-          <span>Lv {{ level() }}</span>
-          @if (xpToNextLevel() !== null) {
-            <span>Lv {{ level() + 1 }}</span>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Streak -->
-    @if (currentStreak() > 0 || longestStreak() > 0) {
-      <div class="profilo__streak-section">
-        <div class="profilo__streak-card" [class.profilo__streak-card--shielded]="streakShieldActive()">
-          <div class="profilo__streak-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-            </svg>
-          </div>
-          <div class="profilo__streak-info">
-            <div class="profilo__streak-count">{{ currentStreak() }}</div>
-            <div class="profilo__streak-label">STREAK ATTIVA</div>
-          </div>
-          <div class="profilo__streak-best">
-            <div class="profilo__streak-best-count">{{ longestStreak() }}</div>
-            <div class="profilo__streak-best-label">RECORD</div>
-          </div>
-          @if (streakShieldActive()) {
-            <div class="profilo__streak-shield" aria-label="Streak shield attivo">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
-              </svg>
-            </div>
-          }
-        </div>
-      </div>
-    }
-
-    <!-- Impostazioni tema -->
-    <div class="profilo__section">
-      <div class="profilo__section-header">
-        <span class="profilo__section-title">Aspetto</span>
-      </div>
-      <div class="profilo__theme-wrap">
-        <app-theme-selector/>
-      </div>
-    </div>
-
-    <!-- Impostazioni mappa -->
-    <div class="profilo__section">
-      <div class="profilo__section-header">
-        <span class="profilo__section-title">Mappa</span>
-      </div>
-      <div class="profilo__settings-list">
-        <div class="profilo__settings-row profilo__settings-row--last profilo__settings-row--toggle">
-          <div class="profilo__settings-icon-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.6"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
-            </svg>
-          </div>
-          <div class="profilo__settings-text">
-            <span class="profilo__settings-label">Ruota con la bussola</span>
-            <span class="profilo__settings-hint">La mappa si orienta verso dove guardi</span>
-          </div>
-          <ion-toggle
-            [checked]="rotateWithHeading()"
-            (ionChange)="onToggleRotateMap($event)"
-            aria-label="Ruota la mappa con la bussola"
-          ></ion-toggle>
-        </div>
-      </div>
-    </div>
-
-    <!-- Menu impostazioni -->
-    <div class="profilo__section">
-      <div class="profilo__settings-list">
-        @for (row of settingsRows; track row.label; let last = $last) {
-          <button class="profilo__settings-row" [class.profilo__settings-row--last]="last" type="button" (click)="onSettingsRow(row)">
-            <div class="profilo__settings-icon-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.6"
-                   stroke-linecap="round" stroke-linejoin="round">
-                @switch (row.icon) {
-                  @case ('bell') {
-                    <path d="M6 17V11a6 6 0 0112 0v6l2 2H4l2-2zM10 21a2 2 0 004 0"/>
-                  }
-                  @case ('layers') {
-                    <path d="M12 3l9 5-9 5-9-5 9-5z"/>
-                    <path d="M3 13l9 5 9-5M3 17l9 5 9-5"/>
-                  }
-                  @case ('person') {
-                    <circle cx="12" cy="8" r="4"/>
-                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
-                  }
-                  @case ('compass') {
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
-                  }
-                  @case ('info') {
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M12 16v-4M12 8h.01"/>
-                  }
-                }
-              </svg>
-            </div>
-            <span class="profilo__settings-label">{{ row.label }}</span>
-            @if (row.value) {
-              <span class="profilo__settings-value">{{ row.value }}</span>
-            }
-            <svg class="profilo__settings-chevron" width="14" height="14" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="1.7"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
+      <div class="profilo__streak-right">
+        <p class="profilo__streak-record">Record: {{ longestStreak() }} giorni</p>
+        @if (streakShieldActive()) {
+          <tq-badge color="success" size="sm">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            Scudo attivo
+          </tq-badge>
         }
       </div>
     </div>
 
-    <!-- Logout -->
-    <div class="profilo__logout-wrap">
-      <button class="profilo__logout-btn" type="button" (click)="logout()">
-        Esci
-      </button>
-      <div class="profilo__version">TRENTINO QUEST · v 1.0.0</div>
+    <!-- ─ Impostazioni ─ -->
+    <div class="profilo__settings">
+
+      <!-- Blocco principale -->
+      <div class="profilo__settings-group">
+
+        <button class="profilo__settings-row" type="button"
+                (click)="onSettingsTap('profile')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Modifica profilo</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <button class="profilo__settings-row" type="button"
+                (click)="onSettingsTap('notifications')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="notifications-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Notifiche</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <!-- Toggle suoni -->
+        <div class="profilo__settings-row profilo__settings-row--toggle">
+          <div class="profilo__settings-icon">
+            <ion-icon name="volume-medium-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Suoni</span>
+          <ion-toggle [checked]="audio.soundEnabled()"
+                      (ionChange)="onAudioToggle($event)"
+                      aria-label="Abilita suoni"
+                      class="profilo__toggle"></ion-toggle>
+        </div>
+
+        <button class="profilo__settings-row" type="button"
+                (click)="onSettingsTap('offline')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="map-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Mappe offline</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <button class="profilo__settings-row" type="button"
+                (click)="onSettingsTap('privacy')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Privacy</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <button class="profilo__settings-row" type="button"
+                (click)="navigateCoop()">
+          <div class="profilo__settings-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Sfide Co-op</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <button class="profilo__settings-row" type="button"
+                (click)="onSettingsTap('language')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="language-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Lingua</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+        <button class="profilo__settings-row profilo__settings-row--last" type="button"
+                (click)="onSettingsTap('credits')">
+          <div class="profilo__settings-icon">
+            <ion-icon name="information-circle-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Crediti</span>
+          <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
+        </button>
+
+      </div>
+
+      <!-- Blocco danger -->
+      <div class="profilo__settings-group">
+
+        <button class="profilo__settings-row profilo__settings-row--danger" type="button"
+                (click)="logout()">
+          <div class="profilo__settings-icon profilo__settings-icon--danger">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label profilo__settings-label--danger">Esci</span>
+        </button>
+
+        <button class="profilo__settings-row profilo__settings-row--danger profilo__settings-row--last"
+                type="button" (click)="onSettingsTap('delete')">
+          <div class="profilo__settings-icon profilo__settings-icon--danger">
+            <ion-icon name="trash-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label profilo__settings-label--danger">Elimina account</span>
+        </button>
+
+      </div>
+
     </div>
+
+    <p class="profilo__version">TRENTINO QUEST · v 1.0.0</p>
 
   </div>
 

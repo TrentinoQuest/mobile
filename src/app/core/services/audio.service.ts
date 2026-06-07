@@ -10,6 +10,7 @@ import { Preferences } from '@capacitor/preferences';
 @Injectable({ providedIn: 'root' })
 export class AudioService {
   private readonly enabled = signal(false);
+  readonly soundEnabled = this.enabled.asReadonly();
 
   isEnabled(): boolean {
     return this.enabled();
