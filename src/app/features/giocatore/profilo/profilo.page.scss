@@ -37,19 +37,23 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.18);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  color: #fff;
-  transition: background 150ms ease;
+  color: var(--color-primary);
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
 
   ion-icon { font-size: 22px; }
 
-  &:active { background: rgba(255, 255, 255, 0.28); }
+  &:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.15);
+  }
 }
 
 .profilo__avatar {
@@ -119,6 +123,7 @@
 }
 
 .profilo__stat-number {
+  font-family: var(--tq-font-display);
   font-size: var(--font-h1);
   font-weight: 800;
   color: var(--color-primary);
@@ -193,7 +198,7 @@
   height: 100%;
   border-radius: var(--radius-full);
   background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
-  transition: width 600ms ease-out;
+  transition: width 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
   min-width: 0;
 }
 
@@ -303,7 +308,8 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-sm);
-  background: var(--color-primary-ultra);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -312,7 +318,8 @@
   ion-icon { font-size: 18px; color: var(--color-primary); }
 
   &--danger {
-    background: rgba(214, 40, 40, 0.08);
+    background: rgba(214, 40, 40, 0.06);
+    border-color: rgba(214, 40, 40, 0.15);
     ion-icon { color: var(--color-error); }
   }
 }
@@ -338,6 +345,17 @@
   --handle-background-checked: #fff;
 }
 
+.profilo__settings-row--theme {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-12);
+}
+
+.profilo__theme-sel {
+  flex-shrink: 0;
+  width: 172px;
+}
+
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 
 .profilo__version {
@@ -346,4 +364,14 @@
   font-size: var(--font-micro);
   color: var(--color-text-disabled);
   letter-spacing: 0.08em;
+}
+
+/* ─── Dark mode: header meno abbagliante ─────────────────────────────────── */
+
+[data-theme='dark'] .profilo__header {
+  background: linear-gradient(160deg, var(--color-primary-shadow) 0%, var(--color-primary) 100%);
+
+  &::before {
+    background: var(--color-primary-shadow);
+  }
 }

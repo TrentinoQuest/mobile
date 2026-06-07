@@ -6,7 +6,7 @@
     <!-- Navigazione social (top-right) -->
     <button class="profilo__social-btn" type="button"
             (click)="navigateSocial()" aria-label="Amici e lega">
-      <ion-icon name="people-outline"></ion-icon>
+      <ion-icon name="people"></ion-icon>
     </button>
 
     <!-- Avatar deterministico -->
@@ -32,7 +32,7 @@
 
     <div class="profilo__stat">
       <div class="profilo__stat-top">
-        <ion-icon name="flash-outline" class="profilo__stat-icon"></ion-icon>
+        <ion-icon name="flash" class="profilo__stat-icon"></ion-icon>
         <span class="profilo__stat-number">{{ xp() | number:'1.0-0' }}</span>
       </div>
       <span class="profilo__stat-label">XP</span>
@@ -42,7 +42,7 @@
 
     <div class="profilo__stat">
       <div class="profilo__stat-top">
-        <ion-icon name="trending-up-outline" class="profilo__stat-icon"></ion-icon>
+        <ion-icon name="trending-up" class="profilo__stat-icon"></ion-icon>
         <span class="profilo__stat-number">{{ level() }}</span>
       </div>
       <span class="profilo__stat-label">Livello</span>
@@ -62,7 +62,7 @@
 
     <div class="profilo__stat">
       <div class="profilo__stat-top">
-        <ion-icon name="albums-outline" class="profilo__stat-icon"></ion-icon>
+        <ion-icon name="albums" class="profilo__stat-icon"></ion-icon>
         <span class="profilo__stat-number">{{ unlockedCount() }}</span>
       </div>
       <span class="profilo__stat-label">Collezione</span>
@@ -138,6 +138,15 @@
           <span class="profilo__settings-label">Notifiche</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
+
+        <!-- Toggle aspetto / tema -->
+        <div class="profilo__settings-row profilo__settings-row--toggle profilo__settings-row--theme">
+          <div class="profilo__settings-icon">
+            <ion-icon name="moon-outline"></ion-icon>
+          </div>
+          <span class="profilo__settings-label">Aspetto</span>
+          <app-theme-selector class="profilo__theme-sel"></app-theme-selector>
+        </div>
 
         <!-- Toggle suoni -->
         <div class="profilo__settings-row profilo__settings-row--toggle">
