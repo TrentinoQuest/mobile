@@ -1,6 +1,5 @@
 <ion-content class="offer-form-page" fullscreen>
   <div class="offer-form-page__container">
-
     <header class="offer-form-page__header">
       <button class="offer-form-page__back" (click)="goBack()" type="button">
         <ion-icon name="arrow-back-outline"></ion-icon>
@@ -12,7 +11,6 @@
     </header>
 
     <form class="offer-form-page__form" (ngSubmit)="submit()">
-
       <div class="offer-form-page__field">
         <label class="offer-form-page__label" for="title">Titolo</label>
         <ion-input
@@ -43,9 +41,7 @@
       </div>
 
       <div class="offer-form-page__field">
-        <label class="offer-form-page__label" for="pointsCost">
-          Costo in punti
-        </label>
+        <label class="offer-form-page__label" for="pointsCost"> Costo in punti </label>
         <ion-input
           id="pointsCost"
           class="offer-form-page__input"
@@ -62,8 +58,6 @@
       <tq-button [loading]="saving()" (tapped)="submit()">
         {{ isEditMode() ? 'Aggiorna offerta' : 'Crea offerta' }}
       </tq-button>
-
     </form>
-
   </div>
 </ion-content>

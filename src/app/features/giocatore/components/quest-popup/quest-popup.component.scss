@@ -17,8 +17,12 @@
   margin: 0;
   color: var(--color-accent);
 
-  &.quest-popup__kicker--discovered { color: var(--color-primary); }
-  &.quest-popup__kicker--locked { color: var(--color-text-disabled); }
+  &.quest-popup__kicker--discovered {
+    color: var(--color-primary);
+  }
+  &.quest-popup__kicker--locked {
+    color: var(--color-text-disabled);
+  }
 }
 
 .quest-popup__title {
@@ -75,7 +79,9 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 0 var(--color-primary-shadow);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
   &:active {
@@ -103,7 +109,9 @@
   font-weight: 600;
   color: var(--color-text-disabled);
 
-  &.quest-popup__distance--inrange { color: var(--color-primary); }
+  &.quest-popup__distance--inrange {
+    color: var(--color-primary);
+  }
 }
 
 .quest-popup__checkin-btn {
@@ -117,7 +125,9 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 0 var(--color-primary-shadow);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
   &:active:not(:disabled) {
@@ -192,5 +202,7 @@
   color: var(--color-accent);
   -webkit-tap-highlight-color: transparent;
 
-  &:active { opacity: 0.7; }
+  &:active {
+    opacity: 0.7;
+  }
 }

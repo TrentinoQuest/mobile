@@ -12,20 +12,28 @@
 
     <!-- Indicatore prossimità (solo quest principale nella search area) -->
     @if (showProximity()) {
-      <div class="quest-sheet__proximity"
-           [class.quest-sheet__proximity--warm]="proximityZone() === 'warm'"
-           [class.quest-sheet__proximity--hot]="proximityZone() === 'hot'"
-           [class.quest-sheet__proximity--burning]="proximityZone() === 'burning'">
+      <div
+        class="quest-sheet__proximity"
+        [class.quest-sheet__proximity--warm]="proximityZone() === 'warm'"
+        [class.quest-sheet__proximity--hot]="proximityZone() === 'hot'"
+        [class.quest-sheet__proximity--burning]="proximityZone() === 'burning'"
+      >
         @if (proximityZone() === 'warm') {
           <ion-icon name="compass-outline" class="quest-sheet__prox-icon"></ion-icon>
           <span>Stai andando nella direzione giusta</span>
         }
         @if (proximityZone() === 'hot') {
-          <ion-icon name="flame-outline" class="quest-sheet__prox-icon quest-sheet__prox-icon--pulse"></ion-icon>
+          <ion-icon
+            name="flame-outline"
+            class="quest-sheet__prox-icon quest-sheet__prox-icon--pulse"
+          ></ion-icon>
           <span>Sei vicino!</span>
         }
         @if (proximityZone() === 'burning') {
-          <ion-icon name="flame" class="quest-sheet__prox-icon quest-sheet__prox-icon--shake"></ion-icon>
+          <ion-icon
+            name="flame"
+            class="quest-sheet__prox-icon quest-sheet__prox-icon--shake"
+          ></ion-icon>
           <span>È qui! Cerca attorno a te!</span>
         }
       </div>

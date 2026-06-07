@@ -13,7 +13,10 @@
   cursor: pointer;
   font-family: inherit;
   font-weight: 700;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, opacity 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    opacity 80ms ease-out;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 

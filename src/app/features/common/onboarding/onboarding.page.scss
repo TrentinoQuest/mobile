@@ -70,7 +70,9 @@
 
 .onboarding--light .onboarding__dot {
   background: var(--color-border);
-  &--active { background: var(--color-primary); }
+  &--active {
+    background: var(--color-primary);
+  }
 }
 
 // ── Back button ───────────────────────────────────────────────────
@@ -124,7 +126,9 @@
     animation: compassSpin 8s linear infinite;
   }
 
-  &__text { text-align: center; }
+  &__text {
+    text-align: center;
+  }
 
   &__title {
     font-family: var(--tq-font-display);
@@ -149,8 +153,12 @@
 }
 
 @keyframes compassSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -180,7 +188,9 @@
     }
   }
 
-  &__text { margin-bottom: var(--space-16); }
+  &__text {
+    margin-bottom: var(--space-16);
+  }
 
   &__title {
     font-family: var(--tq-font-display);
@@ -222,8 +232,15 @@
 }
 
 @keyframes scanLineSweep {
-  0%, 100% { transform: translateY(0);    opacity: 0.9; }
-  50%       { transform: translateY(20px); opacity: 0.2; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(20px);
+    opacity: 0.2;
+  }
 }
 
 // ── Step 3 — Level Up ─────────────────────────────────────────────
@@ -267,7 +284,9 @@
   color: #ffffff;
   align-self: flex-start;
 
-  ion-icon { font-size: 16px; }
+  ion-icon {
+    font-size: 16px;
+  }
 
   &--up {
     background: var(--color-accent);
@@ -311,27 +330,59 @@
 
 // Partenza vivace (28% nei primi 250ms), decelera gradualmente senza crawl — ratio ~3.5:1
 @keyframes xpFillRun {
-  0%   { width: 0%;   }
-  14%  { width: 28%;  }
-  30%  { width: 50%;  }
-  50%  { width: 68%;  }
-  70%  { width: 82%;  }
-  88%  { width: 93%;  }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+  14% {
+    width: 28%;
+  }
+  30% {
+    width: 50%;
+  }
+  50% {
+    width: 68%;
+  }
+  70% {
+    width: 82%;
+  }
+  88% {
+    width: 93%;
+  }
+  100% {
+    width: 100%;
+  }
 }
 
 @keyframes coinCelebrate {
-  0%   { transform: scale(1) rotate(0deg); }
-  30%  { transform: scale(1.35) rotate(-12deg); }
-  60%  { transform: scale(1.25) rotate(8deg); }
-  100% { transform: scale(1.1) rotate(0deg); }
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  30% {
+    transform: scale(1.35) rotate(-12deg);
+  }
+  60% {
+    transform: scale(1.25) rotate(8deg);
+  }
+  100% {
+    transform: scale(1.1) rotate(0deg);
+  }
 }
 
 @keyframes levelBadgePop {
-  0%   { transform: scale(0.4) rotate(-5deg); opacity: 0; }
-  55%  { transform: scale(1.25) rotate(2deg); opacity: 1; }
-  75%  { transform: scale(0.95) rotate(-1deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% {
+    transform: scale(0.4) rotate(-5deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.25) rotate(2deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.95) rotate(-1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -385,7 +436,9 @@
     width: 140px;
     transition: transform 100ms ease-out;
 
-    &--pressing { transform: scale(0.97); }
+    &--pressing {
+      transform: scale(0.97);
+    }
   }
 
   &__book-svg {
@@ -411,7 +464,9 @@
     ion-icon {
       font-size: 30px;
       color: #ffffff;
-      transition: color 200ms ease-out, filter 200ms ease-out;
+      transition:
+        color 200ms ease-out,
+        filter 200ms ease-out;
     }
 
     &--warm ion-icon {
@@ -488,9 +543,15 @@
     color: var(--color-text-primary);
     animation: featureSlideIn 300ms ease-out both;
 
-    &:nth-child(1) { animation-delay: 150ms; }
-    &:nth-child(2) { animation-delay: 260ms; }
-    &:nth-child(3) { animation-delay: 370ms; }
+    &:nth-child(1) {
+      animation-delay: 150ms;
+    }
+    &:nth-child(2) {
+      animation-delay: 260ms;
+    }
+    &:nth-child(3) {
+      animation-delay: 370ms;
+    }
 
     ion-icon {
       font-size: 22px;
@@ -508,7 +569,9 @@
     font-weight: 600;
     animation: onboardingSlideUp 300ms ease-out forwards;
 
-    ion-icon { font-size: 22px; }
+    ion-icon {
+      font-size: 22px;
+    }
   }
 
   &__flash {
@@ -536,9 +599,17 @@
     background: var(--color-primary);
     animation: onboardingParticle 900ms ease-out var(--delay, 0ms) both;
 
-    &:nth-child(2n) { background: var(--color-accent); }
-    &:nth-child(3n) { background: var(--color-primary-light); }
-    &:nth-child(4n) { background: var(--color-accent-light); width: 6px; height: 6px; }
+    &:nth-child(2n) {
+      background: var(--color-accent);
+    }
+    &:nth-child(3n) {
+      background: var(--color-primary-light);
+    }
+    &:nth-child(4n) {
+      background: var(--color-accent-light);
+      width: 6px;
+      height: 6px;
+    }
   }
 
   &__footer {
@@ -550,43 +621,92 @@
 }
 
 @keyframes lockShakeSlow {
-  0%, 100% { transform: translateX(0) rotate(0deg); }
-  25%       { transform: translateX(-4px) rotate(-4deg); }
-  75%       { transform: translateX(4px) rotate(4deg); }
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-4px) rotate(-4deg);
+  }
+  75% {
+    transform: translateX(4px) rotate(4deg);
+  }
 }
 
 @keyframes lockShakeFast {
-  0%, 100% { transform: translateX(0) rotate(0deg); }
-  20%       { transform: translateX(-5px) rotate(-6deg); }
-  40%       { transform: translateX(5px) rotate(6deg); }
-  60%       { transform: translateX(-4px) rotate(-4deg); }
-  80%       { transform: translateX(4px) rotate(4deg); }
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-5px) rotate(-6deg);
+  }
+  40% {
+    transform: translateX(5px) rotate(6deg);
+  }
+  60% {
+    transform: translateX(-4px) rotate(-4deg);
+  }
+  80% {
+    transform: translateX(4px) rotate(4deg);
+  }
 }
 
 @keyframes bookReveal {
-  from { transform: scale(0.75) rotateY(-8deg); opacity: 0; }
-  to   { transform: scale(1) rotateY(0deg); opacity: 1; }
+  from {
+    transform: scale(0.75) rotateY(-8deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes featureSlideIn {
-  from { transform: translateX(-16px); opacity: 0; }
-  to   { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(-16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes onboardingFlash {
-  0%   { opacity: 0; }
-  25%  { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes onboardingSlideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes onboardingParticle {
-  0%   { opacity: 1; transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateY(0); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateY(calc(-1 * var(--travel, 80px))); }
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--angle, 0deg)) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle, 0deg))
+      translateY(calc(-1 * var(--travel, 80px)));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -666,12 +786,24 @@
 // SVG libro step-4 — colori via CSS (adattivi al tema)
 // ═══════════════════════════════════════════════════════════════
 
-.book-cover { fill: var(--color-primary); }
-.book-ring  { fill: var(--color-primary-shadow); }
-.book-spine { fill: var(--color-primary-shadow); }
-.book-page  { fill: var(--color-surface); }
-.page-line  { stroke: var(--color-border); }
-.page-card  { fill: var(--color-primary-ultra); }
+.book-cover {
+  fill: var(--color-primary);
+}
+.book-ring {
+  fill: var(--color-primary-shadow);
+}
+.book-spine {
+  fill: var(--color-primary-shadow);
+}
+.book-page {
+  fill: var(--color-surface);
+}
+.page-line {
+  stroke: var(--color-border);
+}
+.page-card {
+  fill: var(--color-primary-ultra);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Dark mode — contrasto illustrazioni step-n
@@ -681,22 +813,44 @@
 
 [data-theme='dark'] .step-n__illustration {
   // Elementi scuri (#2d6a4f) → vivid primary
-  circle[fill="#2d6a4f"]  { fill: var(--color-primary); }
-  path[fill="#2d6a4f"]    { fill: var(--color-primary); }
-  circle[stroke="#2d6a4f"] { stroke: var(--color-primary); }
-  path[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
+  circle[fill='#2d6a4f'] {
+    fill: var(--color-primary);
+  }
+  path[fill='#2d6a4f'] {
+    fill: var(--color-primary);
+  }
+  circle[stroke='#2d6a4f'] {
+    stroke: var(--color-primary);
+  }
+  path[stroke='#2d6a4f'] {
+    stroke: var(--color-primary);
+  }
 
   // Background rect della mappa (verde menta chiaro) → surface-2
-  rect[fill="#d8f3dc"] { fill: var(--color-surface-2); }
+  rect[fill='#d8f3dc'] {
+    fill: var(--color-surface-2);
+  }
 
   // Pin secondari semi-trasparenti (#52b788) → primary-light
-  circle[fill="#52b788"] { fill: var(--color-primary-light); }
+  circle[fill='#52b788'] {
+    fill: var(--color-primary-light);
+  }
 }
 
 [data-theme='dark'] .step-2__combined {
-  circle[fill="#2d6a4f"]  { fill: var(--color-primary); }
-  circle[stroke="#2d6a4f"] { stroke: var(--color-primary); }
-  path[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
-  rect[fill="#d8f3dc"]    { fill: var(--color-surface-2); }
-  rect[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
+  circle[fill='#2d6a4f'] {
+    fill: var(--color-primary);
+  }
+  circle[stroke='#2d6a4f'] {
+    stroke: var(--color-primary);
+  }
+  path[stroke='#2d6a4f'] {
+    stroke: var(--color-primary);
+  }
+  rect[fill='#d8f3dc'] {
+    fill: var(--color-surface-2);
+  }
+  rect[stroke='#2d6a4f'] {
+    stroke: var(--color-primary);
+  }
 }

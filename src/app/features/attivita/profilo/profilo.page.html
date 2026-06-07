@@ -1,13 +1,11 @@
 <ion-content class="profilo-page" fullscreen>
   <div class="profilo-page__container">
-
     <header class="profilo-page__header">
       <p class="profilo-page__eyebrow">Impostazioni</p>
       <h1 class="profilo-page__title">Profilo attività</h1>
     </header>
 
     <form class="profilo-page__form" (ngSubmit)="save()">
-
       <div class="profilo-page__field">
         <label class="profilo-page__label" for="businessName">Nome attività</label>
         <ion-input
@@ -32,7 +30,7 @@
           fill="outline"
         >
           @for (type of businessTypes; track type.value) {
-            <ion-select-option [value]="type.value">{{ type.label }}</ion-select-option>
+          <ion-select-option [value]="type.value">{{ type.label }}</ion-select-option>
           }
         </ion-select>
       </div>
@@ -51,13 +49,10 @@
       </div>
 
       @if (businessService.error()) {
-        <p class="profilo-page__error">{{ businessService.error() }}</p>
+      <p class="profilo-page__error">{{ businessService.error() }}</p>
       }
 
-      <tq-button [loading]="saving()" (tapped)="save()">
-        Salva modifiche
-      </tq-button>
-
+      <tq-button [loading]="saving()" (tapped)="save()"> Salva modifiche </tq-button>
     </form>
 
     <div class="profilo-page__logout-section">
@@ -65,6 +60,5 @@
         Esci dall'account
       </tq-button>
     </div>
-
   </div>
 </ion-content>

@@ -1,37 +1,49 @@
 <div class="cdm">
-
   <button class="cdm__close" type="button" (click)="dismiss()" aria-label="Chiudi">
     <ion-icon name="close-outline"></ion-icon>
   </button>
 
   <!-- ─── Carta ─── -->
-  <div class="cdm__scene"
-       (pointermove)="onPointerMove($event)"
-       (pointerleave)="onPointerLeave()"
-       (pointercancel)="onPointerLeave()"
-       (click)="flipCard()">
-
-    <div class="cdm__card"
-         [ngClass]="rarityClass()"
-         [class.cdm__card--flip-out]="phase() === 'out'"
-         [class.cdm__card--flip-in]="phase() === 'in'"
-         [style.transform]="tiltTransform()">
-
+  <div
+    class="cdm__scene"
+    (pointermove)="onPointerMove($event)"
+    (pointerleave)="onPointerLeave()"
+    (pointercancel)="onPointerLeave()"
+    (click)="flipCard()"
+  >
+    <div
+      class="cdm__card"
+      [ngClass]="rarityClass()"
+      [class.cdm__card--flip-out]="phase() === 'out'"
+      [class.cdm__card--flip-in]="phase() === 'in'"
+      [style.transform]="tiltTransform()"
+    >
       @if (!showBack()) {
         <!-- FRONTE -->
         <div class="cdm__front">
           @if (entry.collectible.imageUrl) {
-            <img class="cdm__front-img"
-                 [src]="entry.collectible.imageUrl"
-                 [alt]="entry.collectible.name"/>
+            <img
+              class="cdm__front-img"
+              [src]="entry.collectible.imageUrl"
+              [alt]="entry.collectible.name"
+            />
           } @else {
-            <svg class="cdm__front-img" viewBox="0 0 210 280"
-                 preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-              <rect width="210" height="280" [attr.fill]="palette.sky"/>
-              <path d="M0 185 L50 165 L105 180 L155 158 L210 170 L210 280 L0 280 Z"
-                    [attr.fill]="palette.mid" opacity="0.9"/>
-              <path d="M0 220 L60 202 L130 215 L185 196 L210 206 L210 280 L0 280 Z"
-                    [attr.fill]="palette.fg"/>
+            <svg
+              class="cdm__front-img"
+              viewBox="0 0 210 280"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+            >
+              <rect width="210" height="280" [attr.fill]="palette.sky" />
+              <path
+                d="M0 185 L50 165 L105 180 L155 158 L210 170 L210 280 L0 280 Z"
+                [attr.fill]="palette.mid"
+                opacity="0.9"
+              />
+              <path
+                d="M0 220 L60 202 L130 215 L185 196 L210 206 L210 280 L0 280 Z"
+                [attr.fill]="palette.fg"
+              />
             </svg>
           }
           <div class="cdm__front-shine" [style]="shineStyle()"></div>
@@ -44,7 +56,7 @@
             @if (questName) {
               <p class="cdm__front-quest">{{ questName }}</p>
             }
-            <p class="cdm__front-date">{{ entry.unlockedAt | date:'dd/MM/yyyy' }}</p>
+            <p class="cdm__front-date">{{ entry.unlockedAt | date: 'dd/MM/yyyy' }}</p>
           </div>
         </div>
       } @else {
@@ -58,17 +70,16 @@
             </p>
           }
           @if (entry.collectible.coordinates) {
-            <tq-button variant="secondary" iconStart="navigate-outline"
-                       (tapped)="navigateTo()">
+            <tq-button variant="secondary" iconStart="navigate-outline" (tapped)="navigateTo()">
               Naviga verso questo luogo
             </tq-button>
           }
         </div>
       }
-
-    </div><!-- /cdm__card -->
-  </div><!-- /cdm__scene -->
+    </div>
+    <!-- /cdm__card -->
+  </div>
+  <!-- /cdm__scene -->
 
   <p class="cdm__hint">Tocca per girare</p>
-
 </div>

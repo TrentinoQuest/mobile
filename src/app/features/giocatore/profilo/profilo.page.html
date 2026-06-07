@@ -1,18 +1,18 @@
 <ion-content [fullscreen]="true" class="profilo">
-
   <!-- ═══════════════════════════════════════════════════════ HEADER GRADIENT -->
   <div class="profilo__header">
-
     <!-- Navigazione social (top-right) -->
-    <button class="profilo__social-btn" type="button"
-            (click)="navigateSocial()" aria-label="Amici e lega">
+    <button
+      class="profilo__social-btn"
+      type="button"
+      (click)="navigateSocial()"
+      aria-label="Amici e lega"
+    >
       <ion-icon name="people"></ion-icon>
     </button>
 
     <!-- Avatar deterministico -->
-    <div class="profilo__avatar"
-         [style.background]="avatarGradient(playerId())"
-         aria-hidden="true">
+    <div class="profilo__avatar" [style.background]="avatarGradient(playerId())" aria-hidden="true">
       {{ avatarInitial(username()) }}
     </div>
 
@@ -22,14 +22,12 @@
 
     <!-- Badge lega corrente -->
     @if (currentLeagueTier(); as tier) {
-      <tq-badge color="primary" size="sm">{{ TIER_LABEL[tier] }}</tq-badge>
+    <tq-badge color="primary" size="sm">{{ TIER_LABEL[tier] }}</tq-badge>
     }
-
   </div>
 
   <!-- ════════════════════════════════════════════════════════ STATS FLOATING -->
   <div class="profilo__stats-card">
-
     <div class="profilo__stat">
       <div class="profilo__stat-top">
         <ion-icon name="flash" class="profilo__stat-icon"></ion-icon>
@@ -67,12 +65,10 @@
       </div>
       <span class="profilo__stat-label">Collezione</span>
     </div>
-
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════ CONTENUTO -->
   <div class="profilo__body">
-
     <!-- ─ Card progressione XP ─ -->
     <div class="profilo__card">
       <div class="profilo__xp-header">
@@ -80,20 +76,26 @@
         <span class="profilo__xp-percent">{{ xpProgress() }}%</span>
       </div>
 
-      <div class="profilo__xp-track" role="progressbar"
-           [attr.aria-valuenow]="xpProgress()" aria-valuemin="0" aria-valuemax="100">
+      <div
+        class="profilo__xp-track"
+        role="progressbar"
+        [attr.aria-valuenow]="xpProgress()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
         <div class="profilo__xp-fill" [style.width.%]="animatedXpProgress()"></div>
       </div>
 
       @if (xpToNextLevel() !== null) {
-        <p class="profilo__xp-sub">
-          {{ xpToNextLevel() | number:'1.0-0' }} XP al prossimo livello · Lv.{{ level() + 1 }} – {{ levelTitle() }}
-        </p>
+      <p class="profilo__xp-sub">
+        {{ xpToNextLevel() | number:'1.0-0' }} XP al prossimo livello · Lv.{{ level() + 1 }} – {{
+        levelTitle() }}
+      </p>
       } @else {
-        <p class="profilo__xp-sub profilo__xp-sub--max">
-          <ion-icon name="trophy"></ion-icon>
-          Livello massimo
-        </p>
+      <p class="profilo__xp-sub profilo__xp-sub--max">
+        <ion-icon name="trophy"></ion-icon>
+        Livello massimo
+      </p>
       }
     </div>
 
@@ -107,22 +109,19 @@
       <div class="profilo__streak-right">
         <p class="profilo__streak-record">Record: {{ longestStreak() }} giorni</p>
         @if (streakShieldActive()) {
-          <tq-badge color="success" size="sm">
-            <ion-icon name="shield-checkmark"></ion-icon>
-            Scudo attivo
-          </tq-badge>
+        <tq-badge color="success" size="sm">
+          <ion-icon name="shield-checkmark"></ion-icon>
+          Scudo attivo
+        </tq-badge>
         }
       </div>
     </div>
 
     <!-- ─ Impostazioni ─ -->
     <div class="profilo__settings">
-
       <!-- Blocco principale -->
       <div class="profilo__settings-group">
-
-        <button class="profilo__settings-row" type="button"
-                (click)="onSettingsTap('profile')">
+        <button class="profilo__settings-row" type="button" (click)="onSettingsTap('profile')">
           <div class="profilo__settings-icon">
             <ion-icon name="person"></ion-icon>
           </div>
@@ -130,8 +129,11 @@
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
 
-        <button class="profilo__settings-row" type="button"
-                (click)="onSettingsTap('notifications')">
+        <button
+          class="profilo__settings-row"
+          type="button"
+          (click)="onSettingsTap('notifications')"
+        >
           <div class="profilo__settings-icon">
             <ion-icon name="notifications"></ion-icon>
           </div>
@@ -140,7 +142,9 @@
         </button>
 
         <!-- Toggle aspetto / tema -->
-        <div class="profilo__settings-row profilo__settings-row--toggle profilo__settings-row--theme">
+        <div
+          class="profilo__settings-row profilo__settings-row--toggle profilo__settings-row--theme"
+        >
           <div class="profilo__settings-icon">
             <ion-icon name="moon"></ion-icon>
           </div>
@@ -154,14 +158,15 @@
             <ion-icon name="volume-medium"></ion-icon>
           </div>
           <span class="profilo__settings-label">Suoni</span>
-          <ion-toggle [checked]="audio.soundEnabled()"
-                      (ionChange)="onAudioToggle($event)"
-                      aria-label="Abilita suoni"
-                      class="profilo__toggle"></ion-toggle>
+          <ion-toggle
+            [checked]="audio.soundEnabled()"
+            (ionChange)="onAudioToggle($event)"
+            aria-label="Abilita suoni"
+            class="profilo__toggle"
+          ></ion-toggle>
         </div>
 
-        <button class="profilo__settings-row" type="button"
-                (click)="onSettingsTap('offline')">
+        <button class="profilo__settings-row" type="button" (click)="onSettingsTap('offline')">
           <div class="profilo__settings-icon">
             <ion-icon name="map"></ion-icon>
           </div>
@@ -169,8 +174,7 @@
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
 
-        <button class="profilo__settings-row" type="button"
-                (click)="onSettingsTap('privacy')">
+        <button class="profilo__settings-row" type="button" (click)="onSettingsTap('privacy')">
           <div class="profilo__settings-icon">
             <ion-icon name="lock-closed"></ion-icon>
           </div>
@@ -178,8 +182,7 @@
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
 
-        <button class="profilo__settings-row" type="button"
-                (click)="navigateCoop()">
+        <button class="profilo__settings-row" type="button" (click)="navigateCoop()">
           <div class="profilo__settings-icon">
             <ion-icon name="people"></ion-icon>
           </div>
@@ -187,8 +190,7 @@
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
 
-        <button class="profilo__settings-row" type="button"
-                (click)="onSettingsTap('language')">
+        <button class="profilo__settings-row" type="button" (click)="onSettingsTap('language')">
           <div class="profilo__settings-icon">
             <ion-icon name="language"></ion-icon>
           </div>
@@ -196,42 +198,47 @@
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
 
-        <button class="profilo__settings-row profilo__settings-row--last" type="button"
-                (click)="onSettingsTap('credits')">
+        <button
+          class="profilo__settings-row profilo__settings-row--last"
+          type="button"
+          (click)="onSettingsTap('credits')"
+        >
           <div class="profilo__settings-icon">
             <ion-icon name="information-circle"></ion-icon>
           </div>
           <span class="profilo__settings-label">Crediti</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
         </button>
-
       </div>
 
       <!-- Blocco danger -->
       <div class="profilo__settings-group">
-
-        <button class="profilo__settings-row profilo__settings-row--danger" type="button"
-                (click)="logout()">
+        <button
+          class="profilo__settings-row profilo__settings-row--danger"
+          type="button"
+          (click)="logout()"
+        >
           <div class="profilo__settings-icon profilo__settings-icon--danger">
             <ion-icon name="log-out"></ion-icon>
           </div>
           <span class="profilo__settings-label profilo__settings-label--danger">Esci</span>
         </button>
 
-        <button class="profilo__settings-row profilo__settings-row--danger profilo__settings-row--last"
-                type="button" (click)="onSettingsTap('delete')">
+        <button
+          class="profilo__settings-row profilo__settings-row--danger profilo__settings-row--last"
+          type="button"
+          (click)="onSettingsTap('delete')"
+        >
           <div class="profilo__settings-icon profilo__settings-icon--danger">
             <ion-icon name="trash"></ion-icon>
           </div>
-          <span class="profilo__settings-label profilo__settings-label--danger">Elimina account</span>
+          <span class="profilo__settings-label profilo__settings-label--danger"
+            >Elimina account</span
+          >
         </button>
-
       </div>
-
     </div>
 
     <p class="profilo__version">TRENTINO QUEST · v 1.0.0</p>
-
   </div>
-
 </ion-content>

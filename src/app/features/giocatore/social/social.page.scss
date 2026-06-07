@@ -88,7 +88,9 @@
 }
 
 @keyframes socialSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .social__empty-state {
@@ -213,7 +215,9 @@
     transition: transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
     color: var(--color-text-disabled);
 
-    ion-icon { font-size: 20px; }
+    ion-icon {
+      font-size: 20px;
+    }
 
     &--sent {
       color: var(--color-accent);
@@ -245,10 +249,14 @@
   box-shadow: 0 5px 0 var(--color-primary-shadow);
   cursor: pointer;
   margin-bottom: var(--space-16);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
-  ion-icon { font-size: 20px; }
+  ion-icon {
+    font-size: 20px;
+  }
 
   &:active {
     transform: translateY(4px);
@@ -276,7 +284,9 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease;
 
-  &:active { background: var(--color-surface-2); }
+  &:active {
+    background: var(--color-surface-2);
+  }
 
   &__avatar {
     width: 40px;
@@ -390,8 +400,12 @@
   }
 
   @keyframes panelUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
   &__header {
@@ -422,7 +436,9 @@
     color: var(--color-text-secondary);
     flex-shrink: 0;
 
-    ion-icon { font-size: 18px; }
+    ion-icon {
+      font-size: 18px;
+    }
   }
 
   &__search {
@@ -455,7 +471,9 @@
     color: var(--color-text-primary);
     outline: none;
 
-    &::placeholder { color: var(--color-text-disabled); }
+    &::placeholder {
+      color: var(--color-text-disabled);
+    }
   }
 
   &__results {
@@ -480,7 +498,9 @@
   padding: var(--space-12) 0;
   border-bottom: 1px solid var(--color-border);
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 
   &__avatar {
     width: 40px;
@@ -511,6 +531,8 @@
     color: var(--color-success);
     flex-shrink: 0;
 
-    ion-icon { font-size: 16px; }
+    ion-icon {
+      font-size: 16px;
+    }
   }
 }

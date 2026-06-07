@@ -38,7 +38,9 @@
     transition: color 150ms ease-out;
     -webkit-tap-highlight-color: transparent;
 
-    &:active { opacity: 0.7; }
+    &:active {
+      opacity: 0.7;
+    }
   }
 
   &__icon {
@@ -49,9 +51,15 @@
   }
 
   // Scambia icona outline/filled in base allo stato attivo
-  &__icon--filled  { display: none; }
-  &__tab--active &__icon--inactive { display: none; }
-  &__tab--active &__icon--filled   { display: block; }
+  &__icon--filled {
+    display: none;
+  }
+  &__tab--active &__icon--inactive {
+    display: none;
+  }
+  &__tab--active &__icon--filled {
+    display: block;
+  }
 
   // ── Tab attiva — pill background centrato sull'icona ─────────────────────
   &__tab--active {
@@ -87,7 +95,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    transition:
+      transform 80ms ease-out,
+      box-shadow 80ms ease-out;
     -webkit-tap-highlight-color: transparent;
 
     &:active {
@@ -103,8 +113,16 @@
 }
 
 @keyframes tab-icon-bounce {
-  0%   { transform: translateY(0) scale(1); }
-  40%  { transform: translateY(-5px) scale(1.15); }
-  70%  { transform: translateY(1px) scale(0.97); }
-  100% { transform: translateY(0) scale(1); }
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-5px) scale(1.15);
+  }
+  70% {
+    transform: translateY(1px) scale(0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }

@@ -1,238 +1,257 @@
 <ion-content [fullscreen]="true" class="shop">
-
   <!-- ═══════════════════════════════════════════════════════════ HEADER -->
   <div class="shop__header">
     <h1 class="shop__title">Shop</h1>
 
     <div class="shop__segment" role="tablist">
-      <button class="shop__seg-btn"
-              [class.shop__seg-btn--active]="activeTab() === 'offerte'"
-              role="tab" type="button"
-              (click)="setTab('offerte')">Offerte</button>
-      <button class="shop__seg-btn"
-              [class.shop__seg-btn--active]="activeTab() === 'coupon'"
-              role="tab" type="button"
-              (click)="setTab('coupon')">I miei coupon</button>
+      <button
+        class="shop__seg-btn"
+        [class.shop__seg-btn--active]="activeTab() === 'offerte'"
+        role="tab"
+        type="button"
+        (click)="setTab('offerte')"
+      >
+        Offerte
+      </button>
+      <button
+        class="shop__seg-btn"
+        [class.shop__seg-btn--active]="activeTab() === 'coupon'"
+        role="tab"
+        type="button"
+        (click)="setTab('coupon')"
+      >
+        I miei coupon
+      </button>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════ OFFERTE -->
   @if (activeTab() === 'offerte') {
-    <div class="shop__body">
+  <div class="shop__body">
+    @if (offersLoading()) {
+    <div class="shop__spinner"></div>
+    } @else if (offersError()) {
+    <p class="shop__empty">{{ offersError() }}</p>
+    } @else if (offers().length === 0) {
+    <p class="shop__empty">Non ci sono offerte disponibili al momento.</p>
+    } @else {
 
-      @if (offersLoading()) {
-        <div class="shop__spinner"></div>
-      } @else if (offersError()) {
-        <p class="shop__empty">{{ offersError() }}</p>
-      } @else if (offers().length === 0) {
-        <p class="shop__empty">Non ci sono offerte disponibili al momento.</p>
-      } @else {
+    <!-- Burst animazione acquisto completato -->
+    @if (purchaseBurst()) {
+    <div class="shop__burst" aria-hidden="true">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <span>Acquistato!</span>
+    </div>
+    }
 
-        <!-- Burst animazione acquisto completato -->
-        @if (purchaseBurst()) {
-          <div class="shop__burst" aria-hidden="true">
-            <ion-icon name="sparkles-outline"></ion-icon>
-            <span>Acquistato!</span>
+    <div class="offers-list">
+      @for (offer of offers(); track offer.id) {
+      <div class="offer-card">
+        <!-- Header business -->
+        <div class="offer-card__business">
+          <div class="offer-card__business-icon">
+            <ion-icon name="business-outline"></ion-icon>
           </div>
-        }
-
-        <div class="offers-list">
-          @for (offer of offers(); track offer.id) {
-            <div class="offer-card">
-
-              <!-- Header business -->
-              <div class="offer-card__business">
-                <div class="offer-card__business-icon">
-                  <ion-icon name="business-outline"></ion-icon>
-                </div>
-                <span class="offer-card__business-name">{{ offer.businessName }}</span>
-              </div>
-
-              <!-- Titolo e descrizione -->
-              <h2 class="offer-card__title">{{ offer.title }}</h2>
-              <p class="offer-card__desc">{{ offer.description }}</p>
-
-              <!-- Separatore -->
-              <div class="offer-card__divider"></div>
-
-              <!-- Footer: scarsità + prezzo -->
-              <div class="offer-card__footer">
-                <!-- Barra scarsità -->
-                @if (offer.remaining !== null) {
-                  <div class="offer-card__scarcity">
-                    <div class="offer-card__scarcity-track">
-                      <div class="offer-card__scarcity-fill"
-                           [style.width.%]="scarcityPercent(offer.remaining)"
-                           [style.background]="scarcityColor(offer.remaining)">
-                      </div>
-                    </div>
-                    @if (isLowStock(offer.remaining)) {
-                      <span class="offer-card__low-stock">
-                        Solo {{ offer.remaining }} rimast{{ offer.remaining === 1 ? 'o' : 'i' }}
-                      </span>
-                    }
-                  </div>
-                }
-
-                <!-- Bottone prezzo -->
-                <button class="offer-card__buy-btn"
-                        [class.offer-card__buy-btn--loading]="purchasing() === offer.id"
-                        [disabled]="!!purchasing()"
-                        type="button"
-                        (click)="purchaseOffer(offer)">
-                  @if (purchasing() === offer.id) {
-                    <span class="offer-card__buy-spinner"></span>
-                  } @else {
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.25"/>
-                      <path d="M8 4v4l2.5 1.5" stroke="currentColor" stroke-width="1.5"
-                            stroke-linecap="round"/>
-                    </svg>
-                    <span>{{ offer.pointsCost }} monete</span>
-                  }
-                </button>
-              </div>
-
-            </div>
-          }
+          <span class="offer-card__business-name">{{ offer.businessName }}</span>
         </div>
+
+        <!-- Titolo e descrizione -->
+        <h2 class="offer-card__title">{{ offer.title }}</h2>
+        <p class="offer-card__desc">{{ offer.description }}</p>
+
+        <!-- Separatore -->
+        <div class="offer-card__divider"></div>
+
+        <!-- Footer: scarsità + prezzo -->
+        <div class="offer-card__footer">
+          <!-- Barra scarsità -->
+          @if (offer.remaining !== null) {
+          <div class="offer-card__scarcity">
+            <div class="offer-card__scarcity-track">
+              <div
+                class="offer-card__scarcity-fill"
+                [style.width.%]="scarcityPercent(offer.remaining)"
+                [style.background]="scarcityColor(offer.remaining)"
+              ></div>
+            </div>
+            @if (isLowStock(offer.remaining)) {
+            <span class="offer-card__low-stock">
+              Solo {{ offer.remaining }} rimast{{ offer.remaining === 1 ? 'o' : 'i' }}
+            </span>
+            }
+          </div>
+          }
+
+          <!-- Bottone prezzo -->
+          <button
+            class="offer-card__buy-btn"
+            [class.offer-card__buy-btn--loading]="purchasing() === offer.id"
+            [disabled]="!!purchasing()"
+            type="button"
+            (click)="purchaseOffer(offer)"
+          >
+            @if (purchasing() === offer.id) {
+            <span class="offer-card__buy-spinner"></span>
+            } @else {
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.25" />
+              <path
+                d="M8 4v4l2.5 1.5"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span>{{ offer.pointsCost }} monete</span>
+            }
+          </button>
+        </div>
+      </div>
       }
     </div>
+    }
+  </div>
   }
 
   <!-- ══════════════════════════════════════════════════ I MIEI COUPON -->
   @if (activeTab() === 'coupon') {
-    <div class="shop__body">
+  <div class="shop__body">
+    @if (couponsLoading()) {
+    <div class="shop__spinner"></div>
+    } @else if (coupons().length === 0) {
+    <div class="shop__empty-state">
+      <ion-icon name="ticket-outline" class="shop__empty-icon"></ion-icon>
+      <p class="shop__empty-title">Nessun coupon</p>
+      <p class="shop__empty-sub">I coupon acquistati appariranno qui.</p>
+    </div>
+    } @else {
 
-      @if (couponsLoading()) {
-        <div class="shop__spinner"></div>
-      } @else if (coupons().length === 0) {
-        <div class="shop__empty-state">
-          <ion-icon name="ticket-outline" class="shop__empty-icon"></ion-icon>
-          <p class="shop__empty-title">Nessun coupon</p>
-          <p class="shop__empty-sub">I coupon acquistati appariranno qui.</p>
+    <!-- Coupon attivi -->
+    @if (activeCoupons().length > 0) {
+    <div class="coupons-group">
+      <p class="coupons-group__label">Attivi</p>
+      @for (c of activeCoupons(); track c.id) {
+      <div class="coupon-card coupon-card--active" (click)="openCoupon(c)" role="button">
+        <div class="coupon-card__left">
+          <tq-badge color="success" size="sm">Attivo</tq-badge>
+          <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
+          <p class="coupon-card__business">{{ c.businessName }}</p>
         </div>
-      } @else {
-
-        <!-- Coupon attivi -->
-        @if (activeCoupons().length > 0) {
-          <div class="coupons-group">
-            <p class="coupons-group__label">Attivi</p>
-            @for (c of activeCoupons(); track c.id) {
-              <div class="coupon-card coupon-card--active" (click)="openCoupon(c)" role="button">
-                <div class="coupon-card__left">
-                  <tq-badge color="success" size="sm">Attivo</tq-badge>
-                  <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
-                  <p class="coupon-card__business">{{ c.businessName }}</p>
-                </div>
-                <div class="coupon-card__right">
-                  <ion-icon name="qr-code-outline" class="coupon-card__qr-icon"
-                            style="font-size:28px;color:var(--color-primary)"></ion-icon>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Coupon usati -->
-        @if (redeemedCoupons().length > 0) {
-          <div class="coupons-group">
-            <p class="coupons-group__label">Usati</p>
-            @for (c of redeemedCoupons(); track c.id) {
-              <div class="coupon-card coupon-card--redeemed">
-                <div class="coupon-card__left">
-                  <tq-badge color="primary" size="sm">Usato</tq-badge>
-                  <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
-                  <p class="coupon-card__business">{{ c.businessName }}</p>
-                </div>
-                <div class="coupon-card__right">
-                  <ion-icon name="checkmark-circle"
-                            style="font-size:28px;color:var(--color-success);opacity:0.5"></ion-icon>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Coupon scaduti -->
-        @if (expiredCoupons().length > 0) {
-          <div class="coupons-group">
-            <p class="coupons-group__label">Scaduti</p>
-            @for (c of expiredCoupons(); track c.id) {
-              <div class="coupon-card coupon-card--expired">
-                <div class="coupon-card__left">
-                  <tq-badge color="error" size="sm">Scaduto</tq-badge>
-                  <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
-                  <p class="coupon-card__business">{{ c.businessName }}</p>
-                </div>
-                <div class="coupon-card__right">
-                  <ion-icon name="close-circle"
-                            style="font-size:28px;color:var(--color-error);opacity:0.5"></ion-icon>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
+        <div class="coupon-card__right">
+          <ion-icon
+            name="qr-code-outline"
+            class="coupon-card__qr-icon"
+            style="font-size: 28px; color: var(--color-primary)"
+          ></ion-icon>
+        </div>
+      </div>
       }
     </div>
-  }
+    }
 
+    <!-- Coupon usati -->
+    @if (redeemedCoupons().length > 0) {
+    <div class="coupons-group">
+      <p class="coupons-group__label">Usati</p>
+      @for (c of redeemedCoupons(); track c.id) {
+      <div class="coupon-card coupon-card--redeemed">
+        <div class="coupon-card__left">
+          <tq-badge color="primary" size="sm">Usato</tq-badge>
+          <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
+          <p class="coupon-card__business">{{ c.businessName }}</p>
+        </div>
+        <div class="coupon-card__right">
+          <ion-icon
+            name="checkmark-circle"
+            style="font-size: 28px; color: var(--color-success); opacity: 0.5"
+          ></ion-icon>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Coupon scaduti -->
+    @if (expiredCoupons().length > 0) {
+    <div class="coupons-group">
+      <p class="coupons-group__label">Scaduti</p>
+      @for (c of expiredCoupons(); track c.id) {
+      <div class="coupon-card coupon-card--expired">
+        <div class="coupon-card__left">
+          <tq-badge color="error" size="sm">Scaduto</tq-badge>
+          <p class="coupon-card__title">{{ c.offerTitle ?? 'Coupon' }}</p>
+          <p class="coupon-card__business">{{ c.businessName }}</p>
+        </div>
+        <div class="coupon-card__right">
+          <ion-icon
+            name="close-circle"
+            style="font-size: 28px; color: var(--color-error); opacity: 0.5"
+          ></ion-icon>
+        </div>
+      </div>
+      }
+    </div>
+    } }
+  </div>
+  }
 </ion-content>
 
 <!-- ══════════════════════════════════════════════════ COUPON DETAIL OVERLAY -->
 @if (activeCoupon(); as coupon) {
-  <div class="coupon-detail">
-    <button class="coupon-detail__backdrop" type="button"
-            (click)="closeCoupon()" aria-label="Chiudi"></button>
-    <div class="coupon-detail__panel">
+<div class="coupon-detail">
+  <button
+    class="coupon-detail__backdrop"
+    type="button"
+    (click)="closeCoupon()"
+    aria-label="Chiudi"
+  ></button>
+  <div class="coupon-detail__panel">
+    <!-- Chiudi -->
+    <button class="coupon-detail__close" type="button" (click)="closeCoupon()" aria-label="Chiudi">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
 
-      <!-- Chiudi -->
-      <button class="coupon-detail__close" type="button"
-              (click)="closeCoupon()" aria-label="Chiudi">
-        <ion-icon name="close-outline"></ion-icon>
-      </button>
+    <!-- Titolo e business -->
+    <h2 class="coupon-detail__title">{{ coupon.offerTitle ?? 'Coupon' }}</h2>
+    <p class="coupon-detail__business">{{ coupon.businessName }}</p>
 
-      <!-- Titolo e business -->
-      <h2 class="coupon-detail__title">{{ coupon.offerTitle ?? 'Coupon' }}</h2>
-      <p class="coupon-detail__business">{{ coupon.businessName }}</p>
-
-      <!-- QR code -->
-      <div class="coupon-detail__qr-wrap">
-        @if (qrDataUrl()) {
-          <img class="coupon-detail__qr" [src]="qrDataUrl()"
-               alt="QR coupon" width="240" height="240"/>
-        } @else {
-          <div class="coupon-detail__qr-placeholder">
-            <div class="shop__spinner"></div>
-          </div>
-        }
-
-        <!-- Overlay status -->
-        @if (coupon.status === 'expired') {
-          <div class="coupon-detail__status-overlay coupon-detail__status-overlay--expired">
-            <ion-icon name="close-circle"></ion-icon>
-            <span>Coupon scaduto</span>
-          </div>
-        } @else if (coupon.status === 'redeemed') {
-          <div class="coupon-detail__status-overlay coupon-detail__status-overlay--redeemed">
-            <ion-icon name="checkmark-circle"></ion-icon>
-            <span>Coupon utilizzato</span>
-          </div>
-        }
+    <!-- QR code -->
+    <div class="coupon-detail__qr-wrap">
+      @if (qrDataUrl()) {
+      <img class="coupon-detail__qr" [src]="qrDataUrl()" alt="QR coupon" width="240" height="240" />
+      } @else {
+      <div class="coupon-detail__qr-placeholder">
+        <div class="shop__spinner"></div>
       </div>
-
-      <!-- Countdown -->
-      @if (coupon.status === 'active') {
-        <div class="coupon-detail__timer" [class.coupon-detail__timer--critical]="isCountdownCritical()">
-          <ion-icon name="time-outline"></ion-icon>
-          <span class="coupon-detail__countdown">{{ countdownText() }}</span>
-        </div>
       }
 
-      <!-- Istruzione -->
-      <p class="coupon-detail__instruction">Mostra questo codice all'esercente</p>
-
+      <!-- Overlay status -->
+      @if (coupon.status === 'expired') {
+      <div class="coupon-detail__status-overlay coupon-detail__status-overlay--expired">
+        <ion-icon name="close-circle"></ion-icon>
+        <span>Coupon scaduto</span>
+      </div>
+      } @else if (coupon.status === 'redeemed') {
+      <div class="coupon-detail__status-overlay coupon-detail__status-overlay--redeemed">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span>Coupon utilizzato</span>
+      </div>
+      }
     </div>
+
+    <!-- Countdown -->
+    @if (coupon.status === 'active') {
+    <div
+      class="coupon-detail__timer"
+      [class.coupon-detail__timer--critical]="isCountdownCritical()"
+    >
+      <ion-icon name="time-outline"></ion-icon>
+      <span class="coupon-detail__countdown">{{ countdownText() }}</span>
+    </div>
+    }
+
+    <!-- Istruzione -->
+    <p class="coupon-detail__instruction">Mostra questo codice all'esercente</p>
   </div>
+</div>
 }

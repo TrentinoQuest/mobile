@@ -25,7 +25,9 @@ ion-content.scan-modal {
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 5px 0 var(--color-primary-shadow);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
   &:active {
     transform: translateY(4px);
@@ -154,10 +156,25 @@ ion-content.scan-modal {
   width: 36px;
   height: 36px;
 
-  &--tl { top: -2px; left: -2px; }
-  &--tr { top: -2px; right: -2px; transform: rotate(90deg); }
-  &--br { bottom: -2px; right: -2px; transform: rotate(180deg); }
-  &--bl { bottom: -2px; left: -2px; transform: rotate(270deg); }
+  &--tl {
+    top: -2px;
+    left: -2px;
+  }
+  &--tr {
+    top: -2px;
+    right: -2px;
+    transform: rotate(90deg);
+  }
+  &--br {
+    bottom: -2px;
+    right: -2px;
+    transform: rotate(180deg);
+  }
+  &--bl {
+    bottom: -2px;
+    left: -2px;
+    transform: rotate(270deg);
+  }
 }
 
 /* Linea di scansione */
@@ -300,9 +317,19 @@ ion-content.scan-modal {
   left: 0;
   animation: tq-particle-burst 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--delay, 0ms) both;
 
-  &:nth-child(3n) { background: var(--color-accent-light); width: 5px; height: 5px; }
-  &:nth-child(5n) { background: var(--color-accent); }
-  &:nth-child(7n) { background: var(--color-success); width: 6px; height: 6px; }
+  &:nth-child(3n) {
+    background: var(--color-accent-light);
+    width: 5px;
+    height: 5px;
+  }
+  &:nth-child(5n) {
+    background: var(--color-accent);
+  }
+  &:nth-child(7n) {
+    background: var(--color-success);
+    width: 6px;
+    height: 6px;
+  }
 }
 
 /* Stelline decorative */
@@ -329,7 +356,6 @@ ion-content.scan-modal {
     height: 4px;
   }
 }
-
 
 .scan-modal__success-body {
   position: absolute;

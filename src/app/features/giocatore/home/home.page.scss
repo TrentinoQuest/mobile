@@ -102,9 +102,12 @@
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
-  ion-icon, svg {
+  ion-icon,
+  svg {
     font-size: 24px;
     color: var(--color-text-primary);
     overflow: visible;
@@ -119,7 +122,10 @@
     background: var(--color-primary);
     border-color: var(--color-primary);
 
-    ion-icon, svg { color: #ffffff; }
+    ion-icon,
+    svg {
+      color: #ffffff;
+    }
   }
 }
 
@@ -160,8 +166,14 @@
 }
 
 @keyframes filterPanelIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .filter-panel__item {
@@ -200,9 +212,15 @@
   border-radius: var(--radius-full);
   flex-shrink: 0;
 
-  &--primary   { background: var(--color-primary); }
-  &--secondary { background: var(--color-accent); }
-  &--completed { background: var(--color-success); }
+  &--primary {
+    background: var(--color-primary);
+  }
+  &--secondary {
+    background: var(--color-accent);
+  }
+  &--completed {
+    background: var(--color-success);
+  }
 }
 
 /* ============================================================================
@@ -227,15 +245,19 @@
 
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.10);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1);
 
   -webkit-tap-highlight-color: transparent;
   animation: objectiveEnter 300ms ease-out both;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, background 200ms ease, border-color 200ms ease;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    background 200ms ease,
+    border-color 200ms ease;
 
   &:active {
     transform: translateY(4px);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.10);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
   }
 
   &--inrange {
@@ -255,8 +277,14 @@
 }
 
 @keyframes objectiveEnter {
-  from { opacity: 0; translate: 0 8px; }
-  to   { opacity: 1; translate: 0 0px; }
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0px;
+  }
 }
 
 .home__objective__icon {
@@ -271,7 +299,9 @@
   border: none;
   color: var(--color-accent);
 
-  ion-icon { font-size: 20px; }
+  ion-icon {
+    font-size: 20px;
+  }
 
   .home__objective--inrange & {
     background: rgba(255, 255, 255, 0.25);
@@ -346,7 +376,9 @@
   font-weight: 500;
   color: var(--color-text-secondary);
 
-  .home__objective--inrange & { color: rgba(255, 255, 255, 0.75); }
+  .home__objective--inrange & {
+    color: rgba(255, 255, 255, 0.75);
+  }
 }
 
 .home__objective__action {
@@ -358,7 +390,9 @@
 .home__objective__arrow {
   color: var(--color-text-disabled);
 
-  .home__objective--inrange & { color: rgba(255, 255, 255, 0.6); }
+  .home__objective--inrange & {
+    color: rgba(255, 255, 255, 0.6);
+  }
 }
 
 /* ============================================================================
@@ -566,7 +600,9 @@
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
   &:active {
     transform: translateY(4px);
@@ -582,9 +618,16 @@
       box-shadow: 0 0px 0 var(--color-primary-shadow);
     }
 
-    .nearby__row-name { color: #ffffff; }
-    .nearby__row-meta { color: rgba(255, 255, 255, 0.85); }
-    .nearby__row-dist { color: #ffffff; font-weight: 700; }
+    .nearby__row-name {
+      color: #ffffff;
+    }
+    .nearby__row-meta {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .nearby__row-dist {
+      color: #ffffff;
+      font-weight: 700;
+    }
 
     .nearby__row-icon {
       background: rgba(255, 255, 255, 0.25);

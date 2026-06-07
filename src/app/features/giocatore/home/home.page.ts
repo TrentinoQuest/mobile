@@ -528,13 +528,13 @@ export class HomePage implements AfterViewInit, OnDestroy {
       id: this.LAYER_UNCERTAINTY_FILL,
       type: 'fill',
       source: this.SOURCE_UNCERTAINTY,
-      paint: { 'fill-color': 'rgba(184, 134, 11, 1)', 'fill-opacity': 0.12 },
+      paint: { 'fill-color': 'rgba(64, 145, 108, 1)', 'fill-opacity': 0.14 },
     });
     this.map.addLayer({
       id: this.LAYER_UNCERTAINTY_LINE,
       type: 'line',
       source: this.SOURCE_UNCERTAINTY,
-      paint: { 'line-color': 'rgba(184, 134, 11, 0.4)', 'line-width': 1 },
+      paint: { 'line-color': 'rgba(64, 145, 108, 0.55)', 'line-width': 1 },
     });
   }
 
@@ -582,7 +582,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private buildPrimaryCircleFeature(quest: PrimaryQuest): CircleFeature {
     const playerStatus = this.questService.playerStatusOf(quest.id);
     const fillColor =
-      playerStatus === 'discovered' ? '#6BA046' : playerStatus === 'locked' ? '#666666' : '#C8930F';
+      playerStatus === 'discovered' ? '#2d6a4f' : playerStatus === 'locked' ? '#888888' : '#40916c';
     const isAvailable = playerStatus === 'available';
     const isDiscovered = playerStatus === 'discovered';
     return {

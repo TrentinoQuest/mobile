@@ -203,7 +203,6 @@
 // Questo è: navy-black profondo + brand colors vividi e luminosi come nella notte alpina.
 // =============================================================================
 :root[data-theme='dark'] {
-
   // ── --color-* (fix bug: questi mancavano nel blocco dark!) ─────────────────
 
   --color-bg: #0d1117;
@@ -376,7 +375,6 @@
 // Sfondo bianco puro, colori brand diretti (niente warm cream dell'era precedente).
 // =============================================================================
 :root[data-theme='light'] {
-
   // ── --color-* ──────────────────────────────────────────────────────────────
 
   --color-bg: #ffffff;

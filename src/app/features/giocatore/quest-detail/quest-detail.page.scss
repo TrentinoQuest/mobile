@@ -32,8 +32,12 @@
   transition: background 120ms ease;
   flex-shrink: 0;
 
-  ion-icon { font-size: 20px; }
-  &:active { background: var(--color-border); }
+  ion-icon {
+    font-size: 20px;
+  }
+  &:active {
+    background: var(--color-border);
+  }
 }
 
 .quest-detail__status {
@@ -93,7 +97,9 @@
   background: var(--color-accent-ultra);
   box-shadow: 0 4px 0 rgba(var(--color-accent-rgb), 0.25);
 
-  ion-icon { font-size: 48px; }
+  ion-icon {
+    font-size: 48px;
+  }
 
   &--discovered {
     color: var(--color-primary);
@@ -153,7 +159,9 @@
   display: flex;
   align-items: center;
 
-  ion-icon { font-size: 18px; }
+  ion-icon {
+    font-size: 18px;
+  }
 }
 
 .quest-detail__reward-value {
@@ -188,9 +196,13 @@
   font-weight: 600;
   color: var(--color-text-disabled);
 
-  ion-icon { font-size: 16px; }
+  ion-icon {
+    font-size: 16px;
+  }
 
-  &--inrange { color: var(--color-primary); }
+  &--inrange {
+    color: var(--color-primary);
+  }
 }
 
 .quest-detail__cta {
@@ -209,7 +221,9 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 5px 0 var(--color-accent-shadow);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
   &:active {
     transform: translateY(4px);

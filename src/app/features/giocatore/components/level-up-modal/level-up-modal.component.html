@@ -1,12 +1,13 @@
 <ion-content [fullscreen]="true" class="levelup-modal">
-
   <!-- Particelle burst (stelle/diamanti dorati) -->
   <div class="levelup-modal__particles" aria-hidden="true">
     @for (angle of starAngles; track $index) {
-      <div class="levelup-modal__particle"
-           [style.--angle]="angle + 'deg'"
-           [style.--travel]="starTravels[$index] + 'px'"
-           [style.--delay]="($index * 55) + 'ms'"></div>
+      <div
+        class="levelup-modal__particle"
+        [style.--angle]="angle + 'deg'"
+        [style.--travel]="starTravels[$index] + 'px'"
+        [style.--delay]="$index * 55 + 'ms'"
+      ></div>
     }
   </div>
 
@@ -18,18 +19,26 @@
 
   <!-- Corpo centrale -->
   <div class="levelup-modal__body">
-
     <!-- Stella decorativa -->
     <div class="levelup-modal__star-wrap">
       <div class="levelup-modal__star-ring"></div>
       <svg class="levelup-modal__star-svg" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <path d="M24,4 L28.7,17.5 L43,17.8 L31.6,26.5 L35.8,40.2 L24,32 L12.2,40.2 L16.4,26.5 L5,17.8 L19.3,17.5 Z"
-              fill="url(#star-grad)"/>
+        <path
+          d="M24,4 L28.7,17.5 L43,17.8 L31.6,26.5 L35.8,40.2 L24,32 L12.2,40.2 L16.4,26.5 L5,17.8 L19.3,17.5 Z"
+          fill="url(#star-grad)"
+        />
         <defs>
-          <linearGradient id="star-grad" x1="24" y1="4" x2="24" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#FFE870"/>
-            <stop offset="55%" stop-color="#FFB020"/>
-            <stop offset="100%" stop-color="#C07800"/>
+          <linearGradient
+            id="star-grad"
+            x1="24"
+            y1="4"
+            x2="24"
+            y2="40"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stop-color="#FFE870" />
+            <stop offset="55%" stop-color="#FFB020" />
+            <stop offset="100%" stop-color="#C07800" />
           </linearGradient>
         </defs>
       </svg>
@@ -52,14 +61,10 @@
       <span class="levelup-modal__xp-value">{{ xpAwarded }}</span>
       <span class="levelup-modal__xp-unit">xp</span>
     </div>
-
   </div>
 
   <!-- CTA -->
   <div class="levelup-modal__cta">
-    <button class="levelup-modal__cta-btn" (click)="dismiss()">
-      Continua
-    </button>
+    <button class="levelup-modal__cta-btn" (click)="dismiss()">Continua</button>
   </div>
-
 </ion-content>

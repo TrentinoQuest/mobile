@@ -1,25 +1,56 @@
 <ion-content [fullscreen]="true" class="checkin-success">
-
   <!-- Glow di sfondo -->
   <div class="checkin-success__glow"></div>
 
   <!-- Scintille decorative -->
   <svg class="checkin-success__sparkles" viewBox="0 0 393 852" preserveAspectRatio="xMidYMid slice">
-    @for (spark of [[70,160,1.8],[310,200,1.4],[50,340,2],[345,380,1.6],[80,560,1.4],[320,580,2],[110,680,1.2],[290,710,1.5],[195,130,1.1],[150,420,1.7],[240,300,1.3]]; track $index) {
-      <circle [attr.cx]="spark[0]" [attr.cy]="spark[1]" [attr.r]="spark[2]" fill="var(--color-primary)" opacity="0.4"/>
+    @for (
+      spark of [
+        [70, 160, 1.8],
+        [310, 200, 1.4],
+        [50, 340, 2],
+        [345, 380, 1.6],
+        [80, 560, 1.4],
+        [320, 580, 2],
+        [110, 680, 1.2],
+        [290, 710, 1.5],
+        [195, 130, 1.1],
+        [150, 420, 1.7],
+        [240, 300, 1.3],
+      ];
+      track $index
+    ) {
+      <circle
+        [attr.cx]="spark[0]"
+        [attr.cy]="spark[1]"
+        [attr.r]="spark[2]"
+        fill="var(--color-primary)"
+        opacity="0.4"
+      />
     }
   </svg>
 
   <!-- Corpo centrale -->
   <div class="checkin-success__body">
-
     <!-- Icona checkmark con alone -->
     <div class="checkin-success__check-wrap">
       <svg class="checkin-success__check-svg" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="30" stroke="#6BA046" stroke-width="2" opacity="0.3"/>
-        <circle cx="32" cy="32" r="22" fill="rgba(107,160,70,0.15)" stroke="#6BA046" stroke-width="1.5"/>
-        <path d="M20 32l9 9 15-15" stroke="#6BA046" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="32" cy="32" r="30" stroke="#6BA046" stroke-width="2" opacity="0.3" />
+        <circle
+          cx="32"
+          cy="32"
+          r="22"
+          fill="rgba(107,160,70,0.15)"
+          stroke="#6BA046"
+          stroke-width="1.5"
+        />
+        <path
+          d="M20 32l9 9 15-15"
+          stroke="#6BA046"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </div>
 
@@ -42,23 +73,43 @@
     <!-- Streak attiva -->
     @if ((gamification?.currentStreak ?? 0) > 0) {
       <div class="checkin-success__streak">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--color-accent)" aria-hidden="true">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="var(--color-accent)"
+          aria-hidden="true"
+        >
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         streak {{ gamification!.currentStreak }}
-        @if (gamification?.streakBroken) { &nbsp;(azzerata) }
-        @if (gamification?.shieldConsumed) { &nbsp;· shield usato }
-        @if (gamification?.shieldEarned) { &nbsp;· shield guadagnato }
+        @if (gamification?.streakBroken) {
+          &nbsp;(azzerata)
+        }
+        @if (gamification?.shieldConsumed) {
+          &nbsp;· shield usato
+        }
+        @if (gamification?.shieldEarned) {
+          &nbsp;· shield guadagnato
+        }
       </div>
     }
 
     <!-- Level up -->
     @if (leveledUp) {
       <div class="checkin-success__levelup">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-          <path d="M5 12h14M13 6l6 6-6 6"/>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
         Livello {{ gamification!.newLevel }} · {{ gamification!.levelTitle }}
       </div>
@@ -66,20 +117,23 @@
 
     <!-- Totale XP aggiornato -->
     <div class="checkin-success__total">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-           stroke="rgba(176,181,174,0.4)" stroke-width="1.7" stroke-linecap="round">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="rgba(176,181,174,0.4)"
+        stroke-width="1.7"
+        stroke-linecap="round"
+      >
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
       totale {{ gamification?.totalXp ?? newTotalPoints }} xp
     </div>
-
   </div>
 
   <!-- CTA -->
   <div class="checkin-success__cta">
-    <button class="checkin-success__cta-btn" (click)="dismiss()">
-      Continua a esplorare
-    </button>
+    <button class="checkin-success__cta-btn" (click)="dismiss()">Continua a esplorare</button>
   </div>
-
 </ion-content>

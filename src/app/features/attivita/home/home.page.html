@@ -1,36 +1,35 @@
 <ion-content class="business-home" fullscreen>
   <div class="business-home__container">
-
     <!-- Intestazione -->
     <header class="business-home__header">
       <p class="business-home__eyebrow">La tua attività</p>
       @if (businessService.profile(); as profile) {
-        <h1 class="business-home__name">{{ profile.businessName }}</h1>
+      <h1 class="business-home__name">{{ profile.businessName }}</h1>
       } @else {
-        <ion-skeleton-text class="business-home__name-skeleton" animated></ion-skeleton-text>
+      <ion-skeleton-text class="business-home__name-skeleton" animated></ion-skeleton-text>
       }
     </header>
 
     <!-- Card profilo -->
     <div class="business-home__card">
       @if (businessService.loading() && !businessService.profile()) {
-        <ion-skeleton-text animated class="business-home__skeleton-row"></ion-skeleton-text>
-        <ion-skeleton-text animated class="business-home__skeleton-row"></ion-skeleton-text>
+      <ion-skeleton-text animated class="business-home__skeleton-row"></ion-skeleton-text>
+      <ion-skeleton-text animated class="business-home__skeleton-row"></ion-skeleton-text>
       } @else if (businessService.profile(); as profile) {
-        <div class="business-home__card-row">
-          <span class="business-home__card-label">Tipo</span>
-          <span class="business-home__card-value">{{ businessTypeLabel() }}</span>
-        </div>
-        <div class="business-home__card-row">
-          <span class="business-home__card-label">Indirizzo</span>
-          <span class="business-home__card-value">{{ profile.address }}</span>
-        </div>
-        <div class="business-home__card-row">
-          <span class="business-home__card-label">Stato</span>
-          <span class="business-home__card-badge business-home__card-badge--approved">
-            Approvata
-          </span>
-        </div>
+      <div class="business-home__card-row">
+        <span class="business-home__card-label">Tipo</span>
+        <span class="business-home__card-value">{{ businessTypeLabel() }}</span>
+      </div>
+      <div class="business-home__card-row">
+        <span class="business-home__card-label">Indirizzo</span>
+        <span class="business-home__card-value">{{ profile.address }}</span>
+      </div>
+      <div class="business-home__card-row">
+        <span class="business-home__card-label">Stato</span>
+        <span class="business-home__card-badge business-home__card-badge--approved">
+          Approvata
+        </span>
+      </div>
       }
     </div>
 
@@ -44,13 +43,16 @@
 
     <!-- Errore -->
     @if (businessService.error()) {
-      <p class="business-home__error">{{ businessService.error() }}</p>
+    <p class="business-home__error">{{ businessService.error() }}</p>
     }
 
     <!-- CTA Offerte -->
-    <tq-button iconStart="pricetags-outline" iconEnd="arrow-forward-outline" (tapped)="navigateToOfferte()">
+    <tq-button
+      iconStart="pricetags-outline"
+      iconEnd="arrow-forward-outline"
+      (tapped)="navigateToOfferte()"
+    >
       Gestisci offerte
     </tq-button>
-
   </div>
 </ion-content>

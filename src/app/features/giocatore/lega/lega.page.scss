@@ -92,7 +92,9 @@
 }
 
 @keyframes legaSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Empty state ────────────────────────────────────────────────────────── */
@@ -113,9 +115,22 @@
   text-align: center;
 }
 
-.lega__empty-icon { font-size: 56px; color: var(--color-text-disabled); }
-.lega__empty-title { margin: 0; font-size: var(--font-h3); font-weight: 600; color: var(--color-text-primary); }
-.lega__empty-sub { margin: 0; font-size: var(--font-small); color: var(--color-text-secondary); line-height: var(--line-height-loose); }
+.lega__empty-icon {
+  font-size: 56px;
+  color: var(--color-text-disabled);
+}
+.lega__empty-title {
+  margin: 0;
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.lega__empty-sub {
+  margin: 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-loose);
+}
 
 /* ─── Info card lega ─────────────────────────────────────────────────────── */
 
@@ -137,9 +152,22 @@
   gap: var(--space-12);
 }
 
-.lega__info-icon { font-size: 28px; color: rgba(255, 255, 255, 0.9); flex-shrink: 0; }
-.lega__info-name { margin: 0 0 2px; font-size: var(--font-h3); font-weight: 700; color: #fff; }
-.lega__info-week { margin: 0; font-size: var(--font-micro); color: rgba(255, 255, 255, 0.7); }
+.lega__info-icon {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+.lega__info-name {
+  margin: 0 0 2px;
+  font-size: var(--font-h3);
+  font-weight: 700;
+  color: #fff;
+}
+.lega__info-week {
+  margin: 0;
+  font-size: var(--font-micro);
+  color: rgba(255, 255, 255, 0.7);
+}
 
 .lega__info-stats {
   display: flex;
@@ -149,12 +177,24 @@
   flex-shrink: 0;
 }
 
-.lega__info-rank { font-size: var(--font-h1); font-weight: 800; color: #fff; line-height: 1; }
-.lega__info-xp { font-size: var(--font-micro); color: rgba(255, 255, 255, 0.7); }
+.lega__info-rank {
+  font-size: var(--font-h1);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.lega__info-xp {
+  font-size: var(--font-micro);
+  color: rgba(255, 255, 255, 0.7);
+}
 
 /* ─── Classifica ─────────────────────────────────────────────────────────── */
 
-.lega__list { display: flex; flex-direction: column; gap: var(--space-4); }
+.lega__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
 
 .lega__separator {
   display: flex;
@@ -166,8 +206,12 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 
-  &--promotion { color: var(--color-success); }
-  &--relegation { color: var(--color-error); }
+  &--promotion {
+    color: var(--color-success);
+  }
+  &--relegation {
+    color: var(--color-error);
+  }
 }
 
 .lega__separator-line {
@@ -175,8 +219,14 @@
   height: 1.5px;
   border-radius: var(--radius-full);
 
-  .lega__separator--promotion & { background: var(--color-success); opacity: 0.4; }
-  .lega__separator--relegation & { background: var(--color-error); opacity: 0.4; }
+  .lega__separator--promotion & {
+    background: var(--color-success);
+    opacity: 0.4;
+  }
+  .lega__separator--relegation & {
+    background: var(--color-error);
+    opacity: 0.4;
+  }
 }
 
 .league-row {
@@ -212,7 +262,11 @@
     text-align: center;
     flex-shrink: 0;
 
-    &--top { color: var(--color-accent); font-size: var(--font-h3); font-weight: 800; }
+    &--top {
+      color: var(--color-accent);
+      font-size: var(--font-h3);
+      font-weight: 800;
+    }
   }
 
   &__avatar {
@@ -245,8 +299,17 @@
     text-overflow: ellipsis;
   }
 
-  &__friend-icon { font-size: 14px; color: var(--color-primary-light); flex-shrink: 0; }
-  &__xp { font-size: var(--font-small); font-weight: 700; color: var(--color-primary); flex-shrink: 0; }
+  &__friend-icon {
+    font-size: 14px;
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+  }
+  &__xp {
+    font-size: var(--font-small);
+    font-weight: 700;
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
 }
 
 /* ─── Bottone aggiungi amico ─────────────────────────────────────────────── */
@@ -267,10 +330,14 @@
   box-shadow: 0 5px 0 var(--color-primary-shadow);
   cursor: pointer;
   margin-bottom: var(--space-16);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
-  ion-icon { font-size: 20px; }
+  ion-icon {
+    font-size: 20px;
+  }
 
   &:active {
     transform: translateY(4px);
@@ -327,9 +394,15 @@
     text-overflow: ellipsis;
   }
 
-  &__sub { font-size: var(--font-micro); color: var(--color-text-secondary); }
+  &__sub {
+    font-size: var(--font-micro);
+    color: var(--color-text-secondary);
+  }
 
-  &__actions { display: flex; gap: var(--space-8); }
+  &__actions {
+    display: flex;
+    gap: var(--space-8);
+  }
 }
 
 .request-inline-btn {
@@ -343,7 +416,9 @@
   font-size: var(--font-small);
   font-weight: 700;
   cursor: pointer;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
   -webkit-tap-highlight-color: transparent;
 
   &--accept {
@@ -362,7 +437,9 @@
     color: var(--color-error);
     border: 1.5px solid rgba(214, 40, 40, 0.3);
 
-    &:active { background: rgba(214, 40, 40, 0.15); }
+    &:active {
+      background: rgba(214, 40, 40, 0.15);
+    }
   }
 }
 
@@ -386,7 +463,9 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease;
 
-  &:active { background: var(--color-surface-2); }
+  &:active {
+    background: var(--color-surface-2);
+  }
 
   &__avatar {
     width: 40px;
@@ -445,8 +524,12 @@
   }
 
   @keyframes legaPanelUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
   &__header {
@@ -477,7 +560,9 @@
     color: var(--color-text-secondary);
     flex-shrink: 0;
 
-    ion-icon { font-size: 18px; }
+    ion-icon {
+      font-size: 18px;
+    }
   }
 
   &__search {
@@ -491,10 +576,16 @@
     height: 52px;
     margin-bottom: var(--space-16);
 
-    &:focus-within { border-color: var(--color-primary); }
+    &:focus-within {
+      border-color: var(--color-primary);
+    }
   }
 
-  &__search-icon { font-size: 18px; color: var(--color-text-disabled); flex-shrink: 0; }
+  &__search-icon {
+    font-size: 18px;
+    color: var(--color-text-disabled);
+    flex-shrink: 0;
+  }
 
   &__input {
     flex: 1;
@@ -504,11 +595,22 @@
     color: var(--color-text-primary);
     outline: none;
 
-    &::placeholder { color: var(--color-text-disabled); }
+    &::placeholder {
+      color: var(--color-text-disabled);
+    }
   }
 
-  &__results { flex: 1; overflow-y: auto; min-height: 120px; }
-  &__empty { text-align: center; font-size: var(--font-small); color: var(--color-text-secondary); padding: var(--space-24) 0; }
+  &__results {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 120px;
+  }
+  &__empty {
+    text-align: center;
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    padding: var(--space-24) 0;
+  }
 }
 
 .search-result-row {
@@ -518,7 +620,9 @@
   padding: var(--space-12) 0;
   border-bottom: 1px solid var(--color-border);
 
-  &:last-child { border-bottom: none; }
+  &:last-child {
+    border-bottom: none;
+  }
 
   &__avatar {
     width: 40px;
@@ -533,7 +637,12 @@
     color: #fff;
   }
 
-  &__username { font-size: var(--font-body); font-weight: 600; color: var(--color-text-primary); flex: 1; }
+  &__username {
+    font-size: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    flex: 1;
+  }
 
   &__sent {
     display: flex;
@@ -544,6 +653,8 @@
     color: var(--color-success);
     flex-shrink: 0;
 
-    ion-icon { font-size: 16px; }
+    ion-icon {
+      font-size: 16px;
+    }
   }
 }

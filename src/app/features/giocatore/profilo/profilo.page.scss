@@ -46,9 +46,13 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   color: var(--color-primary);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
-  ion-icon { font-size: 22px; }
+  ion-icon {
+    font-size: 22px;
+  }
 
   &:active {
     transform: translateY(3px);
@@ -68,7 +72,9 @@
   color: #fff;
   margin-bottom: var(--space-4);
   /* Ring pulito via box-shadow: nessuna interazione con border-radius */
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55), 0 4px 16px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.55),
+    0 4px 16px rgba(0, 0, 0, 0.22);
 }
 
 .profilo__username {
@@ -119,7 +125,9 @@
   font-size: 18px;
   color: var(--color-primary);
 
-  &--accent { color: var(--color-accent); }
+  &--accent {
+    color: var(--color-accent);
+  }
 }
 
 .profilo__stat-number {
@@ -215,7 +223,9 @@
     color: var(--color-accent);
     font-weight: 600;
 
-    ion-icon { font-size: 16px; }
+    ion-icon {
+      font-size: 16px;
+    }
   }
 }
 
@@ -295,13 +305,26 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease;
 
-  &:active { background: var(--color-surface-2); }
+  &:active {
+    background: var(--color-surface-2);
+  }
 
-  &--last { border-bottom: none; }
+  &--last {
+    border-bottom: none;
+  }
 
-  &--toggle { cursor: default; &:active { background: transparent; } }
+  &--toggle {
+    cursor: default;
+    &:active {
+      background: transparent;
+    }
+  }
 
-  &--danger { &:active { background: rgba(214, 40, 40, 0.05); } }
+  &--danger {
+    &:active {
+      background: rgba(214, 40, 40, 0.05);
+    }
+  }
 }
 
 .profilo__settings-icon {
@@ -316,12 +339,17 @@
   justify-content: center;
   flex-shrink: 0;
 
-  ion-icon { font-size: 18px; color: #ffffff; }
+  ion-icon {
+    font-size: 18px;
+    color: #ffffff;
+  }
 
   &--danger {
     background: var(--color-error);
     box-shadow: 0 3px 0 rgba(180, 28, 28, 0.5);
-    ion-icon { color: #ffffff; }
+    ion-icon {
+      color: #ffffff;
+    }
   }
 }
 
@@ -331,7 +359,9 @@
   font-weight: 500;
   color: var(--color-text-primary);
 
-  &--danger { color: var(--color-error); }
+  &--danger {
+    color: var(--color-error);
+  }
 }
 
 .profilo__settings-chevron {

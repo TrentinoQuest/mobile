@@ -35,7 +35,11 @@
     transition: color 150ms ease-out;
     -webkit-tap-highlight-color: transparent;
 
-    ion-icon { font-size: 26px; position: relative; z-index: 1; }
+    ion-icon {
+      font-size: 26px;
+      position: relative;
+      z-index: 1;
+    }
 
     &--active {
       color: var(--color-primary);
@@ -48,7 +52,9 @@
         border-radius: var(--radius-md);
       }
 
-      ion-icon { font-size: 28px; }
+      ion-icon {
+        font-size: 28px;
+      }
     }
   }
 }

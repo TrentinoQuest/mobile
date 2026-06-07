@@ -20,7 +20,6 @@ ion-content.checkin-success {
   pointer-events: none;
 }
 
-
 .checkin-success__body {
   position: absolute;
   top: 0;
@@ -46,9 +45,16 @@ ion-content.checkin-success {
   filter: drop-shadow(0 0 16px rgba(var(--color-success-rgb), 0.4));
 
   /* SVG element colors via CSS — more reliable than HTML attributes */
-  circle:first-child { stroke: var(--color-success); }
-  circle:nth-child(2) { stroke: var(--color-success); fill: rgba(var(--color-success-rgb), 0.12); }
-  path { stroke: var(--color-success); }
+  circle:first-child {
+    stroke: var(--color-success);
+  }
+  circle:nth-child(2) {
+    stroke: var(--color-success);
+    fill: rgba(var(--color-success-rgb), 0.12);
+  }
+  path {
+    stroke: var(--color-success);
+  }
 }
 
 .checkin-success__eyebrow {
@@ -169,7 +175,9 @@ ion-content.checkin-success {
   cursor: pointer;
   box-shadow: 0 5px 0 var(--color-primary-shadow);
   letter-spacing: 0.01em;
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
 
   &:active {
     transform: translateY(4px);

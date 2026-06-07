@@ -1,5 +1,4 @@
 <ion-content [fullscreen]="true" class="amici">
-
   <!-- Header glass overlay -->
   <div class="amici__header">
     <div class="amici__header-row">
@@ -8,9 +7,17 @@
         <span class="amici__header-title">Amici</span>
       </div>
       <button class="amici__header-btn" type="button" aria-label="Aggiungi amico">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14M5 12h14"/>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
     </div>
@@ -18,17 +25,18 @@
 
   <!-- Corpo scrollabile -->
   <div class="amici__body">
-
     <!-- Segmented control tabs -->
     <div class="amici__tabs-wrap">
       <div class="amici__tabs">
         @for (tab of tabs; track tab.id) {
-          <button class="amici__tab"
-                  [class.amici__tab--active]="activeTab() === tab.id"
-                  type="button"
-                  (click)="setTab(tab.id)">
-            {{ tab.label() }}
-          </button>
+        <button
+          class="amici__tab"
+          [class.amici__tab--active]="activeTab() === tab.id"
+          type="button"
+          (click)="setTab(tab.id)"
+        >
+          {{ tab.label() }}
+        </button>
         }
       </div>
     </div>
@@ -36,81 +44,103 @@
     <!-- Tab: Attività -->
     @if (activeTab() === 'attivita') {
 
-      <!-- Feed attività -->
-      <div class="amici__feed">
-        @for (act of activities(); track act.id; let last = $last) {
-          <div class="amici__activity" [class.amici__activity--last]="last">
-            <div class="amici__avatar" [style.background]="avatarGradient(act.avatarSeed)">
-              {{ act.friendUsername.charAt(0) }}
-            </div>
-            <div class="amici__activity-content">
-              <div class="amici__activity-text">
-                <span class="amici__activity-who">{{ act.friendUsername }}</span>
-                {{ act.verb }}
-                <span class="amici__activity-place">{{ act.placeName }}</span>
-              </div>
-              <div class="amici__activity-meta">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.7"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/>
-                  <circle cx="12" cy="9" r="2.5"/>
-                </svg>
-                <span>{{ act.area }}</span>
-                <span class="amici__activity-dot">·</span>
-                <span class="amici__activity-when">{{ act.when.toUpperCase() }}</span>
-              </div>
-            </div>
+    <!-- Feed attività -->
+    <div class="amici__feed">
+      @for (act of activities(); track act.id; let last = $last) {
+      <div class="amici__activity" [class.amici__activity--last]="last">
+        <div class="amici__avatar" [style.background]="avatarGradient(act.avatarSeed)">
+          {{ act.friendUsername.charAt(0) }}
+        </div>
+        <div class="amici__activity-content">
+          <div class="amici__activity-text">
+            <span class="amici__activity-who">{{ act.friendUsername }}</span>
+            {{ act.verb }}
+            <span class="amici__activity-place">{{ act.placeName }}</span>
           </div>
-        }
-      </div>
-
-      <!-- Persone che potresti conoscere -->
-      <div class="amici__suggestions-section">
-        <div class="amici__suggestions-kicker">POTRESTI CONOSCERE</div>
-        <div class="amici__suggestions">
-          @for (s of suggestions(); track s.id) {
-            <div class="amici__suggestion">
-              <div class="amici__suggestion-avatar" [style.background]="avatarGradient(s.avatarSeed)">
-                {{ s.username.charAt(0) }}
-              </div>
-              <div class="amici__suggestion-name">{{ s.username }}</div>
-              <div class="amici__suggestion-count">{{ s.collectiblesCount }} luoghi</div>
-              <button class="amici__suggestion-add" type="button">Aggiungi</button>
-            </div>
-          }
+          <div class="amici__activity-meta">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+            <span>{{ act.area }}</span>
+            <span class="amici__activity-dot">·</span>
+            <span class="amici__activity-when">{{ act.when.toUpperCase() }}</span>
+          </div>
         </div>
       </div>
+      }
+    </div>
+
+    <!-- Persone che potresti conoscere -->
+    <div class="amici__suggestions-section">
+      <div class="amici__suggestions-kicker">POTRESTI CONOSCERE</div>
+      <div class="amici__suggestions">
+        @for (s of suggestions(); track s.id) {
+        <div class="amici__suggestion">
+          <div class="amici__suggestion-avatar" [style.background]="avatarGradient(s.avatarSeed)">
+            {{ s.username.charAt(0) }}
+          </div>
+          <div class="amici__suggestion-name">{{ s.username }}</div>
+          <div class="amici__suggestion-count">{{ s.collectiblesCount }} luoghi</div>
+          <button class="amici__suggestion-add" type="button">Aggiungi</button>
+        </div>
+        }
+      </div>
+    </div>
 
     }
 
     <!-- Tab: Amici -->
     @if (activeTab() === 'amici') {
-      <div class="amici__empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="9" r="3.5"/>
-          <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/>
-          <circle cx="17" cy="7.5" r="2.5"/>
-          <path d="M15.5 14.5c3 0 5 1.5 5 4.5"/>
-        </svg>
-        <span class="amici__empty-text">Lista amici in arrivo</span>
-      </div>
+    <div class="amici__empty-state">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="9" cy="9" r="3.5" />
+        <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" />
+        <circle cx="17" cy="7.5" r="2.5" />
+        <path d="M15.5 14.5c3 0 5 1.5 5 4.5" />
+      </svg>
+      <span class="amici__empty-text">Lista amici in arrivo</span>
+    </div>
     }
 
     <!-- Tab: Settimana -->
     @if (activeTab() === 'settimana') {
-      <div class="amici__empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M7 4h10v4a5 5 0 01-10 0V4z"/>
-          <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4M10 13v3M14 13v3"/>
-        </svg>
-        <span class="amici__empty-text">Classifica settimanale in arrivo</span>
-      </div>
+    <div class="amici__empty-state">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M7 4h10v4a5 5 0 01-10 0V4z" />
+        <path d="M7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 16h6l1 4H8l1-4M10 13v3M14 13v3" />
+      </svg>
+      <span class="amici__empty-text">Classifica settimanale in arrivo</span>
+    </div>
     }
 
     <div class="amici__spacer"></div>
   </div>
-
 </ion-content>

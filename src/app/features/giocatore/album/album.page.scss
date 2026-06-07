@@ -81,7 +81,11 @@
   margin: var(--space-48) auto;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ─── Hero progressione collezione ───────────────────────────────────────── */
 
@@ -177,7 +181,9 @@
     box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
     cursor: pointer;
     animation: cardIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    transition:
+      transform 80ms ease-out,
+      box-shadow 80ms ease-out;
 
     &:active {
       transform: translateY(4px);
@@ -189,23 +195,37 @@
   &--uncommon {
     border-color: var(--color-success);
     box-shadow: 0 5px 0 rgba(var(--color-success-rgb), 0.35);
-    .taccuino__card-plate { border-top-color: var(--color-success); }
+    .taccuino__card-plate {
+      border-top-color: var(--color-success);
+    }
   }
   &--rare {
     border-color: var(--color-rare);
     box-shadow: 0 5px 0 rgba(52, 152, 219, 0.4);
-    .taccuino__card-plate { border-top-color: var(--color-rare); }
+    .taccuino__card-plate {
+      border-top-color: var(--color-rare);
+    }
   }
   &--legendary {
     border-color: var(--color-legendary);
     box-shadow: 0 5px 0 rgba(230, 126, 34, 0.45);
-    .taccuino__card-plate { border-top-color: var(--color-legendary); }
+    .taccuino__card-plate {
+      border-top-color: var(--color-legendary);
+    }
   }
 }
 
 @keyframes cardIn {
-  from { opacity: 0; translate: 0 12px; scale: 0.88; }
-  to   { opacity: 1; translate: 0 0; scale: 1; }
+  from {
+    opacity: 0;
+    translate: 0 12px;
+    scale: 0.88;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
 }
 
 /* Faccia: contiene immagine o SVG generativa */
@@ -324,7 +344,10 @@
   font-size: var(--font-body);
   font-weight: 500;
   color: var(--color-text-primary);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, opacity 150ms ease;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    opacity 150ms ease;
   -webkit-tap-highlight-color: transparent;
 
   &:active:not(:disabled) {
@@ -332,7 +355,10 @@
     box-shadow: 0 0px 0 rgba(0, 0, 0, 0.08);
   }
 
-  &--dimmed { opacity: 0.45; pointer-events: none; }
+  &--dimmed {
+    opacity: 0.45;
+    pointer-events: none;
+  }
 
   &--correct {
     background: var(--color-success);
@@ -346,7 +372,9 @@
     box-shadow: 0 3px 0 rgba(var(--color-error-rgb), 0.4);
   }
 
-  &:disabled { cursor: default; }
+  &:disabled {
+    cursor: default;
+  }
 }
 
 .quiz-option__letter {
@@ -383,8 +411,12 @@
   flex-shrink: 0;
   font-size: 20px;
 
-  &--ok  { color: var(--color-success); }
-  &--err { color: var(--color-error); }
+  &--ok {
+    color: var(--color-success);
+  }
+  &--err {
+    color: var(--color-error);
+  }
 }
 
 .quiz-explanation {
@@ -451,8 +483,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ─── Missioni ────────────────────────────────────────────────────────────── */
@@ -483,7 +519,7 @@
   }
 
   &--claimed {
-    opacity: 0.60;
+    opacity: 0.6;
   }
 }
 
@@ -589,17 +625,39 @@
 }
 
 @keyframes quizRewardFloat {
-  0%   { opacity: 0; transform: scale(0.55) translateY(6px); }
-  18%  { opacity: 1; transform: scale(1.10) translateY(-3px); }
-  35%  { transform: scale(1) translateY(-6px); }
-  100% { opacity: 0; transform: scale(0.88) translateY(-52px); }
+  0% {
+    opacity: 0;
+    transform: scale(0.55) translateY(6px);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-3px);
+  }
+  35% {
+    transform: scale(1) translateY(-6px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.88) translateY(-52px);
+  }
 }
 
 @keyframes rewardFloat {
-  0%   { opacity: 0; transform: translateX(-50%) scale(0.55) translateY(6px); }
-  18%  { opacity: 1; transform: translateX(-50%) scale(1.10) translateY(-3px); }
-  35%  { transform: translateX(-50%) scale(1) translateY(-6px); }
-  100% { opacity: 0; transform: translateX(-50%) scale(0.88) translateY(-52px); }
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.55) translateY(6px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1) translateY(-3px);
+  }
+  35% {
+    transform: translateX(-50%) scale(1) translateY(-6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.88) translateY(-52px);
+  }
 }
 
 /* ─── Locked collectible sheet ────────────────────────────────────────────── */
@@ -624,8 +682,7 @@
     position: relative;
     background: var(--color-surface);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    padding: var(--space-32) var(--space-24)
-      calc(var(--space-32) + env(safe-area-inset-bottom));
+    padding: var(--space-32) var(--space-24) calc(var(--space-32) + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -661,6 +718,10 @@
 }
 
 @keyframes sheetEnter {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

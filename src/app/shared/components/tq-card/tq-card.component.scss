@@ -16,7 +16,9 @@
 
   &--tappable {
     cursor: pointer;
-    transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+    transition:
+      transform 80ms ease-out,
+      box-shadow 80ms ease-out;
     -webkit-tap-highlight-color: transparent;
 
     &:active {

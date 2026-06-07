@@ -48,8 +48,12 @@
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 
-  ion-icon { font-size: 18px; }
-  &:active { background: var(--color-border); }
+  ion-icon {
+    font-size: 18px;
+  }
+  &:active {
+    background: var(--color-border);
+  }
 }
 
 /* ─── Segment ────────────────────────────────────────────────────────────── */
@@ -184,7 +188,9 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .amici__suggestion {
@@ -239,7 +245,10 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease;
 
-  &:active { background: var(--color-accent-ultra); opacity: 0.8; }
+  &:active {
+    background: var(--color-accent-ultra);
+    opacity: 0.8;
+  }
 }
 
 /* ─── Empty state ────────────────────────────────────────────────────────── */

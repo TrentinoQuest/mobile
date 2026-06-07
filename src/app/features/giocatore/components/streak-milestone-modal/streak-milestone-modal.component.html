@@ -1,12 +1,13 @@
 <ion-content [fullscreen]="true" class="streak-modal">
-
   <!-- Burst di particelle fuoco -->
   <div class="streak-modal__particles" aria-hidden="true">
     @for (angle of particleAngles; track $index) {
-      <div class="streak-modal__particle"
-           [style.--angle]="angle + 'deg'"
-           [style.--travel]="particleTravels[$index] + 'px'"
-           [style.--delay]="($index * 80) + 'ms'"></div>
+      <div
+        class="streak-modal__particle"
+        [style.--angle]="angle + 'deg'"
+        [style.--travel]="particleTravels[$index] + 'px'"
+        [style.--delay]="$index * 80 + 'ms'"
+      ></div>
     }
   </div>
 
@@ -18,7 +19,6 @@
 
   <!-- Corpo centrale -->
   <div class="streak-modal__body">
-
     <!-- Icona fuoco grande -->
     <div class="streak-modal__fire-wrap">
       <div class="streak-modal__fire-ring"></div>
@@ -34,10 +34,12 @@
     <!-- Traccia 7 giorni -->
     <div class="streak-modal__week" aria-label="Ultimi 7 giorni">
       @for (day of days(); track $index) {
-        <div class="streak-modal__day"
-             [class.streak-modal__day--filled]="day.filled"
-             [class.streak-modal__day--today]="day.today"
-             [class.streak-modal__day--future]="day.future">
+        <div
+          class="streak-modal__day"
+          [class.streak-modal__day--filled]="day.filled"
+          [class.streak-modal__day--today]="day.today"
+          [class.streak-modal__day--future]="day.future"
+        >
           <div class="streak-modal__day-dot">
             @if (day.filled) {
               <ion-icon name="flame" class="streak-modal__day-flame" aria-hidden="true"></ion-icon>
@@ -51,9 +53,17 @@
     <!-- Moltiplicatore attivo -->
     @if (hasMultiplier) {
       <div class="streak-modal__multiplier">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         <span>BONUS STREAK</span>
         <span class="streak-modal__mult-value">×{{ gamification.streakMultiplier }}</span>
@@ -64,15 +74,22 @@
     <!-- Shield guadagnato -->
     @if (gamification.shieldEarned) {
       <div class="streak-modal__shield-banner">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" />
         </svg>
         Streak Shield guadagnato!
       </div>
     }
-
   </div>
 
   <!-- CTA -->
@@ -81,5 +98,4 @@
       {{ viewOnly ? 'Chiudi' : 'Continua a esplorare' }}
     </button>
   </div>
-
 </ion-content>

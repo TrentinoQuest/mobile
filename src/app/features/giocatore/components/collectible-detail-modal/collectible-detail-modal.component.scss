@@ -30,8 +30,12 @@
     color: var(--color-text-secondary);
     transition: background 120ms ease;
 
-    &:active { background: var(--color-border); }
-    ion-icon { font-size: 18px; }
+    &:active {
+      background: var(--color-border);
+    }
+    ion-icon {
+      font-size: 18px;
+    }
   }
 
   /* Hint sotto la carta */
@@ -64,34 +68,56 @@
     transition: transform 0.05s linear;
 
     /* Varianti rarità: bordo + bagliore */
-    &--common   { border: 2px solid var(--color-common); }
-    &--rare     {
-      border: 2px solid var(--color-rare);
-      box-shadow: 0 5px 0 rgba(52, 152, 219, 0.5), 0 0 18px rgba(52, 152, 219, 0.28);
+    &--common {
+      border: 2px solid var(--color-common);
     }
-    &--epic     {
+    &--rare {
+      border: 2px solid var(--color-rare);
+      box-shadow:
+        0 5px 0 rgba(52, 152, 219, 0.5),
+        0 0 18px rgba(52, 152, 219, 0.28);
+    }
+    &--epic {
       border: 2px solid var(--color-epic);
-      box-shadow: 0 5px 0 rgba(155, 89, 182, 0.5), 0 0 18px rgba(155, 89, 182, 0.28);
+      box-shadow:
+        0 5px 0 rgba(155, 89, 182, 0.5),
+        0 0 18px rgba(155, 89, 182, 0.28);
     }
     &--legendary {
       border: 2px solid var(--color-legendary);
-      box-shadow: 0 5px 0 rgba(230, 126, 34, 0.5), 0 0 22px rgba(230, 126, 34, 0.36);
+      box-shadow:
+        0 5px 0 rgba(230, 126, 34, 0.5),
+        0 0 22px rgba(230, 126, 34, 0.36);
     }
 
     /* Flip: scaleX squish — si vede solo il "bordo" della carta poi compare la nuova faccia */
-    &--flip-out { animation: cdmFlipOut 200ms ease-in forwards; pointer-events: none; }
-    &--flip-in  { animation: cdmFlipIn  230ms ease-out forwards; pointer-events: none; }
+    &--flip-out {
+      animation: cdmFlipOut 200ms ease-in forwards;
+      pointer-events: none;
+    }
+    &--flip-in {
+      animation: cdmFlipIn 230ms ease-out forwards;
+      pointer-events: none;
+    }
   }
 }
 
 @keyframes cdmFlipOut {
-  from { transform: scaleX(1); }
-  to   { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 @keyframes cdmFlipIn {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* ─── Fronte ──────────────────────────────────────────────────────────────── */
@@ -149,7 +175,7 @@
 .cdm__front-quest {
   margin: 0;
   font-size: var(--font-micro);
-  color: rgba(255, 255, 255, 0.60);
+  color: rgba(255, 255, 255, 0.6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -158,7 +184,7 @@
 .cdm__front-date {
   margin: 0;
   font-size: var(--font-micro);
-  color: rgba(255, 255, 255, 0.40);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* ─── Retro ───────────────────────────────────────────────────────────────── */

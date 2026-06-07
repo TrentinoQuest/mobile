@@ -14,9 +14,17 @@
     <!-- Apre la pagina di dettaglio completa -->
     <button class="quest-popup__detail" type="button" (click)="openDetail()">
       Vedi dettagli
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 6l6 6-6 6"/>
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 6l6 6-6 6" />
       </svg>
     </button>
 
@@ -24,10 +32,20 @@
     @if (q.type === QuestType.PRIMARY && playerStatus() === 'available') {
       <div class="quest-popup__scan">
         <button class="quest-popup__scan-btn" (click)="openScanModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 4h6l1.5 3H20a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h3.5L9 4z"/>
-            <circle cx="12" cy="13" r="4"/>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9 4h6l1.5 3H20a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h3.5L9 4z"
+            />
+            <circle cx="12" cy="13" r="4" />
           </svg>
           Scansiona QR
         </button>
@@ -37,21 +55,28 @@
     <!-- Check-in: solo per quest secondarie non ancora completate -->
     @if (q.type === QuestType.SECONDARY && playerStatus() === 'available') {
       <div class="quest-popup__checkin">
-
         @if (checkInState() === 'idle') {
-          <div class="quest-popup__distance"
-               [class.quest-popup__distance--inrange]="isInRange()">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          <div class="quest-popup__distance" [class.quest-popup__distance--inrange]="isInRange()">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
             </svg>
             {{ distanceLabel() }}
           </div>
-          <button class="quest-popup__checkin-btn"
-                  [class.quest-popup__checkin-btn--disabled]="!isInRange()"
-                  [disabled]="!isInRange()"
-                  (click)="checkIn()">
+          <button
+            class="quest-popup__checkin-btn"
+            [class.quest-popup__checkin-btn--disabled]="!isInRange()"
+            [disabled]="!isInRange()"
+            (click)="checkIn()"
+          >
             @if (isInRange()) {
               Check-in
             } @else {
@@ -69,14 +94,10 @@
 
         @if (checkInState() === 'error') {
           <div class="quest-popup__checkin-error">{{ checkInError() }}</div>
-          <button class="quest-popup__checkin-retry" (click)="retryCheckIn()">
-            Riprova
-          </button>
+          <button class="quest-popup__checkin-retry" (click)="retryCheckIn()">Riprova</button>
         }
-
       </div>
     }
-
   } @else {
     <p class="quest-popup__desc">Nessun dato disponibile.</p>
   }
