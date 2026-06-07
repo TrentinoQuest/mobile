@@ -147,12 +147,12 @@
         <div class="step-3__xp-card">
           @if (levelUpPhase() < 2) {
             <div class="step-3__level-badge">
-              <ion-icon name="trophy-outline"></ion-icon>
+              <ion-icon name="trophy"></ion-icon>
               <span>Livello 4</span>
             </div>
           } @else {
             <div class="step-3__level-badge step-3__level-badge--up">
-              <ion-icon name="star-outline"></ion-icon>
+              <ion-icon name="star"></ion-icon>
               <span>Livello 5!</span>
             </div>
           }
@@ -199,18 +199,18 @@
             <div class="step-4__book-closed"
                  [class.step-4__book-closed--pressing]="pressProgress() > 0">
               <svg class="step-4__book-svg" viewBox="0 0 160 200" fill="none" aria-hidden="true">
-                <rect x="10" y="10" width="140" height="180" rx="8" fill="#2d6a4f"/>
+                <rect class="book-cover" x="10" y="10" width="140" height="180" rx="8"/>
                 <rect x="18" y="18" width="124" height="164" rx="6" fill="none"
                       stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
                 <line x1="30" y1="65"  x2="130" y2="65"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
                 <line x1="30" y1="85"  x2="130" y2="85"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
                 <line x1="30" y1="105" x2="130" y2="105" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
                 <line x1="30" y1="125" x2="130" y2="125" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-                <rect x="8" y="28"  width="6" height="14" rx="3" fill="#1b4d38"/>
-                <rect x="8" y="58"  width="6" height="14" rx="3" fill="#1b4d38"/>
-                <rect x="8" y="88"  width="6" height="14" rx="3" fill="#1b4d38"/>
-                <rect x="8" y="118" width="6" height="14" rx="3" fill="#1b4d38"/>
-                <rect x="8" y="148" width="6" height="14" rx="3" fill="#1b4d38"/>
+                <rect class="book-ring" x="8" y="28"  width="6" height="14" rx="3"/>
+                <rect class="book-ring" x="8" y="58"  width="6" height="14" rx="3"/>
+                <rect class="book-ring" x="8" y="88"  width="6" height="14" rx="3"/>
+                <rect class="book-ring" x="8" y="118" width="6" height="14" rx="3"/>
+                <rect class="book-ring" x="8" y="148" width="6" height="14" rx="3"/>
               </svg>
               <div class="step-4__lock"
                    [class.step-4__lock--warm]="pressProgress() >= 33 && pressProgress() < 67"
@@ -227,34 +227,34 @@
         @if (notebookUnlocked()) {
           <div class="step-4__open-area">
             <svg class="step-4__open-svg" viewBox="0 0 220 170" fill="none" aria-hidden="true">
-              <rect x="8"  y="8" width="97" height="154" rx="6 0 0 6" fill="#2d6a4f"/>
-              <rect x="105" y="8" width="10" height="154" rx="2" fill="#1b4d38"/>
-              <rect x="115" y="8" width="97" height="154" rx="0 6 6 0" fill="#fafaf8"/>
+              <rect class="book-cover" x="8"  y="8" width="97" height="154" rx="6"/>
+              <rect class="book-spine" x="105" y="8" width="10" height="154" rx="2"/>
+              <rect class="book-page" x="115" y="8" width="97" height="154" rx="6"/>
               <line x1="22" y1="46"  x2="96"  y2="46"  stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
               <line x1="22" y1="62"  x2="96"  y2="62"  stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
               <line x1="22" y1="78"  x2="96"  y2="78"  stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
               <line x1="22" y1="94"  x2="96"  y2="94"  stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
               <line x1="22" y1="110" x2="80"  y2="110" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-              <line x1="126" y1="30"  x2="202" y2="30"  stroke="#e8e8e4" stroke-width="1.5"/>
-              <line x1="126" y1="50"  x2="202" y2="50"  stroke="#e8e8e4" stroke-width="1"/>
-              <line x1="126" y1="66"  x2="202" y2="66"  stroke="#e8e8e4" stroke-width="1"/>
-              <line x1="126" y1="82"  x2="185" y2="82"  stroke="#e8e8e4" stroke-width="1"/>
-              <line x1="126" y1="98"  x2="202" y2="98"  stroke="#e8e8e4" stroke-width="1"/>
-              <line x1="126" y1="114" x2="195" y2="114" stroke="#e8e8e4" stroke-width="1"/>
-              <rect x="126" y="138" width="36" height="18" rx="3" fill="#d8f3dc"/>
-              <rect x="168" y="138" width="24" height="18" rx="3" fill="#d8f3dc" opacity="0.6"/>
+              <line class="page-line" x1="126" y1="30"  x2="202" y2="30"  stroke-width="1.5"/>
+              <line class="page-line" x1="126" y1="50"  x2="202" y2="50"  stroke-width="1"/>
+              <line class="page-line" x1="126" y1="66"  x2="202" y2="66"  stroke-width="1"/>
+              <line class="page-line" x1="126" y1="82"  x2="185" y2="82"  stroke-width="1"/>
+              <line class="page-line" x1="126" y1="98"  x2="202" y2="98"  stroke-width="1"/>
+              <line class="page-line" x1="126" y1="114" x2="195" y2="114" stroke-width="1"/>
+              <rect class="page-card" x="126" y="138" width="36" height="18" rx="3"/>
+              <rect class="page-card" x="168" y="138" width="24" height="18" rx="3" opacity="0.6"/>
             </svg>
             <div class="step-4__features">
               <div class="step-4__feature">
-                <ion-icon name="albums-outline"></ion-icon>
+                <ion-icon name="albums"></ion-icon>
                 <span>Collezionabili sbloccati</span>
               </div>
               <div class="step-4__feature">
-                <ion-icon name="trophy-outline"></ion-icon>
+                <ion-icon name="trophy"></ion-icon>
                 <span>Missioni giornaliere</span>
               </div>
               <div class="step-4__feature">
-                <ion-icon name="book-outline"></ion-icon>
+                <ion-icon name="book"></ion-icon>
                 <span>Quiz del lore</span>
               </div>
             </div>

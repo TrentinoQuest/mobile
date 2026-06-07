@@ -127,8 +127,9 @@
   &__text { text-align: center; }
 
   &__title {
+    font-family: var(--tq-font-display);
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #ffffff;
     margin: 0 0 var(--space-12);
     line-height: var(--line-height-tight);
@@ -182,6 +183,7 @@
   &__text { margin-bottom: var(--space-16); }
 
   &__title {
+    font-family: var(--tq-font-display);
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-text-primary);
@@ -255,8 +257,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-8);
-  background: var(--color-primary-ultra);
-  border: 1px solid var(--color-primary-light);
+  background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: var(--space-4) var(--space-12);
   font-size: var(--font-small);
@@ -267,8 +269,8 @@
   ion-icon { font-size: 16px; }
 
   &--up {
-    background: var(--color-accent-ultra);
-    border-color: var(--color-accent-light);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-color: rgba(var(--color-accent-rgb), 0.3);
     color: var(--color-accent);
     animation: levelBadgePop 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
@@ -345,11 +347,13 @@
   align-items: stretch;
 
   &__title {
+    font-family: var(--tq-font-display);
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--color-text-primary);
     text-align: center;
-    margin: calc(var(--space-48) + env(safe-area-inset-top)) 0 0;
+    margin: var(--space-16) 0 0;
+    padding-top: calc(var(--space-32) + env(safe-area-inset-top));
     line-height: var(--line-height-tight);
   }
 
@@ -470,10 +474,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-12);
-    padding: var(--space-8) var(--space-12);
+    padding: var(--space-10) var(--space-12);
     background: var(--color-surface);
     border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
+    border: 1.5px solid var(--color-border);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
     font-size: var(--font-small);
     font-weight: 500;
     color: var(--color-text-primary);
@@ -610,8 +615,9 @@
   }
 
   &__title {
+    font-family: var(--tq-font-display);
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #ffffff;
     margin: 0 0 var(--space-8);
     line-height: var(--line-height-tight);
@@ -650,4 +656,43 @@
     text-underline-offset: 2px;
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SVG libro step-4 — colori via CSS (adattivi al tema)
+// ═══════════════════════════════════════════════════════════════
+
+.book-cover { fill: var(--color-primary); }
+.book-ring  { fill: var(--color-primary-shadow); }
+.book-spine { fill: var(--color-primary-shadow); }
+.book-page  { fill: var(--color-surface); }
+.page-line  { stroke: var(--color-border); }
+.page-card  { fill: rgba(var(--color-primary-rgb), 0.15); }
+
+// ═══════════════════════════════════════════════════════════════
+// Dark mode — contrasto illustrazioni step-n
+// I cerchi/path con colori hardcoded scuri diventano invisibili
+// su sfondo navy; li portiamo al vivid primary o al primary-light
+// ═══════════════════════════════════════════════════════════════
+
+[data-theme='dark'] .step-n__illustration {
+  // Elementi scuri (#2d6a4f) → vivid primary
+  circle[fill="#2d6a4f"]  { fill: var(--color-primary); }
+  path[fill="#2d6a4f"]    { fill: var(--color-primary); }
+  circle[stroke="#2d6a4f"] { stroke: var(--color-primary); }
+  path[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
+
+  // Background rect della mappa (verde menta chiaro) → surface-2
+  rect[fill="#d8f3dc"] { fill: var(--color-surface-2); }
+
+  // Pin secondari semi-trasparenti (#52b788) → primary-light
+  circle[fill="#52b788"] { fill: var(--color-primary-light); }
+}
+
+[data-theme='dark'] .step-2__combined {
+  circle[fill="#2d6a4f"]  { fill: var(--color-primary); }
+  circle[stroke="#2d6a4f"] { stroke: var(--color-primary); }
+  path[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
+  rect[fill="#d8f3dc"]    { fill: var(--color-surface-2); }
+  rect[stroke="#2d6a4f"]  { stroke: var(--color-primary); }
 }

@@ -79,3 +79,4 @@
 | 2 | Fix #6 + #7 + #8/#9 — taccuino hero, card plate, quiz, missioni | 1e1b64d | |
 | 3 | Fix #10 — profilo social btn glass -> Flat 2.0, icone filled | 94a2ac8 | |
 | 4 | Fix #2 + #3 — checkin bg tema, rimuovi close btn, streak flame nei giorni | 876b372 | |
+| 5 | Fix #4 — ring XP visibile: r=23 viewBox 50x50, fuori dall'avatar | a259d2e | |
