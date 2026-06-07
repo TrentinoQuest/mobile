@@ -267,23 +267,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-accent-ultra);
-  border: 1.5px solid rgba(var(--color-accent-rgb), 0.2);
+  background: var(--color-surface-2);
+  border: none;
   color: var(--color-accent);
 
   ion-icon { font-size: 20px; }
 
   .home__objective--inrange & {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
     color: #ffffff;
   }
 
   .home__objective--empty & {
     background: var(--color-surface-2);
-    border-color: var(--color-border);
+    border: none;
     color: var(--color-text-disabled);
   }
+}
+
+[data-theme='dark'] .home__objective--inrange {
+  background: var(--color-primary-shadow);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
 }
 
 .home__objective__text {

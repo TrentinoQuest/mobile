@@ -11,10 +11,10 @@ import {
   lockClosed,
   lockOpen,
   logoGoogle,
-  bookOutline,
-  trophyOutline,
-  albumsOutline,
-  starOutline,
+  book,
+  trophy,
+  albums,
+  star,
   qrCodeOutline,
 } from 'ionicons/icons';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
@@ -73,10 +73,10 @@ export class OnboardingPage implements OnDestroy {
       lockClosed,
       lockOpen,
       logoGoogle,
-      bookOutline,
-      trophyOutline,
-      albumsOutline,
-      starOutline,
+      book,
+      trophy,
+      albums,
+      star,
       qrCodeOutline,
     });
   }

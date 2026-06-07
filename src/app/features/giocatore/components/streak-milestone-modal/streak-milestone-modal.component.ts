@@ -27,7 +27,9 @@ const FIRE_PARTICLE_TRAVELS = [70, 90, 60, 100, 75, 85, 65, 95, 80];
 export class StreakMilestoneModalComponent implements OnInit {
   private readonly modalCtrl = inject(ModalController);
 
-  constructor() { addIcons({ flame }); }
+  constructor() {
+    addIcons({ flame });
+  }
 
   @Input() gamification!: GamificationResult;
   /** true quando aperto dalla home header come consultazione (non dopo un completamento) */

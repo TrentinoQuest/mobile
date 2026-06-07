@@ -108,7 +108,7 @@
         <p class="profilo__streak-record">Record: {{ longestStreak() }} giorni</p>
         @if (streakShieldActive()) {
           <tq-badge color="success" size="sm">
-            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            <ion-icon name="shield-checkmark"></ion-icon>
             Scudo attivo
           </tq-badge>
         }
@@ -124,7 +124,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="onSettingsTap('profile')">
           <div class="profilo__settings-icon">
-            <ion-icon name="person-outline"></ion-icon>
+            <ion-icon name="person"></ion-icon>
           </div>
           <span class="profilo__settings-label">Modifica profilo</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -133,7 +133,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="onSettingsTap('notifications')">
           <div class="profilo__settings-icon">
-            <ion-icon name="notifications-outline"></ion-icon>
+            <ion-icon name="notifications"></ion-icon>
           </div>
           <span class="profilo__settings-label">Notifiche</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -142,7 +142,7 @@
         <!-- Toggle aspetto / tema -->
         <div class="profilo__settings-row profilo__settings-row--toggle profilo__settings-row--theme">
           <div class="profilo__settings-icon">
-            <ion-icon name="moon-outline"></ion-icon>
+            <ion-icon name="moon"></ion-icon>
           </div>
           <span class="profilo__settings-label">Aspetto</span>
           <app-theme-selector class="profilo__theme-sel"></app-theme-selector>
@@ -151,7 +151,7 @@
         <!-- Toggle suoni -->
         <div class="profilo__settings-row profilo__settings-row--toggle">
           <div class="profilo__settings-icon">
-            <ion-icon name="volume-medium-outline"></ion-icon>
+            <ion-icon name="volume-medium"></ion-icon>
           </div>
           <span class="profilo__settings-label">Suoni</span>
           <ion-toggle [checked]="audio.soundEnabled()"
@@ -163,7 +163,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="onSettingsTap('offline')">
           <div class="profilo__settings-icon">
-            <ion-icon name="map-outline"></ion-icon>
+            <ion-icon name="map"></ion-icon>
           </div>
           <span class="profilo__settings-label">Mappe offline</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -172,7 +172,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="onSettingsTap('privacy')">
           <div class="profilo__settings-icon">
-            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-icon name="lock-closed"></ion-icon>
           </div>
           <span class="profilo__settings-label">Privacy</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -181,7 +181,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="navigateCoop()">
           <div class="profilo__settings-icon">
-            <ion-icon name="people-outline"></ion-icon>
+            <ion-icon name="people"></ion-icon>
           </div>
           <span class="profilo__settings-label">Sfide Co-op</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -190,7 +190,7 @@
         <button class="profilo__settings-row" type="button"
                 (click)="onSettingsTap('language')">
           <div class="profilo__settings-icon">
-            <ion-icon name="language-outline"></ion-icon>
+            <ion-icon name="language"></ion-icon>
           </div>
           <span class="profilo__settings-label">Lingua</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -199,7 +199,7 @@
         <button class="profilo__settings-row profilo__settings-row--last" type="button"
                 (click)="onSettingsTap('credits')">
           <div class="profilo__settings-icon">
-            <ion-icon name="information-circle-outline"></ion-icon>
+            <ion-icon name="information-circle"></ion-icon>
           </div>
           <span class="profilo__settings-label">Crediti</span>
           <ion-icon name="chevron-forward" class="profilo__settings-chevron"></ion-icon>
@@ -213,7 +213,7 @@
         <button class="profilo__settings-row profilo__settings-row--danger" type="button"
                 (click)="logout()">
           <div class="profilo__settings-icon profilo__settings-icon--danger">
-            <ion-icon name="log-out-outline"></ion-icon>
+            <ion-icon name="log-out"></ion-icon>
           </div>
           <span class="profilo__settings-label profilo__settings-label--danger">Esci</span>
         </button>
@@ -221,7 +221,7 @@
         <button class="profilo__settings-row profilo__settings-row--danger profilo__settings-row--last"
                 type="button" (click)="onSettingsTap('delete')">
           <div class="profilo__settings-icon profilo__settings-icon--danger">
-            <ion-icon name="trash-outline"></ion-icon>
+            <ion-icon name="trash"></ion-icon>
           </div>
           <span class="profilo__settings-label profilo__settings-label--danger">Elimina account</span>
         </button>

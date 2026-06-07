@@ -12,23 +12,24 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  peopleOutline,
-  flashOutline,
-  trendingUpOutline,
+  people,
+  flash,
+  trendingUp,
   flame,
-  albumsOutline,
+  albums,
   trophy,
-  shieldCheckmarkOutline,
-  logOutOutline,
-  trashOutline,
-  personOutline,
-  notificationsOutline,
-  volumeMediumOutline,
-  mapOutline,
-  lockClosedOutline,
-  languageOutline,
-  informationCircleOutline,
+  shieldCheckmark,
+  logOut,
+  trash,
+  person,
+  notifications,
+  volumeMedium,
+  map,
+  lockClosed,
+  language,
+  informationCircle,
   chevronForward,
+  moon,
 } from 'ionicons/icons';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import type { LeagueCurrentView } from '@trentino-quest/shared-types';
@@ -38,6 +39,7 @@ import { PlayerProfileService } from '../../../core/services/player-profile/play
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
+import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
 import { environment } from '../../../../environments/environment';
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
@@ -66,7 +68,7 @@ const AVATAR_GRADIENTS = [
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonToggle, DecimalPipe, TqBadgeComponent],
+  imports: [IonContent, IonIcon, IonToggle, DecimalPipe, TqBadgeComponent, ThemeSelectorComponent],
 })
 export class ProfiloPage implements OnInit, AfterViewInit {
   private readonly auth = inject(AuthService);
@@ -124,23 +126,24 @@ export class ProfiloPage implements OnInit, AfterViewInit {
 
   constructor() {
     addIcons({
-      peopleOutline,
-      flashOutline,
-      trendingUpOutline,
+      people,
+      flash,
+      trendingUp,
       flame,
-      albumsOutline,
+      albums,
       trophy,
-      shieldCheckmarkOutline,
-      logOutOutline,
-      trashOutline,
-      personOutline,
-      notificationsOutline,
-      volumeMediumOutline,
-      mapOutline,
-      lockClosedOutline,
-      languageOutline,
-      informationCircleOutline,
+      shieldCheckmark,
+      logOut,
+      trash,
+      person,
+      notifications,
+      volumeMedium,
+      map,
+      lockClosed,
+      language,
+      informationCircle,
       chevronForward,
+      moon,
     });
   }
 

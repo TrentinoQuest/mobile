@@ -101,6 +101,7 @@
 .taccuino__hero-info {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 [data-theme='dark'] .taccuino__hero {
@@ -120,10 +121,11 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .taccuino__hero-num {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 800;
   color: #ffffff;
   line-height: 1;
@@ -133,6 +135,7 @@
   font-size: var(--font-h2);
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
 }
 
 .taccuino__hero-sub {
@@ -313,33 +316,34 @@
   width: 100%;
   padding: var(--space-12) var(--space-16);
   border-radius: var(--radius-lg);
-  border: 1.5px solid var(--color-border);
-  background: var(--color-surface);
+  border: none;
+  background: var(--color-surface-2);
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   cursor: pointer;
   text-align: left;
   font-size: var(--font-body);
   font-weight: 500;
   color: var(--color-text-primary);
-  transition: transform 80ms ease-out, box-shadow 80ms ease-out, border-color 150ms ease, opacity 150ms ease;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, opacity 150ms ease;
   -webkit-tap-highlight-color: transparent;
 
   &:active:not(:disabled) {
     transform: translateY(3px);
     box-shadow: 0 0px 0 rgba(0, 0, 0, 0.08);
-    border-color: var(--color-primary);
   }
 
   &--dimmed { opacity: 0.45; pointer-events: none; }
 
   &--correct {
-    border-color: var(--color-success);
-    background: rgba(var(--color-success-rgb), 0.08);
+    background: var(--color-success);
+    color: #ffffff;
+    box-shadow: 0 3px 0 rgba(var(--color-success-rgb), 0.4);
   }
 
   &--wrong {
-    border-color: var(--color-error);
-    background: rgba(var(--color-error-rgb), 0.08);
+    background: var(--color-error);
+    color: #ffffff;
+    box-shadow: 0 3px 0 rgba(var(--color-error-rgb), 0.4);
   }
 
   &:disabled { cursor: default; }
@@ -350,24 +354,22 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  background: var(--color-surface-2);
-  border: 1.5px solid rgba(var(--color-primary-rgb), 0.25);
+  background: var(--color-primary);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-small);
   font-weight: 800;
-  color: var(--color-primary);
+  color: #ffffff;
 
   .quiz-option--correct & {
-    background: var(--color-success);
-    border-color: var(--color-success);
+    background: rgba(255, 255, 255, 0.3);
     color: #ffffff;
   }
 
   .quiz-option--wrong & {
-    background: var(--color-error);
-    border-color: var(--color-error);
+    background: rgba(255, 255, 255, 0.3);
     color: #ffffff;
   }
 }
