@@ -2,7 +2,8 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IonIcon, ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mapOutline, bookOutline, trophyOutline, bagOutline, qrCode } from 'ionicons/icons';
+import { mapOutline, map, bookOutline, book, trophyOutline, trophy, bagOutline, bag, qrCode } from 'ionicons/icons';
+import { HapticsService } from '../../../../core/services/haptics/haptics.service';
 import { QuestType } from '@trentino-quest/shared-types';
 import type { PrimaryQuest } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
@@ -20,9 +21,14 @@ export class TabBarComponent {
   private readonly modalCtrl = inject(ModalController);
   private readonly questService = inject(QuestService);
   private readonly geoService = inject(GeolocationService);
+  private readonly haptics = inject(HapticsService);
 
   constructor() {
-    addIcons({ mapOutline, bookOutline, trophyOutline, bagOutline, qrCode });
+    addIcons({ mapOutline, map, bookOutline, book, trophyOutline, trophy, bagOutline, bag, qrCode });
+  }
+
+  protected handleTabTap(): void {
+    void this.haptics.tapLight();
   }
 
   async openScanModal(): Promise<void> {

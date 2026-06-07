@@ -19,7 +19,7 @@
   width: 100%;
   /* Background di sicurezza nel caso una pagina figlia non ne abbia uno
      proprio. Le pagine vere (home/album/...) lo sovrascriveranno. */
-  background: var(--tq-bg);
+  background: var(--color-bg);
 
   &__outlet {
     /* L'outlet occupa tutto lo spazio: la tab bar e' in fixed e si sovrappone.

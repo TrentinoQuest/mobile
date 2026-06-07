@@ -94,6 +94,36 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+
+  // Alias --tq-* → --color-* per compatibilità con componenti legacy non ancora migrati
+  --tq-bg: var(--color-bg);
+  --tq-bg-rgb: var(--color-bg-rgb);
+  --tq-panel: var(--color-surface);
+  --tq-panel-2: var(--color-surface-2);
+  --tq-panel-hi: var(--color-surface);
+  --tq-text-primary: var(--color-text-primary);
+  --tq-text-secondary: var(--color-text-secondary);
+  --tq-text-muted: var(--color-text-disabled);
+  --tq-text-disabled: var(--color-text-disabled);
+  --tq-hairline: var(--color-border);
+  --tq-hairline-strong: rgba(0, 0, 0, 0.14);
+  --tq-bone: var(--color-text-primary);
+  --tq-ocra: var(--color-accent);
+  --tq-ocra-rgb: var(--color-accent-rgb);
+  --tq-ocra-tint: var(--color-accent-light);
+  --tq-ocra-shade: #cc5a14;
+  --tq-forest: var(--color-primary);
+  --tq-forest-rgb: var(--color-primary-rgb);
+  --tq-rust: var(--color-error);
+  --tq-rust-rgb: var(--color-error-rgb);
+
+  // Z-index (ripetuti anche nei theme block per retrocompatibilità)
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
 }
 
 // =============================================================================

@@ -1,62 +1,47 @@
-<!--
-  Tab bar custom del giocatore.
-  Struttura: 5 slot in flex row, con il FAB centrale che si "stacca"
-  verticalmente (margin-top negativo) per dare l'effetto elevato.
-
-  Le tab usano routerLink + routerLinkActive per la gestione dichiarativa
-  dello stato attivo (Angular aggiunge la classe --active automaticamente).
--->
 <nav class="tab-bar" aria-label="Navigazione giocatore">
-  <!-- TAB 1 — Mappa (home) -->
-  <a
-    class="tab-bar__tab"
-    routerLink="/giocatore/home"
-    routerLinkActive="tab-bar__tab--active"
-    aria-label="Mappa"
-  >
-    <ion-icon name="map-outline" class="tab-bar__icon"></ion-icon>
-    <span class="tab-bar__label">Mappa</span>
+
+  <a class="tab-bar__tab"
+     routerLink="/giocatore/home"
+     routerLinkActive="tab-bar__tab--active"
+     aria-label="Esplora"
+     (click)="handleTabTap()">
+    <ion-icon name="map-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="map"         class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
+    <span class="tab-bar__label">Esplora</span>
   </a>
 
-  <!-- TAB 2 — Taccuino -->
-  <a
-    class="tab-bar__tab"
-    routerLink="/giocatore/album"
-    routerLinkActive="tab-bar__tab--active"
-    aria-label="Taccuino"
-  >
-    <ion-icon name="book-outline" class="tab-bar__icon"></ion-icon>
+  <a class="tab-bar__tab"
+     routerLink="/giocatore/album"
+     routerLinkActive="tab-bar__tab--active"
+     aria-label="Taccuino"
+     (click)="handleTabTap()">
+    <ion-icon name="book-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="book"         class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
     <span class="tab-bar__label">Taccuino</span>
   </a>
 
-  <!--
-    SLOT CENTRALE — QR Scan
-    Non e' una tab di navigazione: e' un trigger che apre la modal.
-    Visivamente e' un FAB elevato in ocra solido.
-  -->
   <button type="button" class="tab-bar__fab" (click)="openScanModal()" aria-label="Scansiona QR">
     <ion-icon name="qr-code" class="tab-bar__fab-icon"></ion-icon>
   </button>
 
-  <!-- TAB 3 — Lega -->
-  <a
-    class="tab-bar__tab"
-    routerLink="/giocatore/lega"
-    routerLinkActive="tab-bar__tab--active"
-    aria-label="Lega"
-  >
-    <ion-icon name="trophy-outline" class="tab-bar__icon"></ion-icon>
+  <a class="tab-bar__tab"
+     routerLink="/giocatore/lega"
+     routerLinkActive="tab-bar__tab--active"
+     aria-label="Lega"
+     (click)="handleTabTap()">
+    <ion-icon name="trophy-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="trophy"         class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
     <span class="tab-bar__label">Lega</span>
   </a>
 
-  <!-- TAB 4 — Shop -->
-  <a
-    class="tab-bar__tab"
-    routerLink="/giocatore/shop"
-    routerLinkActive="tab-bar__tab--active"
-    aria-label="Shop"
-  >
-    <ion-icon name="bag-outline" class="tab-bar__icon"></ion-icon>
+  <a class="tab-bar__tab"
+     routerLink="/giocatore/shop"
+     routerLinkActive="tab-bar__tab--active"
+     aria-label="Shop"
+     (click)="handleTabTap()">
+    <ion-icon name="bag-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="bag"         class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
     <span class="tab-bar__label">Shop</span>
   </a>
+
 </nav>
