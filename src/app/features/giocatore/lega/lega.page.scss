@@ -54,9 +54,9 @@
 
   &--active {
     background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), 0 2px 0 rgba(var(--color-primary-rgb), 0.2);
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: 700;
   }
 }
 
@@ -129,6 +129,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-12);
+  box-shadow: 0 4px 0 #1b4d38;
 }
 
 .lega__info-tier {
@@ -212,7 +213,7 @@
     text-align: center;
     flex-shrink: 0;
 
-    &--top { color: var(--color-accent); font-size: var(--font-body); }
+    &--top { color: var(--color-accent); font-size: var(--font-h3); font-weight: 800; }
   }
 
   &__avatar {

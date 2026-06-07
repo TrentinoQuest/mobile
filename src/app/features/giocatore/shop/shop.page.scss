@@ -51,9 +51,9 @@
 
   &--active {
     background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), 0 2px 0 rgba(var(--color-primary-rgb), 0.2);
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: 700;
   }
 }
 

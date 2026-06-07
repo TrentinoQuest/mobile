@@ -140,6 +140,9 @@
   &:active { opacity: 0.72; }
 
   &.hud__chip--streak-active {
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: var(--radius-full);
+    padding: 4px 8px;
     ion-icon { color: var(--color-accent); }
     .hud__chip-value { color: var(--color-accent); }
   }
@@ -149,6 +152,9 @@
 
 .hud__chip--coins {
   color: var(--color-coins);
+  background: rgba(var(--color-accent-rgb), 0.1);
+  border-radius: var(--radius-full);
+  padding: 4px 8px;
 
   .hud__chip-value { color: var(--color-coins); }
 }

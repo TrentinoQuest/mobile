@@ -112,15 +112,15 @@
 }
 
 .profilo__stat-icon {
-  font-size: 14px;
+  font-size: 18px;
   color: var(--color-primary);
 
   &--accent { color: var(--color-accent); }
 }
 
 .profilo__stat-number {
-  font-size: var(--font-h2);
-  font-weight: 700;
+  font-size: var(--font-h1);
+  font-weight: 800;
   color: var(--color-primary);
   line-height: 1;
   font-variant-numeric: tabular-nums;

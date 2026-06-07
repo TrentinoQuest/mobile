@@ -45,7 +45,7 @@
     <!-- Streak attiva -->
     @if ((gamification?.currentStreak ?? 0) > 0) {
       <div class="checkin-success__streak">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--tq-ocra)" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--color-accent)" aria-hidden="true">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
         </svg>
         streak {{ gamification!.currentStreak }}
@@ -70,7 +70,7 @@
     <!-- Totale XP aggiornato -->
     <div class="checkin-success__total">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-           stroke="rgba(244,235,220,0.45)" stroke-width="1.7" stroke-linecap="round">
+           stroke="rgba(176,181,174,0.4)" stroke-width="1.7" stroke-linecap="round">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
       totale {{ gamification?.totalXp ?? newTotalPoints }} xp
