@@ -18,10 +18,10 @@ import {
   checkmarkCircle,
   wineOutline,
   starOutline,
-  searchOutline,
   personOutline,
   trashOutline,
   trophyOutline,
+  sendOutline,
 } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
@@ -57,11 +57,6 @@ interface FriendRequest {
   requesterId: string;
   username: string;
   createdAt: string;
-}
-
-interface PlayerSearchResult {
-  playerId: string;
-  username: string;
 }
 
 // Gradienti avatar deterministici (stessa palette di lega.page.ts)
@@ -100,14 +95,12 @@ export class SocialPage implements OnInit {
   protected readonly pendingKudos = signal<Set<string>>(new Set());
   protected readonly optimisticKudos = signal<Map<string, boolean>>(new Map());
 
-  // ricerca amici
+  // aggiungi amico
   protected readonly addFriendOpen = signal(false);
   protected readonly searchQuery = signal('');
-  protected readonly searchResults = signal<PlayerSearchResult[]>([]);
-  protected readonly searchLoading = signal(false);
-  protected readonly sentRequests = signal<Set<string>>(new Set());
-
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  protected readonly sendingRequest = signal(false);
+  protected readonly requestSent = signal(false);
+  protected readonly requestError = signal('');
 
   protected readonly requestsBadge = computed(() => this.requests().length);
 
@@ -134,10 +127,10 @@ export class SocialPage implements OnInit {
       checkmarkCircle,
       wineOutline,
       starOutline,
-      searchOutline,
       personOutline,
       trashOutline,
       trophyOutline,
+      sendOutline,
     });
   }
 
@@ -372,57 +365,43 @@ export class SocialPage implements OnInit {
     void this.haptics.tapMedium();
     this.addFriendOpen.set(true);
     this.searchQuery.set('');
-    this.searchResults.set([]);
+    this.requestSent.set(false);
+    this.requestError.set('');
   }
 
   protected closeAddFriend(): void {
     void this.haptics.tapLight();
     this.addFriendOpen.set(false);
-    if (this.searchTimer) clearTimeout(this.searchTimer);
   }
 
-  protected onSearchInput(): void {
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    const q = this.searchQuery().trim();
-    if (!q) {
-      this.searchResults.set([]);
-      return;
-    }
-
-    this.searchTimer = setTimeout(() => this.doSearch(q), 400);
-  }
-
-  private doSearch(username: string): void {
-    this.searchLoading.set(true);
-    this.http
-      .get<
-        PlayerSearchResult[]
-      >(`${environment.apiUrl}/players?username=${encodeURIComponent(username)}`)
-      .subscribe({
-        next: (data) => {
-          this.searchResults.set(data);
-          this.searchLoading.set(false);
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.searchLoading.set(false);
-        },
-      });
-  }
-
-  protected sendFriendRequest(player: PlayerSearchResult): void {
+  protected sendFriendRequest(): void {
+    const username = this.searchQuery().trim();
+    if (!username || this.sendingRequest()) return;
     void this.haptics.tapMedium();
-    this.sentRequests.update((s) => new Set(s).add(player.playerId));
+    this.sendingRequest.set(true);
+    this.requestSent.set(false);
+    this.requestError.set('');
 
     this.http
-      .post(`${environment.apiUrl}/social/friends/request`, { recipientId: player.playerId })
+      .post(`${environment.apiUrl}/social/friends/request`, { username })
       .subscribe({
-        error: () => {
-          this.sentRequests.update((s) => {
-            const n = new Set(s);
-            n.delete(player.playerId);
-            return n;
-          });
+        next: () => {
+          this.sendingRequest.set(false);
+          this.requestSent.set(true);
+          this.searchQuery.set('');
+        },
+        error: (err) => {
+          this.sendingRequest.set(false);
+          const status = (err?.status as number | undefined) ?? 0;
+          this.requestError.set(
+            status === 404
+              ? 'Utente non trovato'
+              : status === 409
+                ? 'Richiesta già inviata o siete già amici'
+                : status === 400
+                  ? 'Username non valido'
+                  : 'Errore, riprova',
+          );
         },
       });
   }

@@ -197,6 +197,16 @@ export class AuthService {
     });
   }
 
+  /** Scala totalPoints dopo un acquisto al market, mantiene il signal sincronizzato. */
+  deductPoints(amount: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = { ...player, totalPoints: Math.max(0, player.totalPoints - amount) };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
   /**
    * Invia il token dispositivo al backend per le notifiche push.
    * Fire-and-forget: eventuali errori di rete vengono ignorati silenziosamente.

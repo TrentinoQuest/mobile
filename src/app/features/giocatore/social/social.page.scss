@@ -375,7 +375,7 @@
 .add-friend-modal {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 10000;
 
   &__backdrop {
     position: absolute;
@@ -392,7 +392,7 @@
     right: 0;
     background: var(--color-surface);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    padding: var(--space-24) var(--space-24) calc(var(--space-32) + env(safe-area-inset-bottom));
+    padding: var(--space-24) var(--space-24) calc(var(--space-32) + env(safe-area-inset-bottom) + 56px);
     max-height: 80dvh;
     display: flex;
     flex-direction: column;
@@ -441,52 +441,86 @@
     }
   }
 
-  &__search {
+  &__row {
     display: flex;
     align-items: center;
     gap: var(--space-12);
-    background: var(--color-surface-2);
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0 var(--space-16);
-    height: 52px;
     margin-bottom: var(--space-16);
-
-    &:focus-within {
-      border-color: var(--color-primary);
-    }
-  }
-
-  &__search-icon {
-    font-size: 18px;
-    color: var(--color-text-disabled);
-    flex-shrink: 0;
   }
 
   &__input {
     flex: 1;
-    border: none;
-    background: transparent;
+    height: 52px;
+    background: var(--color-surface-2);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-16);
     font-size: var(--font-body);
     color: var(--color-text-primary);
     outline: none;
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
 
     &::placeholder {
       color: var(--color-text-disabled);
     }
   }
 
-  &__results {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 120px;
+  &__send-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+    color: #fff;
+    transition: opacity 150ms;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    ion-icon {
+      font-size: 20px;
+    }
   }
 
-  &__empty {
-    text-align: center;
+  &__send-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  &__feedback {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
     font-size: var(--font-small);
-    color: var(--color-text-secondary);
-    padding: var(--space-24) 0;
+    font-weight: 600;
+    padding: var(--space-12) var(--space-16);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-8);
+
+    &--ok {
+      background: color-mix(in srgb, var(--color-success) 12%, transparent);
+      color: var(--color-success);
+    }
+
+    &--err {
+      background: color-mix(in srgb, var(--color-error) 12%, transparent);
+      color: var(--color-error);
+    }
   }
 }
 

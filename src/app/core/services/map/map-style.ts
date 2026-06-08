@@ -102,6 +102,7 @@ export function buildGameMapStyle(mode: MapMode = 'light'): StyleSpecification {
       openmaptiles: {
         type: 'vector',
         url: VECTOR_SOURCE_URL,
+        bounds: [10.3, 45.5, 12.1, 46.6],
       },
     },
     layers: [

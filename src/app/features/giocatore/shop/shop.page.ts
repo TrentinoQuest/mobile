@@ -15,6 +15,7 @@ import {
 } from 'ionicons/icons';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
 import { environment } from '../../../../environments/environment';
 import QRCode from 'qrcode';
@@ -60,6 +61,7 @@ export class ShopPage implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly haptics = inject(HapticsService);
   private readonly audio = inject(AudioService);
+  private readonly authService = inject(AuthService);
   private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
 
@@ -113,7 +115,7 @@ export class ShopPage implements OnInit, OnDestroy {
     if (this.activeTab() === tab) return;
     void this.haptics.tapLight();
     this.activeTab.set(tab);
-    if (tab === 'coupon' && this.coupons().length === 0) {
+    if (tab === 'coupon') {
       this.loadCoupons();
     }
   }
@@ -174,8 +176,9 @@ export class ShopPage implements OnInit, OnDestroy {
         void this.audio.playSuccess();
         this.purchaseBurst.set(true);
         setTimeout(() => this.purchaseBurst.set(false), 900);
-        this.coupons.update((prev) => [coupon, ...prev]);
-        this.setTab('coupon');
+        this.authService.deductPoints(offer.pointsCost);
+        this.activeTab.set('coupon');
+        this.loadCoupons();
         await this.openCoupon(coupon);
       },
       error: async (err) => {

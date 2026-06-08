@@ -21,7 +21,7 @@ import {
   peopleOutline,
   closeOutline,
   checkmarkOutline,
-  searchOutline,
+  sendOutline,
   trashOutline,
   trophyOutline,
   chevronForward,
@@ -48,11 +48,6 @@ interface FriendRequest {
   requesterId: string;
   username: string;
   createdAt: string;
-}
-
-interface PlayerSearchResult {
-  playerId: string;
-  username: string;
 }
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
@@ -131,14 +126,12 @@ export class LegaPage implements OnInit {
   protected readonly requests = signal<FriendRequest[]>([]);
   protected readonly requestsBadge = computed(() => this.requests().length);
 
-  // ── Ricerca amici ─────────────────────────────────────────────────────────
+  // ── Aggiungi amico ────────────────────────────────────────────────────────
   protected readonly addFriendOpen = signal(false);
   protected readonly searchQuery = signal('');
-  protected readonly searchResults = signal<PlayerSearchResult[]>([]);
-  protected readonly searchLoading = signal(false);
-  protected readonly sentRequests = signal<Set<string>>(new Set());
-
-  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  protected readonly sendingRequest = signal(false);
+  protected readonly requestSent = signal(false);
+  protected readonly requestError = signal('');
 
   constructor() {
     addIcons({
@@ -152,7 +145,7 @@ export class LegaPage implements OnInit {
       peopleOutline,
       closeOutline,
       checkmarkOutline,
-      searchOutline,
+      sendOutline,
       trashOutline,
       trophyOutline,
       chevronForward,
@@ -301,55 +294,43 @@ export class LegaPage implements OnInit {
     void this.haptics.tapMedium();
     this.addFriendOpen.set(true);
     this.searchQuery.set('');
-    this.searchResults.set([]);
+    this.requestSent.set(false);
+    this.requestError.set('');
   }
 
   protected closeAddFriend(): void {
     void this.haptics.tapLight();
     this.addFriendOpen.set(false);
-    if (this.searchTimer) clearTimeout(this.searchTimer);
   }
 
-  protected onSearchInput(): void {
-    if (this.searchTimer) clearTimeout(this.searchTimer);
-    const q = this.searchQuery().trim();
-    if (!q) {
-      this.searchResults.set([]);
-      return;
-    }
-    this.searchTimer = setTimeout(() => this.doSearch(q), 400);
-  }
-
-  private doSearch(username: string): void {
-    this.searchLoading.set(true);
-    // Ricerca case-insensitive: query in minuscolo
-    const q = username.toLowerCase();
-    this.http
-      .get<PlayerSearchResult[]>(`${environment.apiUrl}/players?username=${encodeURIComponent(q)}`)
-      .subscribe({
-        next: (data) => {
-          this.searchResults.set(data);
-          this.searchLoading.set(false);
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.searchLoading.set(false);
-        },
-      });
-  }
-
-  protected sendFriendRequest(player: PlayerSearchResult): void {
+  protected sendFriendRequest(): void {
+    const username = this.searchQuery().trim();
+    if (!username || this.sendingRequest()) return;
     void this.haptics.tapMedium();
-    this.sentRequests.update((s) => new Set(s).add(player.playerId));
+    this.sendingRequest.set(true);
+    this.requestSent.set(false);
+    this.requestError.set('');
+
     this.http
-      .post(`${environment.apiUrl}/social/friends/request`, { recipientId: player.playerId })
+      .post(`${environment.apiUrl}/social/friends/request`, { username })
       .subscribe({
-        error: () => {
-          this.sentRequests.update((s) => {
-            const n = new Set(s);
-            n.delete(player.playerId);
-            return n;
-          });
+        next: () => {
+          this.sendingRequest.set(false);
+          this.requestSent.set(true);
+          this.searchQuery.set('');
+        },
+        error: (err) => {
+          this.sendingRequest.set(false);
+          const status = (err?.status as number | undefined) ?? 0;
+          this.requestError.set(
+            status === 404
+              ? 'Utente non trovato'
+              : status === 409
+                ? 'Richiesta già inviata o siete già amici'
+                : status === 400
+                  ? 'Username non valido'
+                  : 'Errore, riprova',
+          );
         },
       });
   }
@@ -377,6 +358,7 @@ export class LegaPage implements OnInit {
     return {
       'league-row': true,
       'league-row--me': m.isCurrentPlayer,
+      'league-row--friend': m.isFriend && !m.isCurrentPlayer,
       'league-row--promotion': m.rank >= 1 && m.rank <= 5,
       'league-row--relegation': m.rank >= 26,
     };

@@ -62,7 +62,7 @@ export class HomeHeaderComponent {
     () => XP_RING_CIRCUMFERENCE * (1 - this.xpProgress() / 100),
   );
 
-  protected readonly coins = computed<number>(() => this.player()?.coins ?? 0);
+  protected readonly coins = computed<number>(() => this.player()?.totalPoints ?? 0);
 
   constructor() {
     addIcons({ flame });

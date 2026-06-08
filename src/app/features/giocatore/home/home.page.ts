@@ -18,7 +18,8 @@ import { ScanModalComponent } from '../components/scan-modal/scan-modal.componen
 import { QuestDetailSheetComponent } from '../components/quest-detail-sheet/quest-detail-sheet.component';
 import { QuestService } from '../../../core/services/quest/quest.service';
 import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
-import { getQuestIcon } from '../../../core/services/quest/quest-icons';
+import { registerQuestIcons } from '../../../core/services/map/quest-map-icons';
+import { buildValleyClusters } from '../../../core/services/map/valley-clustering';
 import {
   AnyQuest,
   PrimaryQuest,
@@ -32,6 +33,8 @@ import { buildGameMapStyle } from '../../../core/services/map/map-style';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { HeadingService } from '../../../core/services/heading/heading.service';
 import { MapSettingsService } from '../../../core/services/map/map-settings.service';
+import { TRENTINO_VALLEY_LINES } from './trentino-valley-lines.data';
+import { TRENTINO_MASK } from './trentino-mask.data';
 
 type PlayerStatus = ReturnType<QuestService['playerStatusOf']>;
 
@@ -88,8 +91,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
 
   private map: maplibregl.Map | null = null;
   private userMarker: maplibregl.Marker | null = null;
-  private allActiveQuestMarkers: maplibregl.Marker[] = [];
-  private readonly questMarkers = new Map<string, maplibregl.Marker>();
   private hasAutoCentered = false;
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
   private readonly REFRESH_INTERVAL_MS = 30_000;
@@ -216,17 +217,24 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly INITIAL_ZOOM = 15.5;
   private readonly USER_FOCUS_ZOOM = 17;
   private readonly AUTO_CENTER_ZOOM = 17.8;
-  private readonly MIN_ZOOM = 9;
+  private readonly MIN_ZOOM = 6;
   private readonly MAX_ZOOM = 19;
   private readonly INITIAL_PITCH = 0;
   private readonly MAX_PITCH = 0;
   private readonly TRENTINO_BOUNDS: [[number, number], [number, number]] = [
-    [10.4, 45.6],
-    [12.0, 46.6],
+    [9.5, 44.8],
+    [12.8, 47.4],
   ];
-  private readonly CLUSTER_ZOOM_THRESHOLD = 13;
-  private readonly CLUSTER_GRID_PX = 70;
   private readonly ACCURACY_THRESHOLD_METERS = 50;
+  private readonly VALLEY_ZOOM_THRESHOLD = 10;
+  private lastQuestClickMs = 0;
+
+  private readonly SOURCE_QUESTS = 'tq-quests';
+  private readonly LAYER_QUEST_POINTS = 'tq-quest-points';
+
+  private readonly SOURCE_VALLEY_CLUSTERS = 'tq-valley-clusters';
+  private readonly LAYER_VALLEY_CIRCLES = 'tq-valley-circles';
+  private readonly LAYER_VALLEY_COUNT = 'tq-valley-count';
 
   private readonly SOURCE_PRIMARY = 'tq-primary-circles';
   private readonly SOURCE_UNCERTAINTY = 'tq-uncertainty';
@@ -235,6 +243,11 @@ export class HomePage implements AfterViewInit, OnDestroy {
   private readonly LAYER_PRIMARY_LINE_DASHED = 'tq-primary-line-dashed';
   private readonly LAYER_UNCERTAINTY_FILL = 'tq-uncertainty-fill';
   private readonly LAYER_UNCERTAINTY_LINE = 'tq-uncertainty-line';
+
+  private readonly SOURCE_TRENTINO_VALLEYS = 'tq-trentino-valleys';
+  private readonly SOURCE_TRENTINO_MASK = 'tq-trentino-mask';
+  private readonly LAYER_TRENTINO_MASK_FILL = 'tq-trentino-mask-fill';
+  private readonly LAYER_TRENTINO_VALLEY_LINES = 'tq-trentino-valley-lines';
 
   constructor() {
     addIcons({ locateOutline, optionsOutline, listOutline });
@@ -312,7 +325,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
       this.refreshInterval = null;
     }
     this.headingService.stop();
-    this.clearQuestMarkers();
     this.userMarker?.remove();
     this.userMarker = null;
     if (this.map) {
@@ -447,9 +459,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
     });
 
     this.map.on('style.load', () => this.onStyleLoad());
-    this.map.on('zoomend', () => {
-      this.renderQuests(untracked(() => this.questService.quests()));
-    });
     this.map.on('rotate', () => {
       if (!this.map) return;
       this.compassAngle.set(-this.map.getBearing());
@@ -459,11 +468,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   private onStyleLoad(): void {
+    this.addTrentinoOverlay();
     this.addGeoJsonSourcesAndLayers();
-    const quests = untracked(() => this.questService.quests());
-    if (quests.length > 0) this.renderQuests(quests);
     const pos = untracked(() => this.geolocationService.position());
     if (pos) this.syncUserGpsLayers(pos.lat, pos.lng, pos.accuracy);
+    void this.addQuestLayers().then(() => {
+      const quests = untracked(() => this.questService.quests());
+      if (quests.length > 0) this.renderQuests(quests);
+    });
     setTimeout(() => this.map?.resize(), 0);
   }
 
@@ -506,10 +518,12 @@ export class HomePage implements AfterViewInit, OnDestroy {
     });
 
     this.map.on('click', this.LAYER_PRIMARY_FILL, (e) => {
+      if (Date.now() - this.lastQuestClickMs < 100) return;
       if (!e.features?.length) return;
       const questId = e.features[0].properties?.['questId'] as string;
       const quest = untracked(() => this.questService.quests()).find((q) => q.id === questId);
       if (!quest) return;
+      this.lastQuestClickMs = Date.now();
       void this.openQuestDetailSheet(quest, this.questService.playerStatusOf(quest.id));
     });
 
@@ -538,16 +552,190 @@ export class HomePage implements AfterViewInit, OnDestroy {
     });
   }
 
+  private addTrentinoOverlay(): void {
+    if (!this.map) return;
+
+    const mode = this.themeService.effectiveTheme();
+    const maskBg = mode === 'dark' ? '#0d1117' : '#f0ede6';
+    const lineColor =
+      getComputedStyle(document.body).getPropertyValue('--color-primary').trim() || '#2d6a4f';
+
+    this.map.addSource(this.SOURCE_TRENTINO_MASK, { type: 'geojson', data: TRENTINO_MASK });
+    this.map.addSource(this.SOURCE_TRENTINO_VALLEYS, {
+      type: 'geojson',
+      data: TRENTINO_VALLEY_LINES,
+    });
+
+    this.map.addLayer({
+      id: this.LAYER_TRENTINO_MASK_FILL,
+      type: 'fill',
+      source: this.SOURCE_TRENTINO_MASK,
+      paint: { 'fill-color': maskBg, 'fill-opacity': 1 },
+    });
+
+    this.map.addLayer({
+      id: this.LAYER_TRENTINO_VALLEY_LINES,
+      type: 'line',
+      source: this.SOURCE_TRENTINO_VALLEYS,
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': lineColor,
+        'line-width': 1.5,
+        'line-opacity': 0.75,
+      },
+    });
+  }
+
   private renderQuests(quests: AnyQuest[]): void {
     if (!this.map || !this.map.getSource(this.SOURCE_PRIMARY)) return;
     const filtered = this.applyFilter(quests);
-    this.clearQuestMarkers();
     this.updatePrimaryCirclesSource(filtered);
-    if (this.map.getZoom() < this.CLUSTER_ZOOM_THRESHOLD) {
-      this.renderWithClustering(filtered);
-    } else {
-      this.renderFlat(filtered);
+    (this.map.getSource(this.SOURCE_QUESTS) as maplibregl.GeoJSONSource | undefined)?.setData(
+      this.buildQuestsGeoJSON(filtered),
+    );
+    (
+      this.map.getSource(this.SOURCE_VALLEY_CLUSTERS) as maplibregl.GeoJSONSource | undefined
+    )?.setData(buildValleyClusters(filtered, (id) => this.questService.playerStatusOf(id)));
+  }
+
+  private buildQuestsGeoJSON(quests: AnyQuest[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
+    return {
+      type: 'FeatureCollection',
+      features: quests.map((q) => {
+        const isPrimary = q.type === QuestType.PRIMARY;
+        const lat = isPrimary
+          ? (q as PrimaryQuest).searchArea.lat
+          : (q as SecondaryQuest).position.lat;
+        const lng = isPrimary
+          ? (q as PrimaryQuest).searchArea.lng
+          : (q as SecondaryQuest).position.lng;
+        const playerStatus = this.questService.playerStatusOf(q.id);
+        const questType = isPrimary ? 'primary' : 'secondary';
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lng, lat] },
+          properties: {
+            questId: q.id,
+            iconImage: `quest-${playerStatus}-${questType}`,
+          },
+        };
+      }),
+    };
+  }
+
+  private async addQuestLayers(): Promise<void> {
+    if (!this.map) return;
+
+    const primaryColor =
+      getComputedStyle(document.body).getPropertyValue('--color-primary').trim() || '#2d6a4f';
+
+    await registerQuestIcons(this.map, primaryColor);
+
+    // Source singola senza clustering nativo — gestiamo noi per valle
+    this.map.addSource(this.SOURCE_QUESTS, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+
+    this.map.addLayer({
+      id: this.LAYER_QUEST_POINTS,
+      type: 'symbol',
+      source: this.SOURCE_QUESTS,
+      layout: {
+        'icon-image': ['get', 'iconImage'],
+        'icon-size': 1,
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        visibility: 'none',
+      },
+    });
+
+    // Source cluster per valle
+    this.map.addSource(this.SOURCE_VALLEY_CLUSTERS, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+
+    this.map.addLayer({
+      id: this.LAYER_VALLEY_CIRCLES,
+      type: 'circle',
+      source: this.SOURCE_VALLEY_CLUSTERS,
+      paint: {
+        'circle-color': primaryColor,
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 9, 8, 14, 10, 20],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff',
+        'circle-translate': [0, -3],
+      },
+    });
+
+    this.map.addLayer({
+      id: this.LAYER_VALLEY_COUNT,
+      type: 'symbol',
+      source: this.SOURCE_VALLEY_CLUSTERS,
+      layout: {
+        'text-field': ['to-string', ['get', 'questCount']],
+        'text-font': ['Noto Sans Bold'],
+        'text-size': ['interpolate', ['linear'], ['zoom'], 6, 9, 8, 11, 10, 13],
+        'text-allow-overlap': true,
+        'text-ignore-placement': true,
+        'text-offset': [0, -0.25],
+      },
+      paint: { 'text-color': '#ffffff' },
+    });
+
+    this.syncQuestLayerVisibility();
+
+    // Zoom → alterna visibilità
+    this.map.on('zoomend', () => this.syncQuestLayerVisibility());
+
+    // Click su quest individuale
+    this.map.on('click', this.LAYER_QUEST_POINTS, (e) => {
+      const feature = e.features?.[0];
+      if (!feature) return;
+      this.lastQuestClickMs = Date.now();
+      const questId = feature.properties?.['questId'] as string;
+      const quest = untracked(() => this.questService.quests()).find((q) => q.id === questId);
+      if (!quest) return;
+      this.haptics.light();
+      void this.openQuestDetailSheet(quest, this.questService.playerStatusOf(quest.id));
+    });
+
+    // Click su cluster di valle → zoom in
+    this.map.on('click', this.LAYER_VALLEY_CIRCLES, (e) => {
+      if (!this.map) return;
+      this.map.easeTo({ center: e.lngLat, zoom: this.VALLEY_ZOOM_THRESHOLD + 1, duration: 600 });
+    });
+    this.map.on('click', this.LAYER_VALLEY_COUNT, (e) => {
+      if (!this.map) return;
+      this.map.easeTo({ center: e.lngLat, zoom: this.VALLEY_ZOOM_THRESHOLD + 1, duration: 600 });
+    });
+
+    for (const layer of [
+      this.LAYER_QUEST_POINTS,
+      this.LAYER_VALLEY_CIRCLES,
+      this.LAYER_VALLEY_COUNT,
+    ]) {
+      this.map.on('mouseenter', layer, () => {
+        if (this.map) this.map.getCanvas().style.cursor = 'pointer';
+      });
+      this.map.on('mouseleave', layer, () => {
+        if (this.map) this.map.getCanvas().style.cursor = '';
+      });
     }
+  }
+
+  private syncQuestLayerVisibility(): void {
+    if (!this.map) return;
+    const zoom = this.map.getZoom();
+    const showValley = zoom < this.VALLEY_ZOOM_THRESHOLD;
+    const vis = (v: boolean) => (v ? 'visible' : 'none') as 'visible' | 'none';
+    this.map.setLayoutProperty(this.LAYER_QUEST_POINTS, 'visibility', vis(!showValley));
+    this.map.setLayoutProperty(this.LAYER_PRIMARY_FILL, 'visibility', vis(!showValley));
+    this.map.setLayoutProperty(this.LAYER_PRIMARY_LINE_SOLID, 'visibility', vis(!showValley));
+    this.map.setLayoutProperty(this.LAYER_PRIMARY_LINE_DASHED, 'visibility', vis(!showValley));
+    this.map.setLayoutProperty(this.LAYER_VALLEY_CIRCLES, 'visibility', vis(showValley));
+    this.map.setLayoutProperty(this.LAYER_VALLEY_COUNT, 'visibility', vis(showValley));
   }
 
   private applyFilter(quests: AnyQuest[]): AnyQuest[] {
@@ -559,12 +747,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
       if (q.type === QuestType.SECONDARY && !f.showSecondary) return false;
       return true;
     });
-  }
-
-  private clearQuestMarkers(): void {
-    for (const marker of this.allActiveQuestMarkers) marker.remove();
-    this.allActiveQuestMarkers = [];
-    this.questMarkers.clear();
   }
 
   private updatePrimaryCirclesSource(quests: AnyQuest[]): void {
@@ -602,107 +784,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
         ],
       },
     };
-  }
-
-  private renderFlat(quests: AnyQuest[]): void {
-    quests.forEach((quest, i) => this.addQuestMarker(quest, i));
-  }
-
-  private renderWithClustering(quests: AnyQuest[]): void {
-    const gridSize = this.CLUSTER_GRID_PX;
-    const items = quests.map((quest) => {
-      const lat =
-        quest.type === QuestType.PRIMARY
-          ? (quest as PrimaryQuest).searchArea.lat
-          : (quest as SecondaryQuest).position.lat;
-      const lng =
-        quest.type === QuestType.PRIMARY
-          ? (quest as PrimaryQuest).searchArea.lng
-          : (quest as SecondaryQuest).position.lng;
-      return { quest, lat, lng };
-    });
-
-    const cells = new Map<string, { quest: AnyQuest; lat: number; lng: number }[]>();
-    for (const item of items) {
-      const pixel = this.map!.project([item.lng, item.lat]);
-      const key = `${Math.floor(pixel.x / gridSize)},${Math.floor(pixel.y / gridSize)}`;
-      if (!cells.has(key)) cells.set(key, []);
-      cells.get(key)!.push(item);
-    }
-
-    let staggerIndex = 0;
-    for (const [, group] of cells) {
-      if (group.length === 1) {
-        this.addQuestMarker(group[0].quest, staggerIndex++);
-      } else {
-        const avgLat = group.reduce((s, item) => s + item.lat, 0) / group.length;
-        const avgLng = group.reduce((s, item) => s + item.lng, 0) / group.length;
-        this.addClusterMarker(avgLat, avgLng, group.length, staggerIndex++);
-      }
-    }
-  }
-
-  private addQuestMarker(quest: AnyQuest, staggerIndex: number): void {
-    const isPrimary = quest.type === QuestType.PRIMARY;
-    const lat = isPrimary
-      ? (quest as PrimaryQuest).searchArea.lat
-      : (quest as SecondaryQuest).position.lat;
-    const lng = isPrimary
-      ? (quest as PrimaryQuest).searchArea.lng
-      : (quest as SecondaryQuest).position.lng;
-    const playerStatus = this.questService.playerStatusOf(quest.id);
-    const iconSvg = getQuestIcon(quest, playerStatus);
-
-    const el = document.createElement('div');
-    el.className = 'quest-marker-wrapper';
-    el.innerHTML = `
-      <div class="quest-marker${isPrimary ? ' quest-marker--primary' : ''} quest-marker--${playerStatus}">
-        <div class="quest-marker__shadow"></div>
-        <div class="quest-marker__body">
-          <div class="quest-marker__pin">${iconSvg}</div>
-        </div>
-      </div>
-    `;
-
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.haptics.light();
-      void this.openQuestDetailSheet(quest, playerStatus);
-    });
-
-    setTimeout(() => {
-      el.style.setProperty('--stagger-delay', `${staggerIndex * 65}ms`);
-      el.classList.add('quest-marker-wrapper--enter');
-    }, 0);
-
-    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-      .setLngLat([lng, lat])
-      .addTo(this.map!);
-    this.allActiveQuestMarkers.push(marker);
-    if (quest.type === QuestType.SECONDARY) this.questMarkers.set(quest.id, marker);
-  }
-
-  private addClusterMarker(lat: number, lng: number, count: number, staggerIndex: number): void {
-    const el = document.createElement('div');
-    el.className = 'quest-cluster-wrapper';
-    el.innerHTML = `
-      <div class="quest-cluster">
-        <div class="quest-marker__shadow"></div>
-        <div class="quest-cluster__body">
-          <span class="quest-cluster__count">${count}</span>
-        </div>
-      </div>
-    `;
-
-    setTimeout(() => {
-      el.style.setProperty('--stagger-delay', `${staggerIndex * 65}ms`);
-      el.classList.add('quest-marker-wrapper--enter');
-    }, 0);
-
-    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-      .setLngLat([lng, lat])
-      .addTo(this.map!);
-    this.allActiveQuestMarkers.push(marker);
   }
 
   private syncUserGpsLayers(lat: number, lng: number, accuracy: number): void {

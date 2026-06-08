@@ -206,48 +206,41 @@
       </button>
     </div>
 
-    <!-- Campo ricerca -->
-    <div class="add-friend-modal__search">
-      <ion-icon name="search-outline" class="add-friend-modal__search-icon"></ion-icon>
+    <!-- Campo username + bottone -->
+    <div class="add-friend-modal__row">
       <input
         class="add-friend-modal__input"
         type="text"
         placeholder="Nome utente..."
         [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event); onSearchInput()"
+        (ngModelChange)="searchQuery.set($event); requestSent.set(false); requestError.set('')"
+        (keyup.enter)="sendFriendRequest()"
         autocomplete="off"
-        aria-label="Cerca per username"
+        autocapitalize="none"
+        aria-label="Username"
       />
-    </div>
-
-    <!-- Risultati -->
-    <div class="add-friend-modal__results">
-      @if (searchLoading()) {
-      <div class="social__spinner"></div>
-      } @else if (searchResults().length === 0 && searchQuery().trim()) {
-      <p class="add-friend-modal__empty">Nessun utente trovato.</p>
-      } @else { @for (player of searchResults(); track player.playerId) {
-      <div class="search-result-row">
-        <div
-          class="search-result-row__avatar"
-          [style.background]="avatarGradient(player.playerId)"
-          aria-hidden="true"
-        >
-          {{ avatarInitial(player.username) }}
-        </div>
-        <span class="search-result-row__username">{{ player.username }}</span>
-
-        @if (sentRequests().has(player.playerId)) {
-        <div class="search-result-row__sent">
-          <ion-icon name="checkmark-outline"></ion-icon>
-          <span>Inviata</span>
-        </div>
+      <button
+        class="add-friend-modal__send-btn"
+        type="button"
+        [disabled]="!searchQuery().trim() || sendingRequest()"
+        (click)="sendFriendRequest()"
+      >
+        @if (sendingRequest()) {
+        <span class="add-friend-modal__send-spinner"></span>
         } @else {
-        <tq-button variant="secondary" (tapped)="sendFriendRequest(player)"> Aggiungi </tq-button>
+        <ion-icon name="send-outline"></ion-icon>
         }
-      </div>
-      } }
+      </button>
     </div>
+
+    <!-- Feedback -->
+    @if (requestSent()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--ok">
+      <ion-icon name="checkmark-circle"></ion-icon> Richiesta inviata!
+    </p>
+    } @else if (requestError()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--err">{{ requestError() }}</p>
+    }
   </div>
 </div>
 }

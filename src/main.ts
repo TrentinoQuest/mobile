@@ -10,7 +10,7 @@ import {
 } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import { Capacitor } from '@capacitor/core';
-import { StatusBar, Style } from '@capacitor/status-bar';
+import { StatusBar } from '@capacitor/status-bar';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
@@ -54,7 +54,6 @@ async function initializeNativeUi(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   try {
     await StatusBar.setOverlaysWebView({ overlay: true });
-    await StatusBar.setStyle({ style: Style.Light });
   } catch {
     // Plugin non disponibile (es. web): ignora silenziosamente.
   }
