@@ -213,7 +213,7 @@ export class AuthService {
    */
   saveDeviceToken(token: string): void {
     this.http
-      .post<void>(`${environment.apiUrl}/auth/device-token`, { token })
+      .post<void>(`${environment.apiUrl}/auth/device-token`, { fcmToken: token })
       .subscribe({ error: () => {} });
   }
 

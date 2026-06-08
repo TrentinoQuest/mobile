@@ -1,0 +1,13 @@
+/* tsconfig per i test di integrazione Vitest.
+   Include tutti i sorgenti dell'app + i test, così il plugin Angular compila
+   AOT ogni componente (inlining di templateUrl/styleUrls) e i test possono
+   istanziarli via DI senza errori "Component is not resolved". */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/vitest",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
+}

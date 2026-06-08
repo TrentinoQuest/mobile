@@ -311,28 +311,26 @@ export class LegaPage implements OnInit {
     this.requestSent.set(false);
     this.requestError.set('');
 
-    this.http
-      .post(`${environment.apiUrl}/social/friends/request`, { username })
-      .subscribe({
-        next: () => {
-          this.sendingRequest.set(false);
-          this.requestSent.set(true);
-          this.searchQuery.set('');
-        },
-        error: (err) => {
-          this.sendingRequest.set(false);
-          const status = (err?.status as number | undefined) ?? 0;
-          this.requestError.set(
-            status === 404
-              ? 'Utente non trovato'
-              : status === 409
-                ? 'Richiesta già inviata o siete già amici'
-                : status === 400
-                  ? 'Username non valido'
-                  : 'Errore, riprova',
-          );
-        },
-      });
+    this.http.post(`${environment.apiUrl}/social/friends/request`, { username }).subscribe({
+      next: () => {
+        this.sendingRequest.set(false);
+        this.requestSent.set(true);
+        this.searchQuery.set('');
+      },
+      error: (err) => {
+        this.sendingRequest.set(false);
+        const status = (err?.status as number | undefined) ?? 0;
+        this.requestError.set(
+          status === 404
+            ? 'Utente non trovato'
+            : status === 409
+              ? 'Richiesta già inviata o siete già amici'
+              : status === 400
+                ? 'Username non valido'
+                : 'Errore, riprova',
+        );
+      },
+    });
   }
 
   // ══════════════════════════════════════════════════════════════════════════
