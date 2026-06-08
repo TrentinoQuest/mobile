@@ -23,9 +23,30 @@ const leaguePayload = {
   rank: 3,
   weeklyXp: 240,
   leaderboard: [
-    { rank: 1, playerId: 'p1', username: 'Alice', weeklyXp: 500, isCurrentPlayer: false, isFriend: true },
-    { rank: 2, playerId: 'p2', username: 'Bob', weeklyXp: 300, isCurrentPlayer: false, isFriend: false },
-    { rank: 3, playerId: 'me', username: 'Io', weeklyXp: 240, isCurrentPlayer: true, isFriend: false },
+    {
+      rank: 1,
+      playerId: 'p1',
+      username: 'Alice',
+      weeklyXp: 500,
+      isCurrentPlayer: false,
+      isFriend: true,
+    },
+    {
+      rank: 2,
+      playerId: 'p2',
+      username: 'Bob',
+      weeklyXp: 300,
+      isCurrentPlayer: false,
+      isFriend: false,
+    },
+    {
+      rank: 3,
+      playerId: 'me',
+      username: 'Io',
+      weeklyXp: 240,
+      isCurrentPlayer: true,
+      isFriend: false,
+    },
   ],
 };
 
@@ -70,5 +91,21 @@ describe('LegaPage — classifica girone', () => {
     expect(league.leaderboard.length).toBe(3);
     expect(league.leaderboard[0].username).toBe('Alice');
     expect(league.leaderboard.some((m: any) => m.isCurrentPlayer)).toBe(true);
+  });
+
+  it('avatarInitial non lancia se un’entry arriva senza username (bug backend /leagues/current)', () => {
+    // Riproduce la response reale: leaderboard senza il campo `username`.
+    // Prima del fix `username.charAt(0)` lanciava e l'intero @for non
+    // renderizzava → "vedo la posizione ma non la lista".
+    const page = makePage({
+      ...leaguePayload,
+      leaderboard: [
+        { rank: 1, playerId: 'p1', weeklyXp: 500, isCurrentPlayer: false, isFriend: false },
+      ],
+    });
+    page.ngOnInit();
+    const member = page.current().leaderboard[0];
+    expect(() => page.avatarInitial(member.username)).not.toThrow();
+    expect(page.avatarInitial(member.username)).toBe('?');
   });
 });

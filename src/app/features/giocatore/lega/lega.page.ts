@@ -348,8 +348,11 @@ export class LegaPage implements OnInit {
     return AVATAR_GRADIENTS[Math.abs(seed) % AVATAR_GRADIENTS.length];
   }
 
-  protected avatarInitial(username: string): string {
-    return username.charAt(0).toUpperCase();
+  protected avatarInitial(username: string | null | undefined): string {
+    // Difensivo: se un'entry della classifica arriva senza username (es. dati
+    // incompleti dal backend), evitiamo il throw che farebbe fallire l'intero
+    // @for nascondendo TUTTA la lista. Mostriamo un fallback.
+    return (username ?? '').charAt(0).toUpperCase() || '?';
   }
 
   protected rowClasses(m: LeagueMemberView): Record<string, boolean> {

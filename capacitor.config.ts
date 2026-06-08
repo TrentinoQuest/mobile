@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'it.trentoquest.mobile',
+  appId: 'it.trentinoquest.mobile',
   appName: 'trentino-quest-mobile',
   webDir: 'www',
   server: {
