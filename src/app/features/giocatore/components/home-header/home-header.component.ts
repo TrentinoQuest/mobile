@@ -1,23 +1,26 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ModalController } from '@ionic/angular/standalone';
+import { IonIcon, ModalController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { flame } from 'ionicons/icons';
 import type { GamificationResult } from '@trentino-quest/shared-types';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { TqBadgeComponent } from '../../../../shared/components/tq-badge/tq-badge.component';
 import { StreakMilestoneModalComponent } from '../streak-milestone-modal/streak-milestone-modal.component';
 
 const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 12000, 18000];
 
-// Circonferenza cerchio XP ring (r=17, viewBox 44x44)
-const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 17;
+// Circonferenza cerchio XP ring (r=23, viewBox 50x50)
+const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 23;
 
 @Component({
   selector: 'app-home-header',
   templateUrl: './home-header.component.html',
   styleUrls: ['./home-header.component.scss'],
   standalone: true,
-  imports: [],
+  imports: [IonIcon, TqBadgeComponent],
 })
 export class HomeHeaderComponent {
   private readonly questService = inject(QuestService);
@@ -59,6 +62,12 @@ export class HomeHeaderComponent {
     () => XP_RING_CIRCUMFERENCE * (1 - this.xpProgress() / 100),
   );
 
+  protected readonly coins = computed<number>(() => this.player()?.totalPoints ?? 0);
+
+  constructor() {
+    addIcons({ flame });
+  }
+
   openProfile(): void {
     void this.router.navigate(['/giocatore/profilo']);
   }
@@ -70,6 +79,7 @@ export class HomeHeaderComponent {
 
     const gamification: GamificationResult = {
       xpAwarded: 0,
+      coinsAwarded: 0,
       streakMultiplier: 1,
       currentStreak: p.currentStreak ?? 0,
       longestStreak: p.longestStreak ?? p.currentStreak ?? 0,

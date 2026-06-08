@@ -1,169 +1,359 @@
-<ion-content [fullscreen]="true" class="album">
+<ion-content [fullscreen]="true" class="taccuino">
+  <!-- ═══════════════════════════════════════════════════════════ HEADER -->
+  <div class="taccuino__header">
+    <h1 class="taccuino__title">Taccuino</h1>
 
-  <!-- Header glass overlay -->
-  <div class="album__header">
-    <div class="album__header-row">
-      <div class="album__header-center">
-        <span class="album__header-sub">LA TUA COLLEZIONE</span>
-        <span class="album__header-title">Album dei ricordi</span>
-      </div>
-      <button class="album__header-btn"
-              [class.album__header-btn--active]="showSearch()"
-              type="button"
-              aria-label="Cerca"
-              (click)="toggleSearch()">
-        @if (showSearch()) {
-          <!-- Icona × per chiudere la ricerca -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        } @else {
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="6"/>
-            <path d="M16 16l4 4"/>
-          </svg>
-        }
+    <!-- Segment control -->
+    <div class="taccuino__segment" role="tablist">
+      <button
+        class="taccuino__seg-btn"
+        [class.taccuino__seg-btn--active]="activeSection() === 'collezione'"
+        role="tab"
+        type="button"
+        (click)="setSection('collezione')"
+      >
+        Collezione
+      </button>
+      <button
+        class="taccuino__seg-btn"
+        [class.taccuino__seg-btn--active]="activeSection() === 'quiz'"
+        role="tab"
+        type="button"
+        (click)="setSection('quiz')"
+      >
+        Quiz del giorno
+      </button>
+      <button
+        class="taccuino__seg-btn"
+        [class.taccuino__seg-btn--active]="activeSection() === 'missioni'"
+        role="tab"
+        type="button"
+        (click)="setSection('missioni')"
+      >
+        Missioni
       </button>
     </div>
-
-    <!-- Campo ricerca (visibile solo quando showSearch) -->
-    @if (showSearch()) {
-      <div class="album__search-wrap">
-        <svg class="album__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="6"/>
-          <path d="M16 16l4 4"/>
-        </svg>
-        <input class="album__search-input"
-               type="search"
-               placeholder="Cerca un collezionabile…"
-               [value]="searchQuery()"
-               (input)="searchQuery.set($any($event.target).value)"
-               autocomplete="off" />
-      </div>
-    }
   </div>
 
-  <!-- Corpo scrollabile -->
-  <div class="album__body" [class.album__body--search-open]="showSearch()">
+  <!-- ══════════════════════════════════════════════════ SEZIONE COLLEZIONE -->
+  @if (activeSection() === 'collezione') {
 
-    @if (loading() && collectibleTotal() === 0) {
-      <div class="album__loading">
-        <div class="album__loading-ring"></div>
-      </div>
-    }
-
-    <!-- Hero stat (nascosto durante la ricerca attiva) -->
-    @if (!searchQuery()) {
-      <div class="album__hero">
-        <div class="album__radial">
-          <svg width="84" height="84" viewBox="0 0 84 84">
-            <circle class="album__radial-track" cx="42" cy="42" r="38" fill="none" stroke-width="5"/>
-            <circle class="album__radial-arc" cx="42" cy="42" r="38" fill="none" stroke-width="5"
-                    stroke-linecap="round"
-                    [attr.stroke-dasharray]="CIRCUMFERENCE"
-                    [attr.stroke-dashoffset]="strokeDashoffset()"
-                    transform="rotate(-90 42 42)"/>
-          </svg>
-          <div class="album__radial-label">{{ progressPercent() }}%</div>
-        </div>
-
-        <div class="album__hero-info">
-          <div class="album__hero-count">
-            <span class="album__hero-big">{{ unlockedCount() }}</span>
-            <span class="album__hero-sep">/ {{ collectibleTotal() }}</span>
-          </div>
-          <div class="album__hero-sub">ricordi raccolti.</div>
-          <div class="album__hero-level">★ COLLEZIONISTA DEL TRENTINO</div>
-        </div>
-      </div>
-    }
-
-    <!-- Chip filtri (nascosti durante ricerca attiva) -->
-    @if (!searchQuery()) {
-      <div class="album__filters">
-        @for (f of filters; track f.id) {
-          <button class="album__filter-chip"
-                  [class.album__filter-chip--active]="activeFilter() === f.id"
-                  type="button"
-                  (click)="setFilter(f.id)">
-            {{ f.label }}
-          </button>
-        }
-      </div>
-    }
-
-    <!-- Messaggio nessun risultato ricerca -->
-    @if (searchQuery() && displayedCards().length === 0) {
-      <div class="album__empty-search">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"
-             style="opacity: 0.3">
-          <circle cx="11" cy="11" r="6"/>
-          <path d="M16 16l4 4"/>
+  <div class="taccuino__body">
+    <!-- Hero progresso -->
+    <div class="taccuino__hero">
+      <div class="taccuino__radial">
+        <svg width="72" height="72" viewBox="0 0 84 84">
+          <circle
+            cx="42"
+            cy="42"
+            r="38"
+            fill="none"
+            stroke="var(--color-border)"
+            stroke-width="5"
+          />
+          <circle
+            cx="42"
+            cy="42"
+            r="38"
+            fill="none"
+            stroke="var(--color-primary)"
+            stroke-width="5"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="CIRCUMFERENCE"
+            [attr.stroke-dashoffset]="strokeDashoffset()"
+            transform="rotate(-90 42 42)"
+          />
         </svg>
-        <span>Nessun collezionabile trovato per "{{ searchQuery() }}"</span>
+        <span class="taccuino__radial-label">{{ progressPercent() }}%</span>
       </div>
+      <div class="taccuino__hero-info">
+        <div class="taccuino__hero-count">
+          <span class="taccuino__hero-num">{{ unlockedCount() }}</span>
+          <span class="taccuino__hero-total">/ {{ collectibleTotal() }}</span>
+        </div>
+        <p class="taccuino__hero-sub">ricordi raccolti</p>
+      </div>
+    </div>
+
+    <!-- Griglia 2 colonne -->
+    @if (loading() && collectibleTotal() === 0) {
+    <div class="taccuino__spinner"></div>
     }
 
-    <!-- Griglia card -->
-    <div class="album__grid">
-      @for (card of displayedCards(); track card.id; let i = $index) {
-        @if (card.locked) {
-          <div class="album__card album__card--locked">
-            <svg class="album__card-lock-icon" width="20" height="20" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="1.5"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="11" width="14" height="9" rx="2"/>
-              <path d="M8 11V8a4 4 0 018 0v3"/>
-            </svg>
-            <span class="album__card-mystery">?? / ??</span>
-          </div>
-        } @else {
-          <div class="album__card album__card--unlocked"
-               [style.background]="card.imageUrl ? '#0d0d0d' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'"
-               [style.animation-delay.ms]="(i % 12) * 45"
-               (click)="openDetail(card)"
-               role="button"
-               [attr.aria-label]="'Dettaglio ' + card.name">
+    <div class="taccuino__grid">
+      @for (card of displayedCards(); track card.id; let i = $index) { @if (card.locked) {
+      <div
+        class="taccuino__card taccuino__card--locked"
+        (click)="openLockedSheet()"
+        role="button"
+        aria-label="Collezionabile non sbloccato"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        >
+          <rect x="5" y="11" width="14" height="9" rx="2" />
+          <path d="M8 11V8a4 4 0 018 0v3" />
+        </svg>
+      </div>
+      } @else {
+      <div
+        class="taccuino__card taccuino__card--unlocked"
+        [class.taccuino__card--uncommon]="card.rarity === CollectibleRarity.UNCOMMON"
+        [class.taccuino__card--rare]="card.rarity === CollectibleRarity.RARE"
+        [class.taccuino__card--legendary]="card.rarity === CollectibleRarity.LEGENDARY"
+        [style.animation-delay.ms]="(i % 12) * 45"
+        (click)="openDetail(card)"
+        role="button"
+        [attr.aria-label]="'Dettaglio ' + card.name"
+      >
+        <!-- Faccia: immagine o illustrazione generativa -->
+        <div
+          class="taccuino__card-face"
+          [style.background]="card.imageUrl ? '#0a0a0a' : 'linear-gradient(180deg,' + palette(card.paletteSeed).sky + ',' + palette(card.paletteSeed).mid + ')'"
+        >
+          @if (card.imageUrl) {
+          <img class="taccuino__card-img" [src]="card.imageUrl" [alt]="card.name" loading="lazy" />
+          } @else {
+          <svg
+            class="taccuino__card-art"
+            viewBox="0 0 100 146"
+            preserveAspectRatio="xMidYMid slice"
+          >
+            <path
+              [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
+              [attr.fill]="palette(card.paletteSeed).mid"
+              opacity="0.7"
+            />
+            <path
+              [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
+              [attr.fill]="palette(card.paletteSeed).fg"
+              opacity="0.55"
+            />
+          </svg>
+          }
+        </div>
 
-            <!-- Immagine reale se disponibile, altrimenti arte generativa SVG -->
-            @if (card.imageUrl) {
-              <img class="album__card-img" [src]="card.imageUrl" [alt]="card.name" loading="lazy" />
-            } @else {
-              <svg class="album__card-art" viewBox="0 0 100 146" preserveAspectRatio="xMidYMid slice">
-                <path [attr.d]="'M0 ' + (95 + (card.paletteSeed % 3) * 4) + ' L20 ' + (72 + (card.paletteSeed % 4) * 3) + ' L40 82 L55 ' + (60 + (card.paletteSeed % 3) * 4) + ' L75 77 L100 65 L100 146 L0 146 Z'"
-                      [attr.fill]="palette(card.paletteSeed).mid" opacity="0.7"/>
-                <path [attr.d]="'M0 118 L25 103 L45 112 L70 96 L100 108 L100 146 L0 146 Z'"
-                      [attr.fill]="palette(card.paletteSeed).fg" opacity="0.55"/>
-                <circle [attr.cx]="68 - (card.paletteSeed % 3) * 15"
-                        [attr.cy]="28 + (card.paletteSeed % 2) * 8"
-                        r="4" [attr.fill]="palette(card.paletteSeed).fg" opacity="0.9"/>
-              </svg>
-            }
-
-            <!-- Sfumatura in basso per leggibilità del nome -->
-            <div class="album__card-scrim"></div>
-
-            <!-- Dot rarity -->
-            @if (card.rarity) {
-              <span class="album__card-rarity" [ngClass]="rarityModifier(card.rarity)"></span>
-            }
-
-            <span class="album__card-num">{{ cardNum(i) }}</span>
-            <span class="album__card-name">{{ card.name }}</span>
-          </div>
-        }
-      }
+        <!-- Targhetta: badge rarità + nome, sfondo solido -->
+        <div class="taccuino__card-plate">
+          @if (card.rarity) {
+          <tq-badge class="taccuino__card-badge" [color]="rarityColor(card.rarity)" size="sm">
+            {{ card.rarity }}
+          </tq-badge>
+          }
+          <span class="taccuino__card-name">{{ card.name }}</span>
+        </div>
+      </div>
+      } }
     </div>
 
     @if (error()) {
-      <div class="album__error">{{ error() }}</div>
+    <p class="taccuino__error">{{ error() }}</p>
     }
-
-    <div class="album__spacer"></div>
   </div>
+  }
 
+  <!-- ══════════════════════════════════════════════════ SEZIONE QUIZ -->
+  @if (activeSection() === 'quiz') {
+  <div class="taccuino__body">
+    @if (quizLoading()) {
+    <div class="taccuino__spinner"></div>
+    } @else if (quizQuestion(); as q) {
+
+    <tq-card [elevated]="true" class="quiz-card">
+      <div class="quiz-card__inner">
+        <tq-badge color="accent" size="sm" class="quiz-card__cat">{{ q.category }}</tq-badge>
+
+        <p class="quiz-card__question">{{ q.text }}</p>
+
+        <!-- Stato: già risposto — mostra opzioni in sola lettura con risposta corretta -->
+        @if (q.alreadyAnswered && !quizResult()) {
+        <div class="quiz-options">
+          @for (opt of q.options; track $index) {
+          <div
+            class="quiz-option"
+            [class.quiz-option--correct]="q.result?.correctOptionIndex === $index"
+          >
+            <span class="quiz-option__letter">{{ ['A','B','C','D'][$index] }}</span>
+            <span class="quiz-option__text">{{ opt }}</span>
+            @if (q.result?.correctOptionIndex === $index) {
+            <ion-icon
+              name="checkmark-circle"
+              class="quiz-option__icon quiz-option__icon--ok"
+            ></ion-icon>
+            }
+          </div>
+          }
+        </div>
+        @if (q.result?.explanation) {
+        <div class="quiz-explanation">
+          <p class="quiz-explanation__text">{{ q.result!.explanation }}</p>
+        </div>
+        } } @else {
+        <!-- Opzioni risposta (interattive) -->
+        <div class="quiz-options">
+          @for (opt of q.options; track $index) {
+          <button
+            class="quiz-option"
+            [class.quiz-option--correct]="quizResult() !== null && quizResult()!.correctOptionIndex === $index"
+            [class.quiz-option--wrong]="quizResult() !== null && quizSelectedIndex() === $index && !quizResult()!.correct"
+            [class.quiz-option--dimmed]="quizAnswering()"
+            [disabled]="quizResult() !== null || quizAnswering()"
+            type="button"
+            (click)="answerQuiz($index)"
+          >
+            <span class="quiz-option__letter">{{ ['A','B','C','D'][$index] }}</span>
+            <span class="quiz-option__text">{{ opt }}</span>
+            @if (quizResult() !== null && quizResult()!.correctOptionIndex === $index) {
+            <ion-icon
+              name="checkmark-circle"
+              class="quiz-option__icon quiz-option__icon--ok"
+            ></ion-icon>
+            } @else if (quizResult() !== null && quizSelectedIndex() === $index &&
+            !quizResult()!.correct) {
+            <ion-icon
+              name="close-circle"
+              class="quiz-option__icon quiz-option__icon--err"
+            ></ion-icon>
+            }
+          </button>
+          }
+        </div>
+
+        <!-- Errore invio risposta -->
+        @if (quizError()) {
+        <p class="quiz-error">{{ quizError() }}</p>
+        }
+
+        <!-- Animazione reward monete (risposta corretta) -->
+        @if (quizRewardVisible()) {
+        <div class="quiz-reward-anim" aria-hidden="true">+{{ quizRewardAmount() }} monete</div>
+        }
+
+        <!-- Spiegazione (dopo risposta) -->
+        @if (quizResult(); as res) {
+        <div class="quiz-explanation">
+          <p class="quiz-explanation__text">{{ res.explanation }}</p>
+          @if (res.correct) {
+          <p class="quiz-explanation__reward">+{{ res.coinsAwarded }} monete</p>
+          } @if (res.mapFragment) {
+          <div class="quiz-fragment">
+            <ion-icon name="map-outline" class="quiz-fragment__icon"></ion-icon>
+            <p class="quiz-fragment__hint">{{ res.mapFragment.hint }}</p>
+            <tq-button variant="ghost" (tapped)="saveMapFragment(res.mapFragment!.hint)">
+              Ricorda questo indizio
+            </tq-button>
+          </div>
+          }
+        </div>
+        } }
+
+        <!-- Countdown prossima domanda -->
+        @if ((quizResult() !== null || q.alreadyAnswered) && quizCountdown()) {
+        <p class="quiz-countdown">Prossima domanda: {{ quizCountdown() }}</p>
+        }
+      </div>
+    </tq-card>
+
+    } @else {
+    <p class="taccuino__empty">Nessuna domanda disponibile al momento.</p>
+    }
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════ SEZIONE MISSIONI -->
+  @if (activeSection() === 'missioni') {
+  <div class="taccuino__body">
+    @if (missionsLoading()) {
+    <div class="taccuino__spinner"></div>
+    } @else if (missions().length > 0) {
+
+    <div class="missions-list">
+      @for (m of missions(); track m.type) {
+      <div class="mission-card-wrap">
+        <!-- Animazione reward (+N XP +N monete) -->
+        @if (missionRewardAnimating().has(m.type)) {
+        <span class="mission-reward-anim" aria-hidden="true">
+          +{{ m.xpReward }} XP &nbsp;+{{ m.coinsReward }}
+        </span>
+        }
+
+        <div
+          class="mission-card"
+          [ngClass]="missionBorderClass(m)"
+          [class.mission-card--claimed]="claimedMissions().has(m.type)"
+        >
+          <div class="mission-card__icon">
+            <ion-icon [name]="MISSION_ICONS[m.type]"></ion-icon>
+          </div>
+          <div class="mission-card__body">
+            <p class="mission-card__title">{{ m.title }}</p>
+            <p class="mission-card__desc">{{ m.description }}</p>
+          </div>
+          <div class="mission-card__right">
+            <div class="mission-card__rewards">
+              <tq-badge color="xp" size="sm">+{{ m.xpReward }} XP</tq-badge>
+              <tq-badge color="accent" size="sm">+{{ m.coinsReward }}</tq-badge>
+            </div>
+            @if (claimedMissions().has(m.type)) {
+            <ion-icon name="checkmark-circle" class="mission-card__done"></ion-icon>
+            } @else if (m.completed) {
+            <tq-button
+              variant="primary"
+              [loading]="missionsCompleting().has(m.type)"
+              (tapped)="claimMission(m.type)"
+            >
+              Riscuoti
+            </tq-button>
+            }
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    @if (missionsCountdown()) {
+    <p class="missions-countdown">Reset missioni tra {{ missionsCountdown() }}</p>
+    } } @else {
+    <p class="taccuino__empty">Nessuna missione assegnata.</p>
+    }
+  </div>
+  }
 </ion-content>
+
+<!-- ══════════════════════════════════════════════════ LOCKED SHEET -->
+@if (lockedSheetVisible()) {
+<div class="locked-sheet">
+  <button
+    class="locked-sheet__backdrop"
+    type="button"
+    (click)="closeLockedSheet()"
+    aria-label="Chiudi"
+  ></button>
+  <div class="locked-sheet__panel">
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="var(--color-text-disabled)"
+      stroke-width="1.5"
+      stroke-linecap="round"
+    >
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 018 0v3" />
+    </svg>
+    <h3 class="locked-sheet__title">Collezionabile misterioso</h3>
+    <p class="locked-sheet__text">
+      Esplora il Trentino e completa le quest principali per scoprire e sbloccare questo
+      collezionabile.
+    </p>
+    <button class="locked-sheet__close" type="button" (click)="closeLockedSheet()">Chiudi</button>
+  </div>
+</div>
+}

@@ -1,293 +1,282 @@
 .amici {
-  --background: var(--tq-bg);
+  --background: var(--color-bg);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
 }
 
-// ── Header glass ─────────────────────────────────────────────────────────────
+/* ─── Header ─────────────────────────────────────────────────────────────── */
 
 .amici__header {
-  position: absolute;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--tq-z-map-overlay);
-  /* Safe area parametrica (notch/Dynamic Island) invece di 50px fissi. */
-  padding-top: calc(var(--tq-safe-top) + var(--tq-space-2));
-  padding-bottom: 14px;
-  background: linear-gradient(
-    to bottom,
-    rgba(var(--tq-bg-rgb), 0.95),
-    rgba(var(--tq-bg-rgb), 0.6) 80%,
-    transparent
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+  padding: calc(var(--space-16) + env(safe-area-inset-top)) var(--space-24) var(--space-12);
+  background: var(--color-surface);
+  border-bottom: 2.5px solid var(--color-border);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-12);
 }
 
 .amici__header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  min-height: 38px;
+  width: 100%;
 }
 
-.amici__header-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.amici__header-sub {
-  font-family: var(--tq-font-mono);
-  font-size: 9px;
-  color: rgba(var(--tq-ocra-rgb), 0.7);
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
-
-.amici__header-title {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 19px;
-  color: var(--tq-bone);
-  line-height: 1.1;
+.amici__title {
+  margin: 0 0 var(--space-12);
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .amici__header-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(244, 235, 220, 0.06);
-  border: 1px solid var(--tq-hairline);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--tq-bone);
+  color: var(--color-text-secondary);
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+
+  ion-icon {
+    font-size: 18px;
+  }
+  &:active {
+    background: var(--color-border);
+  }
 }
 
-// ── Body ─────────────────────────────────────────────────────────────────────
-
-.amici__body {
-  position: absolute;
-  inset: 0;
-  /* Sotto l'header (safe-top + altezza) e sopra la tab bar, parametrico. */
-  padding-top: calc(var(--tq-safe-top) + 50px);
-  padding-bottom: calc(var(--tq-tab-bar-total) + var(--tq-space-6));
-  overflow-y: auto;
-}
-
-// ── Tab segmented control ─────────────────────────────────────────────────────
+/* ─── Segment ────────────────────────────────────────────────────────────── */
 
 .amici__tabs-wrap {
-  padding: 0 22px 16px;
+  padding: var(--space-16) var(--space-24) var(--space-12);
 }
 
 .amici__tabs {
-  background: var(--tq-panel);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--tq-hairline);
   display: flex;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  padding: 3px;
   gap: 2px;
 }
 
 .amici__tab {
   flex: 1;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--tq-text-muted);
   border: none;
-  cursor: pointer;
-  font-family: var(--tq-font-sans);
-  font-size: 11.5px;
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 8px 12px;
+  font-size: var(--font-small);
   font-weight: 500;
-  transition: background var(--tq-duration-fast), color var(--tq-duration-fast);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 180ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
   white-space: nowrap;
 
   &--active {
-    background: var(--tq-panel-2);
-    color: var(--tq-bone);
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    background: var(--color-surface);
+    box-shadow: 0 2px 0 rgba(var(--color-primary-rgb), 0.3);
+    color: var(--color-primary);
+    font-weight: 700;
   }
 }
 
-// ── Feed attività ─────────────────────────────────────────────────────────────
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+
+.amici__body {
+  padding: 0 var(--space-24) calc(var(--space-32) + 80px);
+}
+
+/* ─── Feed attività ──────────────────────────────────────────────────────── */
 
 .amici__feed {
-  padding: 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
 }
 
 .amici__activity {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+  padding: var(--space-12) var(--space-16);
   display: flex;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--tq-hairline);
-
-  &--last {
-    border-bottom: none;
-  }
+  gap: var(--space-12);
 }
 
 .amici__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tq-bone);
-  font-weight: 600;
-  font-size: 14px;
+  font-size: var(--font-body);
+  font-weight: 700;
+  color: #fff;
 }
 
 .amici__activity-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .amici__activity-text {
-  font-size: 13px;
-  color: var(--tq-bone);
-  line-height: 1.4;
+  font-size: var(--font-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
 }
 
 .amici__activity-who {
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .amici__activity-place {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 15px;
-  color: var(--tq-ocra);
+  font-weight: 600;
+  color: var(--color-primary);
 }
 
 .amici__activity-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  color: var(--tq-text-muted);
-  font-size: 10.5px;
+  gap: var(--space-4);
+  color: var(--color-text-disabled);
+  font-size: var(--font-micro);
 }
 
-.amici__activity-dot {
-  color: var(--tq-text-disabled);
-}
-
-.amici__activity-when {
-  font-family: var(--tq-font-mono);
-  font-size: 9.5px;
-  color: var(--tq-text-disabled);
-  letter-spacing: 0.5px;
-}
-
-// ── Suggerimenti amici ────────────────────────────────────────────────────────
+/* ─── Suggerimenti amici ─────────────────────────────────────────────────── */
 
 .amici__suggestions-section {
-  padding: 22px 22px 0;
+  padding-top: var(--space-8);
 }
 
 .amici__suggestions-kicker {
-  font-family: var(--tq-font-mono);
-  font-size: 10px;
-  color: var(--tq-text-muted);
-  letter-spacing: 1.4px;
-  margin-bottom: 12px;
+  font-size: var(--font-micro);
+  font-weight: 700;
+  color: var(--color-text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-12);
 }
 
 .amici__suggestions {
   display: flex;
-  gap: 10px;
+  gap: var(--space-12);
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: var(--space-4);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .amici__suggestion {
   flex-shrink: 0;
-  width: 96px;
-  padding: 14px 10px;
-  background: var(--tq-panel);
-  border: 1px solid var(--tq-hairline);
-  border-radius: 14px;
+  width: 100px;
+  padding: var(--space-16) var(--space-12);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-4);
 }
 
 .amici__suggestion-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  margin-bottom: 8px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tq-bone);
-  font-weight: 600;
-  font-size: 16px;
+  font-size: var(--font-body);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: var(--space-4);
 }
 
 .amici__suggestion-name {
-  font-size: 12px;
-  color: var(--tq-bone);
-  font-weight: 500;
+  font-size: var(--font-small);
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .amici__suggestion-count {
-  font-family: var(--tq-font-mono);
-  font-size: 9px;
-  color: var(--tq-text-disabled);
-  margin-top: 2px;
-  letter-spacing: 0.5px;
+  font-size: var(--font-micro);
+  color: var(--color-text-disabled);
 }
 
 .amici__suggestion-add {
-  margin-top: 8px;
+  margin-top: var(--space-8);
   width: 100%;
-  background: rgba(var(--tq-ocra-rgb), 0.15);
-  color: var(--tq-ocra);
-  border: 1px solid rgba(var(--tq-ocra-rgb), 0.35);
-  padding: 5px 0;
-  border-radius: var(--tq-radius-pill);
-  font-family: var(--tq-font-sans);
-  font-size: 10.5px;
-  font-weight: 600;
+  background: var(--color-accent-ultra);
+  color: var(--color-accent);
+  border: 1.5px solid var(--color-accent-light);
+  padding: 6px 0;
+  border-radius: var(--radius-full);
+  font-size: var(--font-micro);
+  font-weight: 700;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease;
+
+  &:active {
+    background: var(--color-accent-ultra);
+    opacity: 0.8;
+  }
 }
 
-// ── Empty states ──────────────────────────────────────────────────────────────
+/* ─── Empty state ────────────────────────────────────────────────────────── */
 
 .amici__empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 64px 22px;
-  color: var(--tq-text-muted);
+  gap: var(--space-8);
+  padding: var(--space-48) var(--space-24);
+  text-align: center;
+}
+
+.amici__empty-icon {
+  font-size: 56px;
+  color: var(--color-text-disabled);
 }
 
 .amici__empty-text {
-  font-family: var(--tq-font-serif);
-  font-style: italic;
-  font-size: 17px;
-  color: var(--tq-text-muted);
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
 }
 
-// ── Spaziatura fondo ─────────────────────────────────────────────────────────
-
-.amici__spacer {
-  height: 32px;
+.amici__empty-sub {
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-loose);
+  margin: 0;
 }

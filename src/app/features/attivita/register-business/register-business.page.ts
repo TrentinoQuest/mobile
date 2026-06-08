@@ -9,46 +9,49 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { IonContent, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  arrowBackOutline,
+  eyeOutline,
+  eyeOffOutline,
+  locateOutline,
+  checkmarkCircle,
+} from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import {
   BusinessType,
   BUSINESS_TYPE_LABEL,
   RegisterBusinessRequest,
 } from '../../../core/services/business/business.types';
+import { HapticsService } from '../../../core/services/haptics/haptics.service';
+import { AudioService } from '../../../core/services/audio.service';
 
-/**
- * RegisterBusinessPage — Registrazione di una nuova Attività Locale.
- *
- * Campi: email, businessName, businessType, address, password, conferma.
- * La posizione GPS è rilevata automaticamente al click su "Rileva posizione".
- * Endpoint: POST /business/register → AuthResponse → naviga a /attivita/pending
- * (il nuovo business parte sempre con approvalStatus 'pending').
- */
 @Component({
   selector: 'app-register-business',
   templateUrl: './register-business.page.html',
   styleUrls: ['./register-business.page.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IonContent, IonSpinner],
+  imports: [ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner],
 })
 export class RegisterBusinessPage {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly haptics = inject(HapticsService);
+  private readonly audio = inject(AudioService);
 
   readonly submitting = signal(false);
   readonly passwordVisible = signal(false);
   readonly confirmPasswordVisible = signal(false);
   readonly emailAlreadyExists = signal(false);
   readonly detectingLocation = signal(false);
+  readonly shakeForm = signal(false);
 
-  // Posizione GPS rilevata (null = non ancora rilevata)
   private detectedPosition: { lat: number; lng: number } | null = null;
   readonly locationDetected = signal(false);
 
-  // Lista dei tipi attività per il select
   readonly businessTypes: { value: BusinessType; label: string }[] = Object.entries(
     BUSINESS_TYPE_LABEL,
   ).map(([value, label]) => ({ value: value as BusinessType, label }));
@@ -66,7 +69,7 @@ export class RegisterBusinessPage {
   );
 
   constructor() {
-    // Reset errore email quando l'utente la modifica
+    addIcons({ arrowBackOutline, eyeOutline, eyeOffOutline, locateOutline, checkmarkCircle });
     this.form.get('email')?.valueChanges.subscribe(() => {
       if (this.emailAlreadyExists()) this.emailAlreadyExists.set(false);
     });
@@ -84,21 +87,23 @@ export class RegisterBusinessPage {
     this.confirmPasswordVisible.update((v) => !v);
   }
 
-  /** Rileva la posizione GPS corrente tramite API browser nativa. */
   detectLocation(): void {
     if (!navigator.geolocation) {
       void this.showToast('Geolocalizzazione non supportata dal browser.', 'warning');
       return;
     }
+    void this.haptics.tapMedium();
     this.detectingLocation.set(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         this.detectedPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         this.locationDetected.set(true);
         this.detectingLocation.set(false);
+        void this.haptics.success();
       },
       () => {
         this.detectingLocation.set(false);
+        void this.haptics.error();
         void this.showToast(
           'Impossibile rilevare la posizione. Abilita la geolocalizzazione e riprova.',
           'warning',
@@ -111,13 +116,19 @@ export class RegisterBusinessPage {
   async submit(): Promise<void> {
     this.form.markAllAsTouched();
 
-    if (this.form.invalid || this.submitting()) return;
+    if (this.form.invalid || this.submitting()) {
+      if (this.form.invalid) void this.haptics.error();
+      return;
+    }
 
     if (!this.detectedPosition) {
+      void this.haptics.warning();
       await this.showToast('Rileva la tua posizione prima di procedere.', 'warning');
       return;
     }
 
+    void this.haptics.tapHeavy();
+    this.audio.playTap();
     this.submitting.set(true);
     this.emailAlreadyExists.set(false);
 
@@ -132,7 +143,8 @@ export class RegisterBusinessPage {
 
     this.authService.registerBusiness(request).subscribe({
       next: () => {
-        // Token salvati da AuthService. Il nuovo business è sempre pending.
+        void this.haptics.success();
+        this.audio.playSuccess();
         void this.router.navigate(['/attivita/pending']);
       },
       error: (err: HttpErrorResponse) => {
@@ -154,11 +166,15 @@ export class RegisterBusinessPage {
       return;
     }
 
+    void this.haptics.error();
+    this.audio.playError();
+    this.shakeForm.set(true);
+    setTimeout(() => this.shakeForm.set(false), 400);
+
     if (err.status === 400) {
       await this.showToast('Dati non validi. Controlla i campi.', 'danger');
       return;
     }
-
     await this.showToast('Si è verificato un errore. Riprova più tardi.', 'danger');
   }
 
@@ -172,7 +188,6 @@ export class RegisterBusinessPage {
     await toast.present();
   }
 
-  // Accessori per il template
   get email(): AbstractControl {
     return this.form.get('email')!;
   }

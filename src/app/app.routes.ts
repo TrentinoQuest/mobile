@@ -3,6 +3,8 @@ import { UserRole } from '@trentino-quest/shared-types';
 import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
 import { businessStatusGuard } from './core/guards/business-status.guard';
+import { onboardingGuard } from './core/guards/onboarding.guard';
+import { landingGuard } from './core/guards/landing.guard';
 
 /**
  * Mappa di navigazione di Trentino Quest Mobile.
@@ -34,13 +36,23 @@ import { businessStatusGuard } from './core/guards/business-status.guard';
  */
 export const routes: Routes = [
   // ============================================================
+  // Onboarding — primo avvio, utente non autenticato senza onboardingDone
+  // ============================================================
+  {
+    path: 'onboarding',
+    loadComponent: () =>
+      import('./features/common/onboarding/onboarding.page').then((m) => m.OnboardingPage),
+    canActivate: [onboardingGuard],
+  },
+
+  // ============================================================
   // Landing page (default, pubblica)
   // ============================================================
   {
     path: '',
     loadComponent: () =>
       import('./features/common/landing/landing.page').then((m) => m.LandingPage),
-    canActivate: [guestGuard],
+    canActivate: [landingGuard],
   },
 
   // ============================================================
@@ -107,11 +119,32 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/giocatore/amici/amici.page').then((m) => m.AmiciPage),
       },
-      // Tab 4 — Profilo
+      // Tab 3 — Lega
+      {
+        path: 'lega',
+        loadComponent: () => import('./features/giocatore/lega/lega.page').then((m) => m.LegaPage),
+      },
+      // Tab 4 — Shop
+      {
+        path: 'shop',
+        loadComponent: () => import('./features/giocatore/shop/shop.page').then((m) => m.ShopPage),
+      },
+      // Profilo (accessibile da header, non tab)
       {
         path: 'profilo',
         loadComponent: () =>
           import('./features/giocatore/profilo/profilo.page').then((m) => m.ProfiloPage),
+      },
+      // Social (accessibile da profilo, non tab)
+      {
+        path: 'social',
+        loadComponent: () =>
+          import('./features/giocatore/social/social.page').then((m) => m.SocialPage),
+      },
+      // Co-op (accessibile da profilo, non tab)
+      {
+        path: 'coop',
+        loadComponent: () => import('./features/giocatore/coop/coop.page').then((m) => m.CoopPage),
       },
       // Dettaglio quest (push da popup mappa / quest log)
       {

@@ -1,0 +1,93 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.tq-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    opacity 80ms ease-out;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active:not(.tq-btn--disabled) {
+    transform: translateY(4px);
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Variante primary — bottone principale giocoso con effetto estruso
+  &--primary {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 14px 24px;
+    font-size: var(--font-h3);
+    box-shadow: 0 5px 0 var(--color-primary-shadow);
+
+    &:active:not(.tq-btn--disabled) {
+      box-shadow: 0 1px 0 var(--color-primary-shadow);
+    }
+  }
+
+  // Variante secondary — bordo brand, sfondo trasparente
+  &--secondary {
+    background: var(--color-surface);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    padding: 12px 24px;
+    font-size: var(--font-h3);
+  }
+
+  // Primary invertita (su sfondo brand scuro — onboarding step 0/5)
+  &--primary#{&}--inverted {
+    background: #ffffff;
+    color: #1b4d38;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18);
+
+    &:active:not(.tq-btn--disabled) {
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+    }
+  }
+
+  // Secondary invertita (su sfondo brand scuro)
+  &--secondary#{&}--inverted {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #ffffff;
+  }
+
+  // Ghost — link-style, nessuna ombra
+  &--ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: var(--font-small);
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+  }
+
+  &__icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  &__spinner {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,83 +1,79 @@
 .profilo-page {
-  --background: var(--tq-bg);
+  --background: var(--color-bg);
 
   &__container {
-    /* Top con safe area (notch) invece di 56px fissi. */
-    padding: calc(var(--tq-safe-top) + 24px) 24px calc(80px + var(--tq-safe-bottom));
+    padding: calc(env(safe-area-inset-top) + var(--space-24)) var(--space-24)
+      calc(80px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: var(--space-24);
   }
 
   &__eyebrow {
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px;
+    font-size: var(--font-micro);
+    font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--tq-ocra);
-    margin: 0 0 6px;
+    color: var(--color-text-disabled);
+    margin: 0 0 var(--space-4);
   }
 
   &__title {
-    font-family: 'Instrument Serif', serif;
-    font-style: italic;
-    font-size: 28px;
-    color: var(--tq-bone);
+    font-size: var(--font-h1);
+    font-weight: 700;
+    color: var(--color-text-primary);
     margin: 0;
   }
 
   &__form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: var(--space-16);
   }
 
   &__field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-8);
   }
 
   &__label {
-    font-family: 'Geist', sans-serif;
-    font-size: 13px;
-    color: var(--tq-bone);
-    opacity: 0.7;
+    font-size: var(--font-small);
+    font-weight: 600;
+    color: var(--color-text-secondary);
     padding-left: 2px;
   }
 
   &__input,
   &__select {
-    --background: var(--tq-panel);
-    --color: var(--tq-bone);
-    --placeholder-color: rgba(var(--tq-bone-rgb, 240, 230, 210), 0.4);
-    --border-color: rgba(255, 255, 255, 0.12);
-    --border-radius: 12px;
-    --padding-start: 16px;
-    border-radius: 12px;
+    --background: var(--color-surface-2);
+    --color: var(--color-text-primary);
+    --placeholder-color: var(--color-text-disabled);
+    --border-color: var(--color-border);
+    --border-radius: var(--radius-md);
+    --padding-start: var(--space-16);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--color-border);
   }
 
   &__error {
-    font-family: 'Geist', sans-serif;
-    font-size: 14px;
-    color: var(--tq-rust);
+    font-size: var(--font-body);
+    color: var(--color-error);
     text-align: center;
   }
 
   &__save-btn {
-    --background: var(--tq-ocra);
-    --color: var(--tq-bg);
-    --border-radius: 12px;
-    margin-top: 8px;
+    --background: var(--color-primary);
+    --color: #ffffff;
+    --border-radius: var(--radius-md);
+    --box-shadow: 0 5px 0 var(--color-primary-shadow);
+    margin-top: var(--space-8);
   }
 
   &__logout-section {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  &__logout-btn {
-    --border-radius: 12px;
+    margin-top: var(--space-32);
+    padding-top: var(--space-24);
+    border-top: 1.5px solid var(--color-border);
+    --color-primary: var(--color-error);
   }
 }

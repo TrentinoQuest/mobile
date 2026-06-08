@@ -7,10 +7,20 @@ export class SocialService {
   private readonly _activities = signal<FriendActivity[]>(MOCK_ACTIVITIES);
   private readonly _suggestions = signal<FriendSuggestion[]>(MOCK_SUGGESTIONS);
   private readonly _friendCount = signal(14);
+  private readonly _unreadBadge = signal(0);
 
   readonly activities = this._activities.asReadonly();
   readonly suggestions = this._suggestions.asReadonly();
   readonly friendCount = this._friendCount.asReadonly();
+  readonly unreadBadge = this._unreadBadge.asReadonly();
+
+  incrementUnreadBadge(): void {
+    this._unreadBadge.update((n) => n + 1);
+  }
+
+  resetUnreadBadge(): void {
+    this._unreadBadge.set(0);
+  }
 }
 
 const MOCK_ACTIVITIES: FriendActivity[] = [

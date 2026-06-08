@@ -8,69 +8,41 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { IonContent, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { LoginRequest, UserRole } from '@trentino-quest/shared-types';
 import { AuthService } from '../../../../core/services/auth/auth.service';
+import { HapticsService } from '../../../../core/services/haptics/haptics.service';
+import { AudioService } from '../../../../core/services/audio.service';
 
-/**
- * LoginPage — Autenticazione di un utente esistente.
- *
- * Form con 2 campi: email e password.
- * Al submit chiama AuthService.login() che salva token e user in
- * Preferences. Dopo successo, naviga alla home appropriata in base
- * al ruolo dell'utente.
- *
- * Redirect by-role:
- * - player    -> /giocatore/home
- * - business  -> /attivita/home
- * - admin     -> toast + logout (admin usa il backoffice web)
- * - maintenance -> toast + logout (operatori hanno app dedicata)
- *
- * Gestione errori:
- * - 401 (credenziali errate): toast generico (no info-leak)
- * - 400 (input malformato): toast generico
- * - 5xx e altri: toast generico
- * - Network error: gestito da errorInterceptor (naviga a /offline)
- */
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IonContent, IonSpinner],
+  imports: [ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner],
 })
 export class LoginPage {
-  // ===========================================================================
-  // Dependencies
-  // ===========================================================================
-
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly haptics = inject(HapticsService);
+  private readonly audio = inject(AudioService);
 
-  // ===========================================================================
-  // Stato
-  // ===========================================================================
-
-  /** True durante il submit, blocca il bottone. */
   readonly submitting = signal(false);
-
-  /** Toggle visibilita password. */
   readonly passwordVisible = signal(false);
-
-  // ===========================================================================
-  // Form
-  // ===========================================================================
+  readonly shakeForm = signal(false);
 
   readonly form: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
 
-  // ===========================================================================
-  // Azioni
-  // ===========================================================================
+  constructor() {
+    addIcons({ arrowBackOutline, eyeOutline, eyeOffOutline });
+  }
 
   goBack(): void {
     void this.router.navigate(['/']);
@@ -80,16 +52,16 @@ export class LoginPage {
     this.passwordVisible.update((v) => !v);
   }
 
-  /**
-   * Submit del form. Valida, chiama il servizio, gestisce esito.
-   */
   async submit(): Promise<void> {
     this.form.markAllAsTouched();
 
     if (this.form.invalid || this.submitting()) {
+      if (this.form.invalid) void this.haptics.error();
       return;
     }
 
+    void this.haptics.tapHeavy();
+    this.audio.playTap();
     this.submitting.set(true);
 
     const request: LoginRequest = {
@@ -99,7 +71,6 @@ export class LoginPage {
 
     this.authService.login(request).subscribe({
       next: (response) => {
-        // Token salvati automaticamente da AuthService
         void this.handleLoginSuccess(response.user.role);
       },
       error: (err: HttpErrorResponse) => {
@@ -109,58 +80,45 @@ export class LoginPage {
     });
   }
 
-  // ===========================================================================
-  // Gestione successo
-  // ===========================================================================
-
-  /**
-   * Naviga alla home appropriata in base al ruolo dell'utente.
-   * Per i ruoli non supportati dall'app mobile (admin, maintenance),
-   * mostra un toast e fa logout.
-   */
   private async handleLoginSuccess(role: UserRole): Promise<void> {
+    void this.haptics.success();
+    this.audio.playSuccess();
     switch (role) {
       case UserRole.PLAYER:
         await this.router.navigate(['/giocatore/home']);
         break;
-
       case UserRole.BUSINESS:
         await this.router.navigate(['/attivita/home']);
         break;
-
       case UserRole.ADMIN:
         this.authService.logout();
         await this.showInfoToast('Account amministratore. Usa il backoffice web.');
         break;
-
       case UserRole.MAINTENANCE:
         this.authService.logout();
         await this.showInfoToast("Account operatore. Usa l'app dedicata.");
         break;
-
       default:
-        // Ruolo sconosciuto, fallback prudente
         this.authService.logout();
         await this.showErrorToast('Tipo di account non supportato.');
     }
   }
 
-  // ===========================================================================
-  // Gestione errori
-  // ===========================================================================
-
   private async handleLoginError(err: HttpErrorResponse): Promise<void> {
+    void this.haptics.error();
+    this.audio.playError();
+    this.shakeForm.set(true);
+    setTimeout(() => this.shakeForm.set(false), 400);
+
     if (err.status === 401) {
       await this.showErrorToast('Email o password errati.');
       return;
     }
-
     if (err.status === 400) {
       await this.showErrorToast('Dati non validi. Controlla i campi.');
       return;
     }
-
-    await this.showErrorToast('Si e verificato un errore. Riprova piu tardi.');
+    await this.showErrorToast('Si è verificato un errore. Riprova più tardi.');
   }
 
   private async showErrorToast(message: string): Promise<void> {
@@ -182,10 +140,6 @@ export class LoginPage {
     });
     await toast.present();
   }
-
-  // ===========================================================================
-  // Helper per template
-  // ===========================================================================
 
   get email(): AbstractControl {
     return this.form.get('email')!;

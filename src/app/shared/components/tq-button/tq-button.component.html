@@ -1,0 +1,20 @@
+<button
+  class="tq-btn"
+  [class]="'tq-btn--' + variant"
+  [class.tq-btn--inverted]="inverted"
+  [class.tq-btn--disabled]="disabled || loading"
+  [disabled]="disabled || loading"
+  (click)="handleTap()"
+>
+  @if (loading) {
+    <ion-spinner name="crescent" class="tq-btn__spinner" />
+  } @else {
+    @if (iconStart) {
+      <ion-icon [name]="iconStart" class="tq-btn__icon tq-btn__icon--start" />
+    }
+    <span class="tq-btn__label"><ng-content /></span>
+    @if (iconEnd) {
+      <ion-icon [name]="iconEnd" class="tq-btn__icon tq-btn__icon--end" />
+    }
+  }
+</button>

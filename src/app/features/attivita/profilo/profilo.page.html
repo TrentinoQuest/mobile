@@ -1,13 +1,11 @@
 <ion-content class="profilo-page" fullscreen>
   <div class="profilo-page__container">
-
     <header class="profilo-page__header">
       <p class="profilo-page__eyebrow">Impostazioni</p>
       <h1 class="profilo-page__title">Profilo attività</h1>
     </header>
 
     <form class="profilo-page__form" (ngSubmit)="save()">
-
       <div class="profilo-page__field">
         <label class="profilo-page__label" for="businessName">Nome attività</label>
         <ion-input
@@ -32,7 +30,7 @@
           fill="outline"
         >
           @for (type of businessTypes; track type.value) {
-            <ion-select-option [value]="type.value">{{ type.label }}</ion-select-option>
+          <ion-select-option [value]="type.value">{{ type.label }}</ion-select-option>
           }
         </ion-select>
       </div>
@@ -51,31 +49,16 @@
       </div>
 
       @if (businessService.error()) {
-        <p class="profilo-page__error">{{ businessService.error() }}</p>
+      <p class="profilo-page__error">{{ businessService.error() }}</p>
       }
 
-      <ion-button
-        class="profilo-page__save-btn"
-        expand="block"
-        type="submit"
-        [disabled]="saving()"
-      >
-        {{ saving() ? 'Salvataggio...' : 'Salva modifiche' }}
-      </ion-button>
-
+      <tq-button [loading]="saving()" (tapped)="save()"> Salva modifiche </tq-button>
     </form>
 
     <div class="profilo-page__logout-section">
-      <ion-button
-        class="profilo-page__logout-btn"
-        expand="block"
-        fill="outline"
-        color="danger"
-        (click)="logout()"
-      >
+      <tq-button variant="secondary" iconStart="log-out-outline" (tapped)="logout()">
         Esci dall'account
-      </ion-button>
+      </tq-button>
     </div>
-
   </div>
 </ion-content>

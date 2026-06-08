@@ -1,5 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -111,10 +113,15 @@ export class ThemeService {
   // 5. METODI PRIVATI
   // ===========================================================================
 
-  /** Applica il tema effettivo come attributo data-theme su <html>. */
+  /** Applica il tema effettivo come attributo data-theme su <html> e aggiorna la status bar nativa. */
   private applyTheme(): void {
+    const theme = this.effectiveTheme();
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', this.effectiveTheme());
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    if (Capacitor.isNativePlatform()) {
+      const style = theme === 'dark' ? Style.Dark : Style.Light;
+      StatusBar.setStyle({ style }).catch(() => undefined);
     }
   }
 }

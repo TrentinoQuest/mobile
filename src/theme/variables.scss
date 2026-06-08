@@ -6,24 +6,150 @@
 //
 // Non si usa @media (prefers-color-scheme): la modalita' "sistema" viene
 // risolta via JS nel ThemeService, che aggiorna l'attributo in tempo reale.
+//
+// ARCHITETTURA TOKEN:
+//   :root                 → default light + token indipendenti dal tema
+//   [data-theme='dark']   → override completo --color-* + --tq-* + Ionic
+//   [data-theme='light']  → override completo --color-* + --tq-* + Ionic
 // =============================================================================
+
+// =============================================================================
+// DESIGN SYSTEM — token base (light defaults + token invarianti)
+// =============================================================================
+:root {
+  // ── Palette brand (light defaults) ─────────────────────────────────────────
+
+  --color-primary: #2d6a4f;
+  --color-primary-light: #52b788;
+  --color-primary-ultra: #d8f3dc;
+  --color-primary-rgb: 45, 106, 79;
+  --color-primary-shadow: #1b4d38;
+
+  --color-accent: #f4701b;
+  --color-accent-light: #ffb347;
+  --color-accent-ultra: #fff3e0;
+  --color-accent-rgb: 244, 112, 27;
+  --color-accent-shadow: #cc5a14;
+
+  // ── Neutrali ───────────────────────────────────────────────────────────────
+
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f5f5f3;
+  --color-border: #e5e5e0;
+  --color-bg-rgb: 255, 255, 255;
+  --color-surface-rgb: 255, 255, 255;
+
+  // ── Testo ──────────────────────────────────────────────────────────────────
+
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: rgba(26, 26, 24, 0.65);
+  --color-text-disabled: rgba(26, 26, 24, 0.35);
+
+  // ── Semantici ──────────────────────────────────────────────────────────────
+
+  --color-success: #40916c;
+  --color-success-rgb: 64, 145, 108;
+  --color-error: #d62828;
+  --color-error-rgb: 214, 40, 40;
+  --color-warning: #f4a261;
+  --color-warning-rgb: 244, 162, 97;
+  --color-xp: #7b2fbe;
+  --color-coins: #f4701b;
+
+  // ── Rarità collezionabili (immutabili) ─────────────────────────────────────
+
+  --color-common: #bdc3c7;
+  --color-rare: #3498db;
+  --color-epic: #9b59b6;
+  --color-legendary: #e67e22;
+
+  // ── Tipografia (scale invariante) ──────────────────────────────────────────
+
+  --font-display: 2rem;
+  --font-h1: 1.5rem;
+  --font-h2: 1.25rem;
+  --font-h3: 1rem;
+  --font-body: 0.9375rem;
+  --font-small: 0.8125rem;
+  --font-micro: 0.6875rem;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-loose: 1.7;
+
+  // ── Spaziatura (sistema 8pt) ────────────────────────────────────────────────
+
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  // ── Border radius ──────────────────────────────────────────────────────────
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  // ── Elevazione (gaussian shadows — per uso raro) ────────────────────────────
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+
+  // ── Alias --tq-* → --color-* (per componenti legacy non ancora migrati) ────
+
+  --tq-bg: var(--color-bg);
+  --tq-bg-rgb: var(--color-bg-rgb);
+  --tq-panel: var(--color-surface);
+  --tq-panel-2: var(--color-surface-2);
+  --tq-panel-hi: var(--color-surface);
+  --tq-text-primary: var(--color-text-primary);
+  --tq-text-secondary: var(--color-text-secondary);
+  --tq-text-muted: var(--color-text-disabled);
+  --tq-text-disabled: var(--color-text-disabled);
+  --tq-hairline: var(--color-border);
+  --tq-hairline-strong: rgba(0, 0, 0, 0.14);
+  --tq-bone: var(--color-text-primary);
+  --tq-ocra: var(--color-accent);
+  --tq-ocra-rgb: var(--color-accent-rgb);
+  --tq-ocra-tint: var(--color-accent-light);
+  --tq-ocra-shade: var(--color-accent-shadow);
+  --tq-forest: var(--color-primary);
+  --tq-forest-rgb: var(--color-primary-rgb);
+  --tq-rust: var(--color-error);
+  --tq-rust-rgb: var(--color-error-rgb);
+
+  // ── Z-index ────────────────────────────────────────────────────────────────
+
+  --tq-z-map: 0;
+  --tq-z-map-overlay: 1000;
+  --tq-z-sheet: 1010;
+  --tq-z-tab-bar: 1020;
+  --tq-z-modal: 1030;
+  --tq-z-toast: 1040;
+}
 
 // =============================================================================
 // TOKEN INDIPENDENTI DAL TEMA
 // =============================================================================
-// Tipografia, spaziatura, raggi e timing: non dipendono dal colore.
-// Definiti una sola volta — nessuna duplicazione tra dark e light.
-// =============================================================================
 :root {
-  /* Famiglie tipografiche
-   * NOTA: il serif e' Instrument Serif (caricato in index.html, solo italic).
-   * In passato qui c'era 'Playfair Display' che NON veniva mai caricato → i titoli
-   * narrativi cadevano sul fallback Georgia. Allineato al font realmente servito. */
+  // ── Famiglie tipografiche ──────────────────────────────────────────────────
+
+  --tq-font-display: 'Nunito', 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --tq-font-sans: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --tq-font-serif: 'Instrument Serif', 'Playfair Display', Georgia, serif;
   --tq-font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Scala di spaziatura (base 4 px) */
+  // ── Scala di spaziatura (base 4 px) ───────────────────────────────────────
+
   --tq-space-1: 4px;
   --tq-space-2: 8px;
   --tq-space-3: 12px;
@@ -35,221 +161,205 @@
   --tq-space-10: 40px;
   --tq-space-12: 48px;
 
-  /* Raggi */
+  // ── Raggi ──────────────────────────────────────────────────────────────────
+
   --tq-radius-sm: 4px;
   --tq-radius-md: 8px;
   --tq-radius-lg: 16px;
   --tq-radius-xl: 24px;
   --tq-radius-pill: 999px;
 
-  /* Durate animazioni */
+  // ── Durate animazioni ──────────────────────────────────────────────────────
+
   --tq-duration-fast: 150ms;
   --tq-duration-base: 280ms;
   --tq-duration-slow: 500ms;
 
-  /* Easing */
+  // ── Easing ─────────────────────────────────────────────────────────────────
+
   --tq-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  /* Easing "spring": leggero overshoot per il feel gamificato (entrate, pop). */
   --tq-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* =========================================================================
-   * SAFE-AREA PARAMETRICA — fondamento del layout responsive
-   * =========================================================================
-   * Espone gli inset di sistema come token riutilizzabili: nessun componente
-   * deve piu' scrivere env(safe-area-inset-*) a mano. Funziona su qualsiasi
-   * telefono — notch, Dynamic Island, home indicator, o niente.
-   * Richiede viewport-fit=cover in index.html (gia' presente).
-   * ========================================================================= */
+  // ── Safe area ──────────────────────────────────────────────────────────────
+
   --tq-safe-top: env(safe-area-inset-top, 0px);
   --tq-safe-bottom: env(safe-area-inset-bottom, 0px);
   --tq-safe-left: env(safe-area-inset-left, 0px);
   --tq-safe-right: env(safe-area-inset-right, 0px);
 
-  /* =========================================================================
-   * METRICHE CHROME — dimensioni degli elementi di navigazione persistenti
-   * =========================================================================
-   * Definite una volta sola: cambiare l'altezza della tab bar aggiorna in
-   * automatico tutti gli overlay che la scavalcano (FAB, toast, sheet, liste).
-   * ========================================================================= */
+  // ── Metriche chrome ────────────────────────────────────────────────────────
+
   --tq-tab-bar-height: 62px;
-  /* Altezza reale occupata = barra + safe area inferiore (home indicator). */
   --tq-tab-bar-total: calc(var(--tq-tab-bar-height) + var(--tq-safe-bottom));
   --tq-fab-size: 60px;
-
-  /* Offset pronti per posizionare overlay flottanti senza numeri magici. */
   --tq-above-tab-bar: calc(var(--tq-tab-bar-total) + var(--tq-space-4));
   --tq-hud-top: calc(var(--tq-safe-top) + var(--tq-space-3));
 }
 
 // =============================================================================
-// TEMA SCURO
+// TEMA SCURO — Alpine Night
+// =============================================================================
+// Palette completamente nuova. Il vecchio dark mode era di un design diverso.
+// Questo è: navy-black profondo + brand colors vividi e luminosi come nella notte alpina.
 // =============================================================================
 :root[data-theme='dark'] {
-  /* -------------------------------------------------------------------------
-   * Token brand TQ — tema scuro
-   * ------------------------------------------------------------------------- */
+  // ── --color-* (fix bug: questi mancavano nel blocco dark!) ─────────────────
 
-  --tq-bg: #121212;
-  --tq-panel: #1e1e1e;
-  --tq-panel-2: #2a2a2a;
-  --tq-text-primary: #e0e0e0;
-  --tq-text-secondary: rgba(224, 224, 224, 0.72);
-  --tq-text-muted: rgba(224, 224, 224, 0.55);
-  --tq-hairline: rgba(224, 224, 224, 0.1);
-  --tq-hairline-strong: rgba(224, 224, 224, 0.25);
+  --color-bg: #0d1117;
+  --color-surface: #161c24;
+  --color-surface-2: #1d2533;
+  --color-border: #2a3545;
+  --color-bg-rgb: 13, 17, 23;
+  --color-surface-rgb: 22, 28, 36;
 
-  /* "Bone": crema calda usata per testo/bordi su sfondo scuro */
-  --tq-bone: #f4ebdc;
+  --color-text-primary: #ecf0f4;
+  --color-text-secondary: rgba(236, 240, 244, 0.65);
+  --color-text-disabled: rgba(236, 240, 244, 0.35);
 
-  /* Testo disabilitato/placeholder */
-  --tq-text-disabled: rgba(224, 224, 224, 0.35);
+  --color-primary: #52d68a;
+  --color-primary-light: #7de8a8;
+  --color-primary-ultra: #0c1a12;
+  --color-primary-rgb: 82, 214, 138;
+  --color-primary-shadow: #2d9e5f;
 
-  /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
-  --tq-bg-rgb: 18, 18, 18;
+  --color-accent: #ff9600;
+  --color-accent-light: #ffb340;
+  --color-accent-ultra: #1a1200;
+  --color-accent-rgb: 255, 150, 0;
+  --color-accent-shadow: #cc7700;
 
-  /** Ocra desaturato: leggibile su sfondo scuro senza abbagliare **/
-  --tq-ocra: #b8860b;
-  --tq-ocra-rgb: 184, 134, 11;
-  --tq-ocra-tint: #c9950d;
-  --tq-ocra-shade: #a2770a;
-  /** Verde bosco schiarito: contrasto sufficiente su sfondo scuro **/
-  --tq-forest: #5a8a3a;
-  --tq-forest-rgb: 90, 138, 58;
-  /** Ruggine calda: variante luminosa per dark mode **/
-  --tq-rust: #c4673a;
-  --tq-rust-rgb: 196, 103, 58;
+  --color-success: #52d68a;
+  --color-success-rgb: 82, 214, 138;
+  --color-error: #ff5c5c;
+  --color-error-rgb: 255, 92, 92;
+  --color-warning: #ffc200;
+  --color-warning-rgb: 255, 194, 0;
+  --color-xp: #a87ce8;
+  --color-coins: #ff9600;
 
-  /* -------------------------------------------------------------------------
-   * Ionic color palette — primary (ocra, Giocatore)
-   * ------------------------------------------------------------------------- */
+  // ── --tq-* (alias verso --color-*) ────────────────────────────────────────
 
-  --ion-color-primary: #b8860b;
-  --ion-color-primary-rgb: 184, 134, 11;
+  --tq-bg: var(--color-bg);
+  --tq-bg-rgb: 13, 17, 23;
+  --tq-panel: var(--color-surface);
+  --tq-panel-2: var(--color-surface-2);
+  --tq-panel-hi: var(--color-surface);
+  --tq-text-primary: var(--color-text-primary);
+  --tq-text-secondary: var(--color-text-secondary);
+  --tq-text-muted: var(--color-text-disabled);
+  --tq-text-disabled: var(--color-text-disabled);
+  --tq-hairline: var(--color-border);
+  --tq-hairline-strong: rgba(236, 240, 244, 0.18);
+  --tq-bone: #ecf0f4;
+  --tq-ocra: var(--color-accent);
+  --tq-ocra-rgb: 255, 150, 0;
+  --tq-ocra-tint: var(--color-accent-light);
+  --tq-ocra-shade: var(--color-accent-shadow);
+  --tq-forest: var(--color-primary);
+  --tq-forest-rgb: 82, 214, 138;
+  --tq-rust: var(--color-error);
+  --tq-rust-rgb: 255, 92, 92;
+
+  // ── Ionic — sfondo, testo, superfici ──────────────────────────────────────
+
+  --ion-background-color: #0d1117;
+  --ion-background-color-rgb: 13, 17, 23;
+  --ion-text-color: #ecf0f4;
+  --ion-text-color-rgb: 236, 240, 244;
+  --ion-item-background: #161c24;
+  --ion-card-background: #161c24;
+  --ion-toolbar-background: #161c24;
+  --ion-toolbar-border-color: #2a3545;
+  --ion-border-color: #2a3545;
+
+  // ── Ionic — palette colori ─────────────────────────────────────────────────
+
+  --ion-color-primary: #52d68a;
+  --ion-color-primary-rgb: 82, 214, 138;
   --ion-color-primary-contrast: #000000;
   --ion-color-primary-contrast-rgb: 0, 0, 0;
-  --ion-color-primary-shade: #a2770a;
-  --ion-color-primary-tint: #bf9223;
+  --ion-color-primary-shade: #2d9e5f;
+  --ion-color-primary-tint: #7de8a8;
 
-  /* Ionic color palette — secondary (verde bosco, Attivita Locale) */
+  --ion-color-secondary: #52d68a;
+  --ion-color-secondary-rgb: 82, 214, 138;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0, 0, 0;
+  --ion-color-secondary-shade: #2d9e5f;
+  --ion-color-secondary-tint: #7de8a8;
 
-  --ion-color-secondary: #5a8a3a;
-  --ion-color-secondary-rgb: 90, 138, 58;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #4f7933;
-  --ion-color-secondary-tint: #6b964e;
-
-  /* -------------------------------------------------------------------------
-   * Ionic color palette — colori di stato
-   * ------------------------------------------------------------------------- */
-
-  --ion-color-tertiary: #6a64ff;
-  --ion-color-tertiary-rgb: 106, 100, 255;
+  --ion-color-tertiary: #7b6be8;
+  --ion-color-tertiary-rgb: 123, 107, 232;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #5d58e0;
-  --ion-color-tertiary-tint: #7974ff;
+  --ion-color-tertiary-shade: #6a5bd0;
+  --ion-color-tertiary-tint: #9080ee;
 
-  --ion-color-success: #2fdf75;
-  --ion-color-success-rgb: 47, 223, 117;
+  --ion-color-success: #52d68a;
+  --ion-color-success-rgb: 82, 214, 138;
   --ion-color-success-contrast: #000000;
   --ion-color-success-contrast-rgb: 0, 0, 0;
-  --ion-color-success-shade: #29c467;
-  --ion-color-success-tint: #44e283;
+  --ion-color-success-shade: #2d9e5f;
+  --ion-color-success-tint: #7de8a8;
 
-  --ion-color-warning: #ffd534;
-  --ion-color-warning-rgb: 255, 213, 52;
+  --ion-color-warning: #ffc200;
+  --ion-color-warning-rgb: 255, 194, 0;
   --ion-color-warning-contrast: #000000;
   --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #e0bb2e;
-  --ion-color-warning-tint: #ffd948;
+  --ion-color-warning-shade: #d6a400;
+  --ion-color-warning-tint: #ffd040;
 
-  --ion-color-danger: #ff4961;
-  --ion-color-danger-rgb: 255, 73, 97;
+  --ion-color-danger: #ff5c5c;
+  --ion-color-danger-rgb: 255, 92, 92;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #e04055;
-  --ion-color-danger-tint: #ff5b71;
+  --ion-color-danger-shade: #cc4848;
+  --ion-color-danger-tint: #ff7878;
 
-  /** dark in dark mode = quasi-bianco (per testi enfatizzati) **/
-  --ion-color-dark: #f4f5f8;
-  --ion-color-dark-rgb: 244, 245, 248;
+  --ion-color-dark: #ecf0f4;
+  --ion-color-dark-rgb: 236, 240, 244;
   --ion-color-dark-contrast: #000000;
   --ion-color-dark-contrast-rgb: 0, 0, 0;
-  --ion-color-dark-shade: #d7d8da;
-  --ion-color-dark-tint: #f5f6f9;
+  --ion-color-dark-shade: #c8ced4;
+  --ion-color-dark-tint: #f0f4f8;
 
-  --ion-color-medium: #989aa2;
-  --ion-color-medium-rgb: 152, 154, 162;
+  --ion-color-medium: #7a8494;
+  --ion-color-medium-rgb: 122, 132, 148;
   --ion-color-medium-contrast: #000000;
   --ion-color-medium-contrast-rgb: 0, 0, 0;
-  --ion-color-medium-shade: #86888f;
-  --ion-color-medium-tint: #a2a4ab;
+  --ion-color-medium-shade: #677080;
+  --ion-color-medium-tint: #8a94a4;
 
-  /** light in dark mode = quasi-nero (sfondi sottili) **/
-  --ion-color-light: #222428;
-  --ion-color-light-rgb: 34, 36, 40;
-  --ion-color-light-contrast: #ffffff;
-  --ion-color-light-contrast-rgb: 255, 255, 255;
-  --ion-color-light-shade: #1e2023;
-  --ion-color-light-tint: #383a3e;
+  --ion-color-light: #1d2533;
+  --ion-color-light-rgb: 29, 37, 51;
+  --ion-color-light-contrast: #ecf0f4;
+  --ion-color-light-contrast-rgb: 236, 240, 244;
+  --ion-color-light-shade: #161c24;
+  --ion-color-light-tint: #252e40;
 
-  /* -------------------------------------------------------------------------
-   * Override globali Ionic — sfondo, testo, superfici
-   * ------------------------------------------------------------------------- */
+  // ── Ionic step colors (scala navy → chiaro) ────────────────────────────────
 
-  /** #121212: Material Design recommendation, meno duro all'occhio su OLED **/
-  --ion-background-color: #121212;
-  --ion-background-color-rgb: 18, 18, 18;
+  --ion-color-step-50: #161c24;
+  --ion-color-step-100: #1d2533;
+  --ion-color-step-150: #253040;
+  --ion-color-step-200: #2e3b4d;
+  --ion-color-step-250: #38465a;
+  --ion-color-step-300: #425167;
+  --ion-color-step-350: #4d5d74;
+  --ion-color-step-400: #586880;
+  --ion-color-step-450: #64748d;
+  --ion-color-step-500: #71809a;
+  --ion-color-step-550: #7f8fa7;
+  --ion-color-step-600: #8e9db3;
+  --ion-color-step-650: #9daabf;
+  --ion-color-step-700: #acb9cc;
+  --ion-color-step-750: #bbc7d8;
+  --ion-color-step-800: #cad5e4;
+  --ion-color-step-850: #d9e2ef;
+  --ion-color-step-900: #e3eaf3;
+  --ion-color-step-950: #ecf0f4;
 
-  /** #e0e0e0: meno abbagliante del bianco puro, riduce affaticamento **/
-  --ion-text-color: #e0e0e0;
-  --ion-text-color-rgb: 224, 224, 224;
-
-  /** Sfondi secondari: livello di "elevazione" sopra il background **/
-  --ion-item-background: #1e1e1e;
-  --ion-card-background: #1e1e1e;
-
-  --ion-toolbar-background: #1e1e1e;
-  --ion-toolbar-border-color: #2a2a2a;
-  --ion-border-color: #2a2a2a;
-
-  /* Step colors — scala invertita: toni scuri vicini al bg (50), chiari al testo (950) */
-  --ion-color-step-50: #1e1e1e;
-  --ion-color-step-100: #2a2a2a;
-  --ion-color-step-150: #353535;
-  --ion-color-step-200: #404040;
-  --ion-color-step-250: #4b4b4b;
-  --ion-color-step-300: #565656;
-  --ion-color-step-350: #616161;
-  --ion-color-step-400: #6c6c6c;
-  --ion-color-step-450: #777777;
-  --ion-color-step-500: #828282;
-  --ion-color-step-550: #8d8d8d;
-  --ion-color-step-600: #989898;
-  --ion-color-step-650: #a3a3a3;
-  --ion-color-step-700: #aeaeae;
-  --ion-color-step-750: #b9b9b9;
-  --ion-color-step-800: #c4c4c4;
-  --ion-color-step-850: #cfcfcf;
-  --ion-color-step-900: #dadada;
-  --ion-color-step-950: #e5e5e5;
-
-  /* ------------------------------------------------------------------------
- * Z-INDEX — gerarchia degli overlay
- * ------------------------------------------------------------------------
- * Valori alti per battere lo z-index interno di Leaflet (.leaflet-pane
- * arriva fino a 700). Spazi di 10 tra livelli per future granularita'
- * (es. tooltip sopra tab bar ma sotto modal).
- *
- * Livelli (dal basso verso l'alto):
- * - map:           container della mappa, sotto tutto
- * - map-overlay:   header, controlli, card flottanti sopra la mappa
- * - sheet:         bottom sheet (es. lista quest vicine)
- * - tab-bar:       tab bar persistente del giocatore
- * - modal:         modali fullscreen (scan QR, profilo dettagli)
- * - toast:         toast notification, sempre in cima
- * ------------------------------------------------------------------------ */
+  // ── Z-index ────────────────────────────────────────────────────────────────
 
   --tq-z-map: 0;
   --tq-z-map-overlay: 1000;
@@ -260,66 +370,95 @@
 }
 
 // =============================================================================
-// TEMA CHIARO
+// TEMA CHIARO — Clean White
+// =============================================================================
+// Sfondo bianco puro, colori brand diretti (niente warm cream dell'era precedente).
 // =============================================================================
 :root[data-theme='light'] {
-  /* -------------------------------------------------------------------------
-   * Token brand TQ — tema chiaro (warm cream palette)
-   * ------------------------------------------------------------------------- */
+  // ── --color-* ──────────────────────────────────────────────────────────────
 
-  --tq-bg: #faf7f0;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f5f5f3;
+  --color-border: #e5e5e0;
+  --color-bg-rgb: 255, 255, 255;
+  --color-surface-rgb: 255, 255, 255;
+
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: rgba(26, 26, 24, 0.65);
+  --color-text-disabled: rgba(26, 26, 24, 0.35);
+
+  --color-primary: #2d6a4f;
+  --color-primary-light: #52b788;
+  --color-primary-ultra: #d8f3dc;
+  --color-primary-rgb: 45, 106, 79;
+  --color-primary-shadow: #1b4d38;
+
+  --color-accent: #f4701b;
+  --color-accent-light: #ffb347;
+  --color-accent-ultra: #fff3e0;
+  --color-accent-rgb: 244, 112, 27;
+  --color-accent-shadow: #cc5a14;
+
+  --color-success: #40916c;
+  --color-success-rgb: 64, 145, 108;
+  --color-error: #d62828;
+  --color-error-rgb: 214, 40, 40;
+  --color-warning: #f4a261;
+  --color-warning-rgb: 244, 162, 97;
+  --color-xp: #7b2fbe;
+  --color-coins: #f4701b;
+
+  // ── --tq-* ─────────────────────────────────────────────────────────────────
+
+  --tq-bg: #ffffff;
+  --tq-bg-rgb: 255, 255, 255;
   --tq-panel: #ffffff;
-  --tq-panel-2: #f4ebdc;
-  --tq-text-primary: #1a1815;
-  --tq-text-secondary: rgba(26, 24, 21, 0.72);
-  --tq-text-muted: rgba(26, 24, 21, 0.55);
-  --tq-hairline: rgba(26, 24, 21, 0.1);
-  --tq-hairline-strong: rgba(26, 24, 21, 0.22);
+  --tq-panel-2: #f5f5f3;
+  --tq-panel-hi: #ffffff;
+  --tq-text-primary: #1a1a18;
+  --tq-text-secondary: rgba(26, 26, 24, 0.65);
+  --tq-text-muted: rgba(26, 26, 24, 0.45);
+  --tq-text-disabled: rgba(26, 26, 24, 0.35);
+  --tq-hairline: #e5e5e0;
+  --tq-hairline-strong: rgba(26, 26, 24, 0.18);
+  --tq-bone: #1a1a18;
+  --tq-ocra: #f4701b;
+  --tq-ocra-rgb: 244, 112, 27;
+  --tq-ocra-tint: #ffb347;
+  --tq-ocra-shade: #cc5a14;
+  --tq-forest: #2d6a4f;
+  --tq-forest-rgb: 45, 106, 79;
+  --tq-rust: #d62828;
+  --tq-rust-rgb: 214, 40, 40;
 
-  /* "Bone": colore caldo scuro usato per testo/bordi su sfondo chiaro */
-  --tq-bone: #1a1815;
+  // ── Ionic — sfondo, testo, superfici ──────────────────────────────────────
 
-  /* Testo disabilitato/placeholder */
-  --tq-text-disabled: rgba(26, 24, 21, 0.35);
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: #1a1a18;
+  --ion-text-color-rgb: 26, 26, 24;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-border-color: #e5e5e0;
+  --ion-border-color: #e5e5e0;
 
-  /* Decomposizioni RGB necessarie per rgba() nei gradient e glow */
-  --tq-bg-rgb: 250, 247, 240;
+  // ── Ionic — palette colori ─────────────────────────────────────────────────
 
-  /** Ocra piu' scuro: contrasto AA garantito su sfondo bianco **/
-  --tq-ocra: #8b6508;
-  --tq-ocra-rgb: 139, 101, 8;
-  --tq-ocra-tint: #9a7219;
-  --tq-ocra-shade: #7a5a07;
-  /** Verde bosco piu' scuro: contrasto AA garantito su sfondo bianco **/
-  --tq-forest: #4a7a2c;
-  --tq-forest-rgb: 74, 122, 44;
-  /** Ruggine scura: contrasto AA garantito su sfondo bianco **/
-  --tq-rust: #9c4830;
-  --tq-rust-rgb: 156, 72, 48;
-
-  /* -------------------------------------------------------------------------
-   * Ionic color palette — primary (ocra, Giocatore)
-   * ------------------------------------------------------------------------- */
-
-  --ion-color-primary: #8b6508;
-  --ion-color-primary-rgb: 139, 101, 8;
+  --ion-color-primary: #2d6a4f;
+  --ion-color-primary-rgb: 45, 106, 79;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #7a5a07;
-  --ion-color-primary-tint: #9a7219;
+  --ion-color-primary-shade: #1b4d38;
+  --ion-color-primary-tint: #52b788;
 
-  /* Ionic color palette — secondary (verde bosco, Attivita Locale) */
-
-  --ion-color-secondary: #4a7a2c;
-  --ion-color-secondary-rgb: 74, 122, 44;
+  --ion-color-secondary: #2d6a4f;
+  --ion-color-secondary-rgb: 45, 106, 79;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #416b27;
-  --ion-color-secondary-tint: #5c8741;
-
-  /* -------------------------------------------------------------------------
-   * Ionic color palette — colori di stato
-   * ------------------------------------------------------------------------- */
+  --ion-color-secondary-shade: #1b4d38;
+  --ion-color-secondary-tint: #52b788;
 
   --ion-color-tertiary: #5260ff;
   --ion-color-tertiary-rgb: 82, 96, 255;
@@ -349,7 +488,6 @@
   --ion-color-danger-shade: #cf3c4f;
   --ion-color-danger-tint: #ed576b;
 
-  /** dark in light mode = quasi-nero (testi enfatizzati) **/
   --ion-color-dark: #222428;
   --ion-color-dark-rgb: 34, 36, 40;
   --ion-color-dark-contrast: #ffffff;
@@ -364,7 +502,6 @@
   --ion-color-medium-shade: #808289;
   --ion-color-medium-tint: #9d9fa6;
 
-  /** light in light mode = quasi-bianco (sfondi sottili) **/
   --ion-color-light: #f4f5f8;
   --ion-color-light-rgb: 244, 245, 248;
   --ion-color-light-contrast: #000000;
@@ -372,24 +509,8 @@
   --ion-color-light-shade: #d7d8da;
   --ion-color-light-tint: #f5f6f9;
 
-  /* -------------------------------------------------------------------------
-   * Override globali Ionic — sfondo, testo, superfici
-   * ------------------------------------------------------------------------- */
+  // ── Ionic step colors (scala chiaro → scuro) ───────────────────────────────
 
-  --ion-background-color: #faf7f0;
-  --ion-background-color-rgb: 250, 247, 240;
-
-  --ion-text-color: #1a1815;
-  --ion-text-color-rgb: 26, 24, 21;
-
-  --ion-item-background: #ffffff;
-  --ion-card-background: #ffffff;
-
-  --ion-toolbar-background: #ffffff;
-  --ion-toolbar-border-color: rgba(26, 24, 21, 0.1);
-  --ion-border-color: rgba(26, 24, 21, 0.1);
-
-  /* Step colors — scala naturale: toni chiari vicini al bg (50), scuri al testo (950) */
   --ion-color-step-50: #f2f2f2;
   --ion-color-step-100: #e6e6e6;
   --ion-color-step-150: #d9d9d9;
@@ -410,21 +531,7 @@
   --ion-color-step-900: #1a1a1a;
   --ion-color-step-950: #0d0d0d;
 
-  /* ------------------------------------------------------------------------
- * Z-INDEX — gerarchia degli overlay
- * ------------------------------------------------------------------------
- * Valori alti per battere lo z-index interno di Leaflet (.leaflet-pane
- * arriva fino a 700). Spazi di 10 tra livelli per future granularita'
- * (es. tooltip sopra tab bar ma sotto modal).
- *
- * Livelli (dal basso verso l'alto):
- * - map:           container della mappa, sotto tutto
- * - map-overlay:   header, controlli, card flottanti sopra la mappa
- * - sheet:         bottom sheet (es. lista quest vicine)
- * - tab-bar:       tab bar persistente del giocatore
- * - modal:         modali fullscreen (scan QR, profilo dettagli)
- * - toast:         toast notification, sempre in cima
- * ------------------------------------------------------------------------ */
+  // ── Z-index ────────────────────────────────────────────────────────────────
 
   --tq-z-map: 0;
   --tq-z-map-overlay: 1000;

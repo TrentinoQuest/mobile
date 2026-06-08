@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
-import { IonContent, ModalController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, ModalController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { flame } from 'ionicons/icons';
 import type { GamificationResult } from '@trentino-quest/shared-types';
 
 // 0=Dom 1=Lun ... 6=Sab
@@ -20,10 +22,14 @@ const FIRE_PARTICLE_TRAVELS = [70, 90, 60, 100, 75, 85, 65, 95, 80];
   templateUrl: './streak-milestone-modal.component.html',
   styleUrls: ['./streak-milestone-modal.component.scss'],
   standalone: true,
-  imports: [IonContent],
+  imports: [IonContent, IonIcon],
 })
 export class StreakMilestoneModalComponent implements OnInit {
   private readonly modalCtrl = inject(ModalController);
+
+  constructor() {
+    addIcons({ flame });
+  }
 
   @Input() gamification!: GamificationResult;
   /** true quando aperto dalla home header come consultazione (non dopo un completamento) */

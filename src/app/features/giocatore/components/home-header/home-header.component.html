@@ -1,62 +1,47 @@
-<!--
-  HUD identità giocatore — avatar con ring XP, username, streak e luoghi.
-  Riga singola compatta sopra la mappa; solo i chip sono pointer-events: auto.
--->
-<header class="home-hud" aria-label="Stato giocatore">
-
-  <div class="home-hud__row">
-
-    <!-- Card identità: avatar + ring XP + username + livello → profilo -->
-    <button class="home-hud__identity" (click)="openProfile()" aria-label="Vai al profilo">
-
-      <!-- Ring XP + avatar lettera -->
-      <div class="home-hud__ring-wrap" aria-hidden="true">
-        <svg class="home-hud__ring-svg" viewBox="0 0 44 44" fill="none">
-          <circle class="home-hud__ring-bg" cx="22" cy="22" r="17"/>
-          <circle class="home-hud__ring-fill" cx="22" cy="22" r="17"
-                  [style.stroke-dasharray]="ringCircumference"
-                  [style.stroke-dashoffset]="xpRingOffset()"/>
+<!-- HUD identità giocatore: floating card con avatar, livello, streak e monete. -->
+<div class="hud">
+  <!-- Identità: colonna avatar+livello + username → naviga al profilo -->
+  <button class="hud__identity" (click)="openProfile()" aria-label="Vai al profilo">
+    <div class="hud__avatar-col">
+      <div class="hud__ring-wrap" aria-hidden="true">
+        <svg class="hud__ring-svg" viewBox="0 0 50 50" fill="none">
+          <circle class="hud__ring-bg" cx="25" cy="25" r="23" />
+          <circle
+            class="hud__ring-fill"
+            cx="25"
+            cy="25"
+            r="23"
+            [style.stroke-dasharray]="ringCircumference"
+            [style.stroke-dashoffset]="xpRingOffset()"
+          />
         </svg>
-        <div class="home-hud__avatar">
-          {{ (username() || '?').charAt(0).toUpperCase() }}
-        </div>
+        <div class="hud__avatar">{{ (username() || '?').charAt(0).toUpperCase() }}</div>
       </div>
-
-      <!-- Testi -->
-      <div class="home-hud__id-text">
-        <span class="home-hud__username">{{ username() }}</span>
-        <span class="home-hud__level-info">Lv {{ level() }} · {{ levelTitle() }}</span>
-      </div>
-
-    </button>
-
-    <div class="home-hud__spacer"></div>
-
-    <!-- Streak (tappabile → dettaglio streak) -->
-    <button class="home-hud__streak"
-            [class.home-hud__streak--active]="currentStreak() > 0"
-            [class.home-hud__streak--shielded]="streakShieldActive()"
-            (click)="openStreakDetail()"
-            aria-label="Streak {{ currentStreak() }} giorni">
-      <svg class="home-hud__streak-flame" viewBox="0 0 24 32" fill="none" aria-hidden="true">
-        <path d="M12 2C10 5 8 7 9 11C6 9 5.5 6 7 3C4 6 3 10 4 14C2 12 2 8 3 5C1 9 1 14 3 18C5 22 9 26 12 30C15 26 19 22 21 18C23 14 23 9 21 5C22 8 22 12 20 14C21 10 21 6 18 3C19.5 6 19 9 16 11C17 7 15 5 12 2Z"
-              fill="currentColor"/>
-      </svg>
-      <span class="home-hud__streak-count">{{ currentStreak() }}</span>
-    </button>
-
-    <!-- Luoghi scoperti -->
-    <div class="home-hud__quests">
-      @if (loading() && total() === 0) {
-        <span class="home-hud__skeleton">—/—</span>
-      } @else {
-        <span class="home-hud__quests-count">
-          <strong>{{ discovered() }}</strong>/{{ total() }}
-        </span>
-      }
-      <span class="home-hud__quests-label">luoghi</span>
+      <span class="hud__level">Lv.{{ level() }}</span>
     </div>
+    <span class="hud__username">{{ username() }}</span>
+  </button>
 
+  <div class="hud__spacer"></div>
+
+  <!-- Streak → modale dettaglio -->
+  <button
+    class="hud__chip hud__chip--streak"
+    [class.hud__chip--streak-active]="currentStreak() > 0"
+    (click)="openStreakDetail()"
+    aria-label="Streak {{ currentStreak() }} giorni"
+  >
+    <ion-icon name="flame" aria-hidden="true"></ion-icon>
+    <span class="hud__chip-value">{{ currentStreak() }}</span>
+  </button>
+
+  <!-- Monete: moneta circolare dorata -->
+  <div class="hud__chip hud__chip--coins" aria-label="{{ coins() }} monete">
+    <svg class="hud__gem" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="9" fill="currentColor" />
+      <circle cx="10" cy="10" r="6" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" />
+      <circle cx="10" cy="10" r="2.5" fill="rgba(255,255,255,0.55)" />
+    </svg>
+    <span class="hud__chip-value">{{ coins() }}</span>
   </div>
-
-</header>
+</div>

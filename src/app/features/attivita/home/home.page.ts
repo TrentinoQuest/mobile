@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonContent, IonButton, IonIcon, IonSkeletonText } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonSkeletonText } from '@ionic/angular/standalone';
+import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { addIcons } from 'ionicons';
 import { pricetagsOutline, arrowForwardOutline } from 'ionicons/icons';
 import { BusinessService } from '../../../core/services/business/business.service';
@@ -17,7 +18,7 @@ import { BUSINESS_TYPE_LABEL, OfferStatus } from '../../../core/services/busines
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonContent, IonButton, IonIcon, IonSkeletonText],
+  imports: [IonContent, IonIcon, IonSkeletonText, TqButtonComponent],
 })
 export class AttivitaHomePage implements OnInit {
   protected readonly businessService = inject(BusinessService);

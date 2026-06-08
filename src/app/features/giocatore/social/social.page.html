@@ -1,0 +1,246 @@
+<ion-content [fullscreen]="true" class="social">
+  <!-- ═══════════════════════════════════════════════════════════ HEADER -->
+  <div class="social__header">
+    <h1 class="social__title">Social</h1>
+
+    <!-- Segment + badge richieste -->
+    <div class="social__segment" role="tablist">
+      <button
+        class="social__seg-btn"
+        [class.social__seg-btn--active]="activeTab() === 'feed'"
+        role="tab"
+        type="button"
+        (click)="setTab('feed')"
+      >
+        Feed
+      </button>
+      <button
+        class="social__seg-btn"
+        [class.social__seg-btn--active]="activeTab() === 'amici'"
+        role="tab"
+        type="button"
+        (click)="setTab('amici')"
+      >
+        Amici
+      </button>
+      <button
+        class="social__seg-btn social__seg-btn--badge"
+        [class.social__seg-btn--active]="activeTab() === 'richieste'"
+        role="tab"
+        type="button"
+        (click)="setTab('richieste')"
+      >
+        Richieste @if (requestsBadge() > 0) {
+        <span class="social__seg-badge">{{ requestsBadge() }}</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ FEED -->
+  @if (activeTab() === 'feed') {
+  <div class="social__body">
+    @if (feedLoading()) {
+    <div class="social__spinner"></div>
+    } @else if (feed().length === 0) {
+    <div class="social__empty-state">
+      <ion-icon name="people-outline" class="social__empty-icon"></ion-icon>
+      <p class="social__empty-title">Il feed è vuoto</p>
+      <p class="social__empty-sub">Aggiungi amici per vedere le loro avventure.</p>
+    </div>
+    } @else {
+    <div class="feed-list">
+      @for (item of feed(); track item.activityId) {
+      <div class="feed-card">
+        <!-- Avatar + info riga -->
+        <div class="feed-card__top">
+          <div
+            class="feed-card__avatar"
+            [style.background]="avatarGradient(item.playerId)"
+            aria-hidden="true"
+          >
+            {{ avatarInitial(item.username) }}
+          </div>
+          <div class="feed-card__meta">
+            <span class="feed-card__username">{{ item.username }}</span>
+            <span class="feed-card__time">{{ relativeTime(item.timestamp) }}</span>
+          </div>
+        </div>
+
+        <!-- Testo attività -->
+        <p class="feed-card__activity">{{ activityText(item) }}</p>
+
+        <!-- Badge rarità (solo sblocco collezionabile) -->
+        @if (item.type === 'collectible_unlock' && item.collectibleRarity) {
+        <tq-badge
+          [color]="$any(item.collectibleRarity.toLowerCase())"
+          size="sm"
+          class="feed-card__badge"
+        >
+          {{ item.collectibleRarity }}
+        </tq-badge>
+        }
+
+        <!-- Kudos -->
+        <div class="feed-card__kudos-row">
+          <span class="feed-card__kudos-count">{{ kudosCountFor(item) }}</span>
+          <button
+            class="feed-card__kudos-btn"
+            [class.feed-card__kudos-btn--sent]="myKudosFor(item.activityId)"
+            type="button"
+            (click)="sendKudos(item)"
+            (contextmenu)="$event.preventDefault()"
+            (pointerdown)="longPressStart($event, item)"
+            (pointerup)="longPressCancel()"
+            (pointerleave)="longPressCancel()"
+            aria-label="Invia kudos"
+          >
+            <ion-icon [name]="myKudosFor(item.activityId) ? 'heart' : 'heart-outline'"></ion-icon>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════ AMICI -->
+  @if (activeTab() === 'amici') {
+  <div class="social__body">
+    <!-- Bottone aggiungi amico -->
+    <button class="add-friend-btn" type="button" (click)="openAddFriend()">
+      <ion-icon name="person-add-outline"></ion-icon>
+      <span>Aggiungi amico</span>
+    </button>
+
+    @if (friendsLoading()) {
+    <div class="social__spinner"></div>
+    } @else if (friends().length === 0) {
+    <div class="social__empty-state">
+      <ion-icon name="people-outline" class="social__empty-icon"></ion-icon>
+      <p class="social__empty-title">Nessun amico</p>
+      <p class="social__empty-sub">Aggiungi amici per condividere le avventure.</p>
+    </div>
+    } @else {
+    <div class="friends-list">
+      @for (friend of friends(); track friend.friendshipId) {
+      <div
+        class="friend-row"
+        (pointerdown)="longPressStartFriend($event, friend)"
+        (pointerup)="longPressCancel()"
+        (pointerleave)="longPressCancel()"
+      >
+        <div
+          class="friend-row__avatar"
+          [style.background]="avatarGradient(friend.playerId)"
+          aria-hidden="true"
+        >
+          {{ avatarInitial(friend.username) }}
+        </div>
+        <span class="friend-row__username">{{ friend.username }}</span>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════ RICHIESTE -->
+  @if (activeTab() === 'richieste') {
+  <div class="social__body">
+    @if (requestsLoading()) {
+    <div class="social__spinner"></div>
+    } @else if (requests().length === 0) {
+    <div class="social__empty-state">
+      <ion-icon name="person-outline" class="social__empty-icon"></ion-icon>
+      <p class="social__empty-title">Nessuna richiesta</p>
+      <p class="social__empty-sub">Le richieste di amicizia ricevute appariranno qui.</p>
+    </div>
+    } @else {
+    <div class="requests-list">
+      @for (req of requests(); track req.friendshipId) {
+      <div class="request-card">
+        <div
+          class="request-card__avatar"
+          [style.background]="avatarGradient(req.requesterId)"
+          aria-hidden="true"
+        >
+          {{ avatarInitial(req.username) }}
+        </div>
+        <div class="request-card__info">
+          <span class="request-card__username">{{ req.username }}</span>
+          <span class="request-card__sub">vuole essere tuo amico</span>
+        </div>
+        <div class="request-card__actions">
+          <tq-button variant="primary" (tapped)="acceptRequest(req)"> Accetta </tq-button>
+          <tq-button variant="ghost" (tapped)="rejectRequest(req)"> Rifiuta </tq-button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</ion-content>
+
+<!-- ══════════════════════════════════════════════════ MODAL RICERCA AMICI -->
+@if (addFriendOpen()) {
+<div class="add-friend-modal">
+  <button
+    class="add-friend-modal__backdrop"
+    type="button"
+    (click)="closeAddFriend()"
+    aria-label="Chiudi"
+  ></button>
+  <div class="add-friend-modal__panel">
+    <div class="add-friend-modal__header">
+      <h3 class="add-friend-modal__title">Cerca utente</h3>
+      <button
+        class="add-friend-modal__close"
+        type="button"
+        (click)="closeAddFriend()"
+        aria-label="Chiudi"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Campo username + bottone -->
+    <div class="add-friend-modal__row">
+      <input
+        class="add-friend-modal__input"
+        type="text"
+        placeholder="Nome utente..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); requestSent.set(false); requestError.set('')"
+        (keyup.enter)="sendFriendRequest()"
+        autocomplete="off"
+        autocapitalize="none"
+        aria-label="Username"
+      />
+      <button
+        class="add-friend-modal__send-btn"
+        type="button"
+        [disabled]="!searchQuery().trim() || sendingRequest()"
+        (click)="sendFriendRequest()"
+      >
+        @if (sendingRequest()) {
+        <span class="add-friend-modal__send-spinner"></span>
+        } @else {
+        <ion-icon name="send-outline"></ion-icon>
+        }
+      </button>
+    </div>
+
+    <!-- Feedback -->
+    @if (requestSent()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--ok">
+      <ion-icon name="checkmark-circle"></ion-icon> Richiesta inviata!
+    </p>
+    } @else if (requestError()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--err">{{ requestError() }}</p>
+    }
+  </div>
+</div>
+}

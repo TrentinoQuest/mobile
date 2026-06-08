@@ -1,193 +1,128 @@
-/* ============================================================================
- * TabBarComponent (giocatore)
- * ============================================================================
- * Tab bar custom in fixed bottom, 4 tab + FAB centrale elevato.
- *
- * Effetto visivo chiave: "glass blur" — la barra non e' opaca, ha un
- * gradient verticale semi-trasparente + backdrop-filter blur, cosi'
- * sulla home la mappa traspare delicatamente sotto.
- *
- * I colori usano i token --tq-* quindi il componente si adatta
- * automaticamente al tema chiaro/scuro selezionato dall'utente.
- * ========================================================================== */
-
 :host {
-  /* Il componente si posiziona da solo, non occupa flusso nel padre. */
   display: contents;
 }
 
 .tab-bar {
-  /* Posizionamento fisso in basso, larghezza piena. */
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: var(--tq-z-tab-bar);
 
-  /* Layout: 5 slot equi-distribuiti. */
   display: flex;
   align-items: center;
   justify-content: space-around;
 
-  /* Altezza parametrica + safe area (home indicator / gesture bar).
-     I token vivono in variables.scss: cambiare --tq-tab-bar-height aggiorna
-     in automatico tutti gli overlay che scavalcano la barra. */
-  height: var(--tq-tab-bar-height);
-  padding-bottom: var(--tq-safe-bottom);
-  padding-left: var(--tq-safe-left);
-  padding-right: var(--tq-safe-right);
-  /* Aumenta l'altezza totale quando c'e' safe area (iPhone moderni). */
+  height: 62px;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   box-sizing: content-box;
 
-  /* Background "glass": gradient verticale dal bg opaco in basso al
-     semi-trasparente in alto, con blur dietro. Permette alla mappa di
-     trasparire sotto, mantenendo leggibilita' alle icone. */
-  background: linear-gradient(
-    to top,
-    rgba(var(--tq-bg-rgb), 0.95) 0%,
-    rgba(var(--tq-bg-rgb), 0.85) 60%,
-    rgba(var(--tq-bg-rgb), 0.7) 100%
-  );
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
 
-  /* Hairline superiore sottile, calda. */
-  border-top: 1px solid var(--tq-hairline);
-
-  /* ============================================================
-   * TAB normale (Mappa, Album, Amici, Profilo)
-   * ============================================================ */
+  // ── Tab ───────────────────────────────────────────────────────────────────
   &__tab {
-    /* Layout interno della tab: icona sopra, label sotto. */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-
-    /* Area cliccabile generosa per touch. */
     flex: 1 1 0;
     min-width: 0;
     height: 100%;
-    padding: 6px 4px 4px;
-
-    /* Stato di default: dimmed. */
-    color: var(--tq-text-muted);
+    padding: 8px 4px;
+    color: var(--color-text-disabled);
     text-decoration: none;
-
-    /* Per la barretta superiore ocra in stato active (vedi --active). */
     position: relative;
+    transition: color 150ms ease-out;
+    -webkit-tap-highlight-color: transparent;
 
-    /* Transizione fluida del colore quando cambia tab attiva. */
-    transition: color var(--tq-duration-fast) var(--tq-ease-out);
-
-    /* Feedback al tap (mobile non ha hover stabile, ma serve per
-       click di mouse in dev e per il momento del touch). */
     &:active {
       opacity: 0.7;
     }
-
-    /* Disattiva l'highlight blu di iOS al tap. */
-    -webkit-tap-highlight-color: transparent;
   }
 
   &__icon {
-    font-size: 22px;
+    font-size: 26px;
     line-height: 1;
+    position: relative;
+    z-index: 1;
   }
 
-  &__label {
-    font-family: var(--tq-font-sans);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    line-height: 1;
+  // Scambia icona outline/filled in base allo stato attivo
+  &__icon--filled {
+    display: none;
+  }
+  &__tab--active &__icon--inactive {
+    display: none;
+  }
+  &__tab--active &__icon--filled {
+    display: block;
   }
 
-  /* ============================================================
-   * Tab attiva — gestita da RouterLinkActive
-   * ============================================================ */
+  // ── Tab attiva — pill background centrato sull'icona ─────────────────────
   &__tab--active {
-    color: var(--tq-ocra);
+    color: var(--color-primary);
 
     &::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 24px;
-      height: 3px;
-      background: var(--tq-ocra);
-      border-radius: 0 0 var(--tq-radius-sm) var(--tq-radius-sm);
+      inset: 10px 12px;
+      background: rgba(var(--color-primary-rgb), 0.12);
+      border-radius: var(--radius-md);
     }
 
-    /* Icona: leggero bounce al diventare attiva */
     .tab-bar__icon {
-      animation: tab-icon-bounce 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+      font-size: 28px;
+      animation: tab-icon-bounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
   }
 
-  /* ============================================================
-   * FAB centrale — QR Scan
-   * ============================================================ */
+  // ── FAB QR scan ───────────────────────────────────────────────────────────
   &__fab {
-    /* Reset stili button browser. */
     appearance: none;
     border: none;
     cursor: pointer;
     padding: 0;
-
-    /* Dimensione parametrica, perfettamente circolare. */
-    flex: 0 0 var(--tq-fab-size);
-    width: var(--tq-fab-size);
-    height: var(--tq-fab-size);
-    border-radius: 50%;
-
-    /* Effetto "stacco" dalla barra: si solleva sopra. */
+    flex: 0 0 58px;
+    width: 58px;
+    height: 58px;
+    border-radius: var(--radius-full);
     margin-top: -22px;
-
-    /* Riempimento ocra solido + bordo sottile bone per definirlo
-       contro la barra glass. */
-    background: var(--tq-ocra);
-    box-shadow:
-      /* Bordo sottile inset per ridefinire l'oggetto sopra il blur */
-      inset 0 0 0 1.5px rgba(244, 235, 220, 0.18),
-      /* Ombra calda morbida sotto, fa "galleggiare" il FAB */ 0 8px 20px -4px rgba(0, 0, 0, 0.45),
-      /* Lieve glow ocra esterno per il vibe gamificato */ 0 0 24px -8px
-        rgba(var(--tq-ocra-rgb), 0.55);
-
-    /* Layout interno per centrare l'icona. */
+    background: var(--color-accent);
+    box-shadow: 0 5px 0 var(--color-accent-shadow);
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* Transizione su pressed. */
     transition:
-      transform var(--tq-duration-fast) var(--tq-ease-out),
-      box-shadow var(--tq-duration-fast) var(--tq-ease-out);
-
+      transform 80ms ease-out,
+      box-shadow 80ms ease-out;
     -webkit-tap-highlight-color: transparent;
 
     &:active {
-      transform: scale(0.92);
-      box-shadow:
-        inset 0 0 0 1.5px rgba(244, 235, 220, 0.18),
-        0 4px 12px -4px rgba(0, 0, 0, 0.45),
-        0 0 14px -4px rgba(var(--tq-ocra-rgb), 0.35);
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 var(--color-accent-shadow);
     }
   }
 
   &__fab-icon {
-    font-size: 28px;
-    color: #000;
+    font-size: 26px;
+    color: #ffffff;
   }
 }
 
-/* Keyframes locali tab bar — non rischiano hash perché non vanno in Leaflet */
 @keyframes tab-icon-bounce {
-  0%   { transform: translateY(0) scale(1); }
-  40%  { transform: translateY(-5px) scale(1.15); }
-  70%  { transform: translateY(1px) scale(0.97); }
-  100% { transform: translateY(0) scale(1); }
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-5px) scale(1.15);
+  }
+  70% {
+    transform: translateY(1px) scale(0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }

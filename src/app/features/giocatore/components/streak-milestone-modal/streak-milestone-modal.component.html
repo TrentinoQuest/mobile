@@ -1,12 +1,13 @@
 <ion-content [fullscreen]="true" class="streak-modal">
-
   <!-- Burst di particelle fuoco -->
   <div class="streak-modal__particles" aria-hidden="true">
     @for (angle of particleAngles; track $index) {
-      <div class="streak-modal__particle"
-           [style.--angle]="angle + 'deg'"
-           [style.--travel]="particleTravels[$index] + 'px'"
-           [style.--delay]="($index * 80) + 'ms'"></div>
+      <div
+        class="streak-modal__particle"
+        [style.--angle]="angle + 'deg'"
+        [style.--travel]="particleTravels[$index] + 'px'"
+        [style.--delay]="$index * 80 + 'ms'"
+      ></div>
     }
   </div>
 
@@ -18,22 +19,10 @@
 
   <!-- Corpo centrale -->
   <div class="streak-modal__body">
-
     <!-- Icona fuoco grande -->
     <div class="streak-modal__fire-wrap">
       <div class="streak-modal__fire-ring"></div>
-      <svg class="streak-modal__fire-svg" viewBox="0 0 48 64" fill="none" aria-hidden="true">
-        <path d="M24 4C20 10 16 14 18 22C12 18 11 12 14 6C8 12 6 20 8 28C4 24 4 16 6 10C2 18 2 28 6 36C10 44 18 52 24 60C30 52 38 44 42 36C46 28 46 18 42 10C44 16 44 24 40 28C42 20 42 12 36 6C39 12 38 18 32 22C34 14 30 10 24 4Z"
-              fill="url(#fire-grad)"/>
-        <ellipse cx="24" cy="46" rx="8" ry="5" fill="rgba(255,200,100,0.3)"/>
-        <defs>
-          <linearGradient id="fire-grad" x1="24" y1="4" x2="24" y2="60" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#FFD060"/>
-            <stop offset="50%" stop-color="#FF8C00"/>
-            <stop offset="100%" stop-color="#C84000"/>
-          </linearGradient>
-        </defs>
-      </svg>
+      <ion-icon name="flame" class="streak-modal__fire-icon" aria-hidden="true"></ion-icon>
     </div>
 
     <!-- Contatore streak -->
@@ -45,16 +34,15 @@
     <!-- Traccia 7 giorni -->
     <div class="streak-modal__week" aria-label="Ultimi 7 giorni">
       @for (day of days(); track $index) {
-        <div class="streak-modal__day"
-             [class.streak-modal__day--filled]="day.filled"
-             [class.streak-modal__day--today]="day.today"
-             [class.streak-modal__day--future]="day.future">
+        <div
+          class="streak-modal__day"
+          [class.streak-modal__day--filled]="day.filled"
+          [class.streak-modal__day--today]="day.today"
+          [class.streak-modal__day--future]="day.future"
+        >
           <div class="streak-modal__day-dot">
             @if (day.filled) {
-              <svg width="14" height="14" viewBox="0 0 24 28" fill="none" aria-hidden="true">
-                <path d="M12 2C10 5 8 7 9 11C6 9 5.5 6 7 3C4 6 3 10 4 14C2 12 2 8 3 5C1 9 1 14 3 18C5 22 9 26 12 30C15 26 19 22 21 18C23 14 23 9 21 5C22 8 22 12 20 14C21 10 21 6 18 3C19.5 6 19 9 16 11C17 7 15 5 12 2Z"
-                      fill="currentColor"/>
-              </svg>
+              <ion-icon name="flame" class="streak-modal__day-flame" aria-hidden="true"></ion-icon>
             }
           </div>
           <span class="streak-modal__day-label">{{ day.label }}</span>
@@ -65,9 +53,17 @@
     <!-- Moltiplicatore attivo -->
     @if (hasMultiplier) {
       <div class="streak-modal__multiplier">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </svg>
         <span>BONUS STREAK</span>
         <span class="streak-modal__mult-value">×{{ gamification.streakMultiplier }}</span>
@@ -78,15 +74,22 @@
     <!-- Shield guadagnato -->
     @if (gamification.shieldEarned) {
       <div class="streak-modal__shield-banner">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-             aria-hidden="true">
-          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z" />
         </svg>
         Streak Shield guadagnato!
       </div>
     }
-
   </div>
 
   <!-- CTA -->
@@ -95,5 +98,4 @@
       {{ viewOnly ? 'Chiudi' : 'Continua a esplorare' }}
     </button>
   </div>
-
 </ion-content>
