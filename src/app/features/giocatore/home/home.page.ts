@@ -296,11 +296,15 @@ export class HomePage implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.initMap();
     this.hasAutoCentered = false;
-    // I dati vengono caricati da ionViewWillEnter (che scatta anche alla
-    // prima entrata): niente doppio fetch qui.
-  }
 
-  ionViewWillEnter(): void {
+    // Il layout giocatore usa un <router-outlet> Angular standard (non
+    // ion-router-outlet, per evitare le transizioni slide di Ionic): gli
+    // hook ionViewWillEnter/ionViewWillLeave NON scattano in questo shell.
+    // Con IonicRouteStrategy + RouterOutlet standard la pagina viene
+    // ricreata a ogni ingresso nella tab e distrutta all'uscita, quindi il
+    // caricamento dati + polling vivono qui (ngAfterViewInit) e la pulizia
+    // in ngOnDestroy. Spostare questa logica negli hook Ionic la
+    // renderebbe morta: le quest non si caricherebbero all'apertura.
     setTimeout(() => this.map?.resize(), 100);
     this.questService.loadQuests(undefined, true);
     this.questService.loadCompletions(undefined, undefined, true);
@@ -311,9 +315,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
     void this.headingService.start();
   }
 
-  ionViewWillLeave(): void {
-    // Ferma il polling: le pagine tab restano in cache (IonicRouteStrategy)
-    // e senza questo continuerebbero a chiamare il backend in background.
+  ngOnDestroy(): void {
+    // Ferma il polling e la bussola: senza questo continuerebbero a girare
+    // dopo aver lasciato la tab (la pagina viene distrutta dal RouterOutlet).
     this.stopPolling();
     this.headingService.stop();
     this.showFilterPanel.set(false);
@@ -321,11 +325,6 @@ export class HomePage implements AfterViewInit, OnDestroy {
       void this.activeSheet.dismiss();
       this.activeSheet = null;
     }
-  }
-
-  ngOnDestroy(): void {
-    this.stopPolling();
-    this.headingService.stop();
     this.userMarker?.remove();
     this.userMarker = null;
     if (this.map) {
