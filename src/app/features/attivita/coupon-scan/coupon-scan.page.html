@@ -28,47 +28,62 @@
     </div>
     }
 
-    <!-- VERIFIED — info coupon + eventuale riscatto -->
+    <!-- VERIFIED — biglietto col verdetto + eventuale riscatto -->
     @case ('verified') {
     @if (coupon(); as c) {
-    <div
-      class="coupon-scan__card"
-      [class.coupon-scan__card--active]="c.status === 'active'"
-      [class.coupon-scan__card--invalid]="c.status !== 'active'"
-    >
-      <div class="coupon-scan__card-badge">
-        @switch (c.status) {
-        @case ('active') {
-        <ion-icon name="ticket-outline"></ion-icon>
-        <span>Valido</span>
-        }
-        @case ('redeemed') {
-        <ion-icon name="close-circle"></ion-icon>
-        <span>Già riscattato</span>
-        }
-        @case ('expired') {
-        <ion-icon name="time-outline"></ion-icon>
-        <span>Scaduto</span>
-        }
-        }
+    <div class="coupon-scan__ticket" [class.coupon-scan__ticket--valid]="c.status === 'active'">
+      <!-- Zona verdetto: la risposta che serve al cassiere, leggibile al volo -->
+      <div class="coupon-scan__verdict">
+        <div class="coupon-scan__verdict-seal">
+          @switch (c.status) {
+          @case ('active') {
+          <ion-icon name="checkmark-outline"></ion-icon>
+          }
+          @case ('redeemed') {
+          <ion-icon name="close-outline"></ion-icon>
+          }
+          @case ('expired') {
+          <ion-icon name="time-outline"></ion-icon>
+          }
+          }
+        </div>
+        <h2 class="coupon-scan__verdict-text">
+          @switch (c.status) {
+          @case ('active') { Coupon valido }
+          @case ('redeemed') { Già riscattato }
+          @case ('expired') { Coupon scaduto }
+          }
+        </h2>
+        <p class="coupon-scan__verdict-hint">
+          @switch (c.status) {
+          @case ('active') { Conferma il riscatto per accettarlo. }
+          @case ('redeemed') { Non può essere accettato di nuovo. }
+          @case ('expired') { Non è più utilizzabile. }
+          }
+        </p>
       </div>
 
-      <h2 class="coupon-scan__card-title">{{ c.offerTitle }}</h2>
+      <!-- Linea di strappo perforata -->
+      <div class="coupon-scan__tear" aria-hidden="true"></div>
 
-      <div class="coupon-scan__card-row">
-        <ion-icon name="storefront-outline"></ion-icon>
-        <span>{{ c.businessName }}</span>
+      <!-- Dettagli offerta -->
+      <div class="coupon-scan__ticket-body">
+        <h3 class="coupon-scan__offer">{{ c.offerTitle }}</h3>
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Attività</span>
+          <span class="coupon-scan__fact-value">{{ c.businessName }}</span>
+        </div>
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Scadenza</span>
+          <span class="coupon-scan__fact-value">{{ c.expiresAt | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        @if (c.redeemedAt) {
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Usato il</span>
+          <span class="coupon-scan__fact-value">{{ c.redeemedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        }
       </div>
-      <div class="coupon-scan__card-row">
-        <ion-icon name="time-outline"></ion-icon>
-        <span>Scadenza {{ c.expiresAt | date: 'dd/MM/yyyy' }}</span>
-      </div>
-      @if (c.redeemedAt) {
-      <div class="coupon-scan__card-row">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        <span>Riscattato il {{ c.redeemedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
-      </div>
-      }
     </div>
 
     <div class="coupon-scan__actions">

@@ -81,80 +81,152 @@
     margin: 0;
   }
 
-  // ── Card coupon verificato ───────────────────────────────────
-  &__card {
+  // ── Biglietto coupon verificato ──────────────────────────────
+  // Reso come un biglietto fisico: zona verdetto "timbrata" sopra,
+  // linea di strappo perforata, dettagli offerta sotto.
+  &__ticket {
+    position: relative;
+    overflow: hidden; // ritaglia i fori della perforazione sui bordi
     background: var(--color-surface);
-    border-radius: var(--radius-lg);
-    padding: var(--space-20) var(--space-16);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-12);
     border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
     animation: coupon-card-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
-    &--active {
+    &--valid {
       border-color: var(--color-primary);
-      box-shadow: 0 8px 24px -10px rgba(var(--color-primary-rgb), 0.35);
-    }
-
-    &--invalid {
-      opacity: 0.85;
     }
   }
 
-  // Azioni sotto la card: entrano subito dopo di lei
+  // Zona verdetto: tinta rossa per "rifiuta", verde per "accetta"
+  &__verdict {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-8);
+    padding: var(--space-24) var(--space-16);
+    background: rgba(var(--color-error-rgb), 0.08);
+
+    .coupon-scan__ticket--valid & {
+      background: rgba(var(--color-primary-rgb), 0.1);
+    }
+  }
+
+  &__verdict-seal {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-error);
+    animation: coupon-badge-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) 160ms both;
+
+    ion-icon {
+      font-size: 34px;
+      color: #fff;
+    }
+
+    .coupon-scan__ticket--valid & {
+      background: var(--color-primary);
+    }
+  }
+
+  &__verdict-text {
+    margin: 0;
+    font-size: var(--font-h1);
+    font-weight: 700;
+    line-height: var(--line-height-tight);
+    color: var(--color-error);
+
+    .coupon-scan__ticket--valid & {
+      color: var(--color-primary);
+    }
+  }
+
+  &__verdict-hint {
+    margin: 0;
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+  }
+
+  // Linea di strappo: tratteggio + fori semicircolari sui bordi
+  &__tear {
+    position: relative;
+    height: 0;
+    border-top: 2px dashed var(--color-border);
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--color-bg);
+      border: 2px solid var(--color-border);
+    }
+
+    &::before {
+      left: -13px;
+    }
+
+    &::after {
+      right: -13px;
+    }
+
+    .coupon-scan__ticket--valid &::before,
+    .coupon-scan__ticket--valid &::after {
+      border-color: var(--color-primary);
+    }
+  }
+
+  &__ticket-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    padding: var(--space-16);
+  }
+
+  &__offer {
+    margin: 0 0 var(--space-4);
+    font-size: var(--font-h2);
+    font-weight: 700;
+    line-height: var(--line-height-tight);
+    color: var(--color-text-primary);
+  }
+
+  // Righe label/valore in stile scontrino
+  &__fact {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-12);
+  }
+
+  &__fact-label {
+    font-size: var(--font-micro);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-disabled);
+    flex-shrink: 0;
+  }
+
+  &__fact-value {
+    font-size: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-align: right;
+  }
+
+  // Azioni sotto il biglietto: entrano subito dopo di lui
   &__actions {
     display: flex;
     flex-direction: column;
     gap: var(--space-16);
     animation: coupon-fade-up 320ms ease-out 140ms both;
-  }
-
-  &__card-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-6);
-    align-self: flex-start;
-    padding: var(--space-4) var(--space-12);
-    border-radius: var(--radius-pill);
-    font-size: var(--font-micro);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: var(--color-bg);
-    color: var(--color-text-secondary);
-    animation: coupon-badge-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) 180ms both;
-
-    ion-icon {
-      font-size: 16px;
-    }
-
-    .coupon-scan__card--active & {
-      background: rgba(var(--color-primary-rgb), 0.12);
-      color: var(--color-primary);
-    }
-  }
-
-  &__card-title {
-    font-size: var(--font-h2);
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0;
-    line-height: var(--line-height-tight);
-  }
-
-  &__card-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-8);
-    font-size: var(--font-body);
-    color: var(--color-text-secondary);
-
-    ion-icon {
-      font-size: 18px;
-      flex-shrink: 0;
-      color: var(--color-text-disabled);
-    }
   }
 
   // ── Schermata esito (success / error) ────────────────────────
@@ -239,8 +311,8 @@
     }
 
     &--error {
-      background: var(--color-danger);
-      box-shadow: 0 10px 28px -6px rgba(var(--color-danger-rgb), 0.5);
+      background: var(--color-error);
+      box-shadow: 0 10px 28px -6px rgba(var(--color-error-rgb), 0.5);
       animation:
         coupon-seal-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
         coupon-seal-shake 420ms ease-in-out 320ms;
@@ -293,7 +365,7 @@
   &__receipt-business {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     font-size: var(--font-small, var(--font-body));
     color: var(--color-text-secondary);
 
@@ -407,8 +479,8 @@
   .coupon-scan {
     &__check-svg,
     &__seal,
-    &__card,
-    &__card-badge,
+    &__ticket,
+    &__verdict-seal,
     &__actions,
     &__outcome-title,
     &__outcome-text,

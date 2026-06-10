@@ -8,9 +8,7 @@ import {
   checkmarkOutline,
   checkmarkCircle,
   closeOutline,
-  closeCircle,
   timeOutline,
-  ticketOutline,
   storefrontOutline,
   refreshOutline,
 } from 'ionicons/icons';
@@ -82,9 +80,7 @@ export class CouponScanPage {
       checkmarkOutline,
       checkmarkCircle,
       closeOutline,
-      closeCircle,
       timeOutline,
-      ticketOutline,
       storefrontOutline,
       refreshOutline,
     });
