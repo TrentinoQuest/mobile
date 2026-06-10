@@ -506,10 +506,160 @@
       background: var(--color-surface);
       color: var(--color-error);
     }
+  }
 
-    &--redeemed {
-      background: var(--color-surface);
-      color: var(--color-success);
+  /* Schermata di successo (coupon riscattato dall'esercente) */
+  &__success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-8);
+    padding: var(--space-16) 0 0;
+    width: 100%;
+  }
+
+  &__success-check {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    margin-bottom: var(--space-8);
+  }
+
+  &__success-svg {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: var(--color-success);
+    box-shadow: 0 12px 30px -8px rgba(var(--color-success-rgb), 0.6);
+    transform: scale(0);
+    animation: couponSuccessPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 60ms both;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__success-circle {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.35);
+    stroke-width: 2;
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: couponSuccessCircle 500ms ease-out 320ms forwards;
+  }
+
+  &__success-mark {
+    stroke: #fff;
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: couponSuccessMark 360ms cubic-bezier(0.65, 0, 0.45, 1) 540ms forwards;
+  }
+
+  &__success-ring {
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--color-success-rgb), 0.5);
+    opacity: 0;
+    animation: couponSuccessRipple 1100ms ease-out 360ms;
+
+    &--delay {
+      animation-delay: 620ms;
+    }
+  }
+
+  &__success-title {
+    margin: 0;
+    font-size: var(--font-h1);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+  }
+
+  &__success-offer {
+    margin: 0;
+    font-size: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  &__success-business {
+    margin: 0;
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+  }
+
+  &__success-hint {
+    margin: var(--space-8) 0 0;
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    max-width: 30ch;
+  }
+
+  &__done {
+    margin-top: var(--space-20);
+    width: 100%;
+    padding: var(--space-16);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--color-primary);
+    color: #fff;
+    font-size: var(--font-body);
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @keyframes couponSuccessPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes couponSuccessCircle {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes couponSuccessMark {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes couponSuccessRipple {
+    0% {
+      opacity: 0.7;
+      transform: scale(0.6);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.9);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &__success-svg {
+      animation: none;
+      transform: none;
+    }
+    &__success-circle,
+    &__success-mark {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+    &__success-ring {
+      display: none;
     }
   }
 

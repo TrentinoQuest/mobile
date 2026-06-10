@@ -6,6 +6,8 @@ import { EMPTY } from 'rxjs';
 import { BusinessRepository } from './repository/business.repository';
 import {
   Business,
+  CouponRedeemInfo,
+  CouponView,
   CreateOfferRequest,
   Offer,
   OfferStatus,
@@ -170,6 +172,25 @@ export class BusinessService {
       );
   }
 
+  /**
+   * Verifica un coupon scansionato dal cassiere senza riscattarlo
+   * (GET /market/business/redeem/{token}). Operazione transiente: non tocca
+   * i signal persistenti, è il componente a gestire stato ed errori
+   * (vedi formatError per la traduzione dei codici).
+   */
+  verifyCoupon(token: string): Observable<CouponRedeemInfo> {
+    return this.repository.verifyCoupon(token);
+  }
+
+  /**
+   * Riscatta un coupon proprio (POST /market/business/redeem/{token}).
+   * Operazione transiente: il componente gestisce esito ed errori
+   * (COUPON_NOT_OWNED, COUPON_ALREADY_REDEEMED, COUPON_EXPIRED).
+   */
+  redeemCoupon(token: string): Observable<CouponView> {
+    return this.repository.redeemCoupon(token);
+  }
+
   /** Reset completo dello stato. Chiamato su logout. */
   reset(): void {
     this._profile.set(null);
@@ -221,4 +242,7 @@ const ERROR_CODE_MESSAGES: Record<string, string> = {
   NOT_APPROVED: "L'attività non è ancora approvata. Non puoi creare offerte.",
   OFFER_NOT_FOUND: 'Offerta non trovata.',
   VALIDATION_ERROR: 'Dati non validi.',
+  COUPON_NOT_OWNED: 'Questo coupon appartiene a un’offerta di un’altra attività.',
+  COUPON_ALREADY_REDEEMED: 'Coupon già riscattato.',
+  COUPON_EXPIRED: 'Coupon scaduto.',
 };

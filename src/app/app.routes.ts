@@ -213,6 +213,12 @@ export const routes: Routes = [
         canActivate: [businessStatusGuard],
       },
       {
+        path: 'coupon',
+        loadComponent: () =>
+          import('./features/attivita/coupon-scan/coupon-scan.page').then((m) => m.CouponScanPage),
+        canActivate: [businessStatusGuard],
+      },
+      {
         path: 'offerte/new',
         loadComponent: () =>
           import('./features/attivita/offerte/form/offer-form.page').then((m) => m.OfferFormPage),

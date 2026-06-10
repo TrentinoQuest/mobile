@@ -75,6 +75,10 @@ export class ShopPage implements OnInit, OnDestroy {
   protected readonly purchaseBurst = signal(false);
 
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
+  /** Polling dello stato del coupon mentre il QR è mostrato (vedi startStatusPolling). */
+  private statusPollInterval: ReturnType<typeof setInterval> | null = null;
+  /** Cadenza del polling stato coupon (ms). */
+  private static readonly STATUS_POLL_MS = 3_000;
 
   protected readonly activeCoupons = computed(() =>
     this.coupons().filter((c) => c.status === 'active'),
@@ -106,6 +110,7 @@ export class ShopPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopCountdown();
+    this.stopStatusPolling();
   }
 
   protected setTab(tab: ShopTab): void {
@@ -206,6 +211,11 @@ export class ShopPage implements OnInit, OnDestroy {
     this.activeCoupon.set(coupon);
     this.qrDataUrl.set('');
     this.startCountdown(coupon.expiresAt);
+    // Solo i coupon attivi possono cambiare stato sotto i nostri occhi
+    // (riscatto da parte del cassiere): avviamo il polling solo per quelli.
+    if (coupon.status === 'active') {
+      this.startStatusPolling(coupon.id);
+    }
 
     try {
       const url = await QRCode.toDataURL(coupon.token, {
@@ -224,6 +234,50 @@ export class ShopPage implements OnInit, OnDestroy {
     this.activeCoupon.set(null);
     this.qrDataUrl.set('');
     this.stopCountdown();
+    this.stopStatusPolling();
+  }
+
+  /**
+   * Mentre il QR è mostrato, interroga periodicamente /market/my-coupons per
+   * rilevare quando il cassiere riscatta il coupon. Appena lo stato passa da
+   * 'active' a 'redeemed' (o 'expired'), aggiorna il dettaglio e la lista così
+   * il QR viene coperto dall'overlay "Coupon utilizzato" e non è più
+   * ripresentabile. Il backend resta comunque l'autorità: un secondo riscatto
+   * sullo stesso token risponde 409 COUPON_ALREADY_REDEEMED.
+   */
+  private startStatusPolling(couponId: string): void {
+    this.stopStatusPolling();
+    this.statusPollInterval = setInterval(() => {
+      this.http.get<CouponView[]>(`${environment.apiUrl}/market/my-coupons`).subscribe({
+        next: (list) => {
+          this.coupons.set(list);
+          const fresh = list.find((c) => c.id === couponId);
+          const current = this.activeCoupon();
+          if (!fresh || !current || current.id !== couponId) return;
+          if (fresh.status !== current.status) {
+            this.activeCoupon.set(fresh);
+            if (fresh.status !== 'active') {
+              this.stopStatusPolling();
+              this.stopCountdown();
+              if (fresh.status === 'redeemed') {
+                void this.haptics.success();
+                void this.audio.playSuccess();
+              }
+            }
+          }
+        },
+        error: () => {
+          // Errore transitorio di rete: il prossimo tick riprova.
+        },
+      });
+    }, ShopPage.STATUS_POLL_MS);
+  }
+
+  private stopStatusPolling(): void {
+    if (this.statusPollInterval !== null) {
+      clearInterval(this.statusPollInterval);
+      this.statusPollInterval = null;
+    }
   }
 
   private startCountdown(expiresAt: string): void {

@@ -22,6 +22,8 @@ import type {
 } from '../app/core/services/player-profile/player-profile.types';
 import type {
   Business,
+  CouponRedeemInfo,
+  CouponView,
   CreateOfferRequest,
   Offer,
   UpdateBusinessProfileRequest,
@@ -97,6 +99,12 @@ export class MockBusinessRepository extends BusinessRepository {
   }
   deleteOffer(): Observable<void> {
     return of(undefined);
+  }
+  verifyCoupon(_token: string): Observable<CouponRedeemInfo> {
+    return of(undefined as unknown as CouponRedeemInfo);
+  }
+  redeemCoupon(_token: string): Observable<CouponView> {
+    return of(undefined as unknown as CouponView);
   }
 }
 

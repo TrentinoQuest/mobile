@@ -211,6 +211,30 @@
       <ion-icon name="close-outline"></ion-icon>
     </button>
 
+    @if (coupon.status === 'redeemed') {
+    <!-- Schermata di successo: l'esercente ha riscattato il coupon -->
+    <div class="coupon-detail__success">
+      <div class="coupon-detail__success-check" aria-hidden="true">
+        <span class="coupon-detail__success-ring"></span>
+        <span class="coupon-detail__success-ring coupon-detail__success-ring--delay"></span>
+        <svg class="coupon-detail__success-svg" viewBox="0 0 52 52">
+          <circle class="coupon-detail__success-circle" cx="26" cy="26" r="24" />
+          <path
+            class="coupon-detail__success-mark"
+            fill="none"
+            d="M14.5 27 l7.5 7.5 l16 -16"
+          />
+        </svg>
+      </div>
+      <h2 class="coupon-detail__success-title">Offerta riscattata!</h2>
+      <p class="coupon-detail__success-offer">{{ coupon.offerTitle ?? 'Coupon' }}</p>
+      @if (coupon.businessName) {
+      <p class="coupon-detail__success-business">{{ coupon.businessName }}</p>
+      }
+      <p class="coupon-detail__success-hint">L'esercente può consegnarti l'offerta.</p>
+      <button class="coupon-detail__done" type="button" (click)="closeCoupon()">Fatto</button>
+    </div>
+    } @else {
     <!-- Titolo e business -->
     <h2 class="coupon-detail__title">{{ coupon.offerTitle ?? 'Coupon' }}</h2>
     <p class="coupon-detail__business">{{ coupon.businessName }}</p>
@@ -231,11 +255,6 @@
         <ion-icon name="close-circle"></ion-icon>
         <span>Coupon scaduto</span>
       </div>
-      } @else if (coupon.status === 'redeemed') {
-      <div class="coupon-detail__status-overlay coupon-detail__status-overlay--redeemed">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        <span>Coupon utilizzato</span>
-      </div>
       }
     </div>
 
@@ -252,6 +271,7 @@
 
     <!-- Istruzione -->
     <p class="coupon-detail__instruction">Mostra questo codice all'esercente</p>
+    }
   </div>
 </div>
 }

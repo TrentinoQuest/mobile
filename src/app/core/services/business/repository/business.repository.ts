@@ -1,6 +1,8 @@
 import { Observable } from 'rxjs';
 import {
   Business,
+  CouponRedeemInfo,
+  CouponView,
   CreateOfferRequest,
   Offer,
   UpdateBusinessProfileRequest,
@@ -32,4 +34,18 @@ export abstract class BusinessRepository {
 
   /** DELETE /business/offers/{id} — archivia una propria offerta (soft delete, 204). */
   abstract deleteOffer(id: string): Observable<void>;
+
+  /**
+   * GET /market/business/redeem/{token} — verifica un coupon scansionato dal
+   * cassiere senza riscattarlo. 403 COUPON_NOT_OWNED se appartiene a un'altra
+   * attività, 404 se il token non esiste.
+   */
+  abstract verifyCoupon(token: string): Observable<CouponRedeemInfo>;
+
+  /**
+   * POST /market/business/redeem/{token} — riscatta un coupon proprio.
+   * 403 COUPON_NOT_OWNED, 404 token assente, 409 COUPON_ALREADY_REDEEMED /
+   * COUPON_EXPIRED.
+   */
+  abstract redeemCoupon(token: string): Observable<CouponView>;
 }

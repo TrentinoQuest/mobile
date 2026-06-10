@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { homeOutline, pricetagsOutline, personOutline } from 'ionicons/icons';
+import { homeOutline, pricetagsOutline, personOutline, qrCodeOutline } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth/auth.service';
 
 /**
@@ -25,6 +25,6 @@ export class AttivitaLayoutComponent {
   protected readonly authService = inject(AuthService);
 
   constructor() {
-    addIcons({ homeOutline, pricetagsOutline, personOutline });
+    addIcons({ homeOutline, pricetagsOutline, qrCodeOutline, personOutline });
   }
 }

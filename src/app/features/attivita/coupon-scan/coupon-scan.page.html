@@ -1,0 +1,134 @@
+<ion-content class="coupon-scan" fullscreen>
+  <div class="coupon-scan__container">
+    <header class="coupon-scan__header">
+      <p class="coupon-scan__eyebrow">Cassa</p>
+      <h1 class="coupon-scan__title">Valida coupon</h1>
+    </header>
+
+    @switch (state()) {
+
+    <!-- IDLE — invito alla scansione -->
+    @case ('idle') {
+    <div class="coupon-scan__hero">
+      <div class="coupon-scan__hero-icon">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </div>
+      <p class="coupon-scan__hero-text">
+        Inquadra il QR del coupon mostrato dal cliente per verificarne la validità.
+      </p>
+    </div>
+    <tq-button iconStart="scan-outline" (tapped)="scan()">Scansiona coupon</tq-button>
+    }
+
+    <!-- VERIFYING -->
+    @case ('verifying') {
+    <div class="coupon-scan__pending">
+      <ion-icon class="coupon-scan__spinner" name="qr-code-outline"></ion-icon>
+      <p class="coupon-scan__pending-text">Verifica del coupon in corso…</p>
+    </div>
+    }
+
+    <!-- VERIFIED — info coupon + eventuale riscatto -->
+    @case ('verified') {
+    @if (coupon(); as c) {
+    <div
+      class="coupon-scan__card"
+      [class.coupon-scan__card--active]="c.status === 'active'"
+      [class.coupon-scan__card--invalid]="c.status !== 'active'"
+    >
+      <div class="coupon-scan__card-badge">
+        @switch (c.status) {
+        @case ('active') {
+        <ion-icon name="ticket-outline"></ion-icon>
+        <span>Valido</span>
+        }
+        @case ('redeemed') {
+        <ion-icon name="close-circle"></ion-icon>
+        <span>Già riscattato</span>
+        }
+        @case ('expired') {
+        <ion-icon name="time-outline"></ion-icon>
+        <span>Scaduto</span>
+        }
+        }
+      </div>
+
+      <h2 class="coupon-scan__card-title">{{ c.offerTitle }}</h2>
+
+      <div class="coupon-scan__card-row">
+        <ion-icon name="storefront-outline"></ion-icon>
+        <span>{{ c.businessName }}</span>
+      </div>
+      <div class="coupon-scan__card-row">
+        <ion-icon name="time-outline"></ion-icon>
+        <span>Scadenza {{ c.expiresAt | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      @if (c.redeemedAt) {
+      <div class="coupon-scan__card-row">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span>Riscattato il {{ c.redeemedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      }
+    </div>
+
+    @if (c.status === 'active') {
+    <tq-button iconStart="checkmark-circle" (tapped)="redeem()">Riscatta coupon</tq-button>
+    }
+    <tq-button
+      [variant]="c.status === 'active' ? 'ghost' : 'secondary'"
+      iconStart="scan-outline"
+      (tapped)="reset()"
+    >
+      Scansiona un altro
+    </tq-button>
+    }
+    }
+
+    <!-- REDEEMING -->
+    @case ('redeeming') {
+    <div class="coupon-scan__pending">
+      <ion-icon class="coupon-scan__spinner" name="ticket-outline"></ion-icon>
+      <p class="coupon-scan__pending-text">Riscatto in corso…</p>
+    </div>
+    }
+
+    <!-- SUCCESS -->
+    @case ('success') {
+    <div class="coupon-scan__outcome">
+      <div class="coupon-scan__check" aria-hidden="true">
+        <span class="coupon-scan__check-ring"></span>
+        <span class="coupon-scan__check-ring coupon-scan__check-ring--delay"></span>
+        <svg class="coupon-scan__check-svg" viewBox="0 0 52 52">
+          <circle class="coupon-scan__check-circle" cx="26" cy="26" r="24" />
+          <path class="coupon-scan__check-mark" fill="none" d="M14.5 27 l7.5 7.5 l16 -16" />
+        </svg>
+      </div>
+      <h2 class="coupon-scan__outcome-title">Coupon riscattato</h2>
+      @if (coupon(); as c) {
+      <div class="coupon-scan__receipt">
+        <span class="coupon-scan__receipt-offer">{{ c.offerTitle }}</span>
+        <span class="coupon-scan__receipt-business">
+          <ion-icon name="storefront-outline"></ion-icon>{{ c.businessName }}
+        </span>
+      </div>
+      }
+      <p class="coupon-scan__outcome-text">Consegna l’offerta al cliente.</p>
+    </div>
+    <tq-button iconStart="scan-outline" (tapped)="reset()">Scansiona un altro</tq-button>
+    }
+
+    <!-- ERROR -->
+    @case ('error') {
+    <div class="coupon-scan__outcome">
+      <div class="coupon-scan__seal coupon-scan__seal--error">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
+      <h2 class="coupon-scan__outcome-title">Coupon non valido</h2>
+      <p class="coupon-scan__outcome-text">{{ errorMessage() }}</p>
+    </div>
+    <tq-button iconStart="refresh-outline" (tapped)="reset()">Riprova</tq-button>
+    }
+
+    }
+  </div>
+</ion-content>
