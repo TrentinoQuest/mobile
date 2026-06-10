@@ -3,13 +3,14 @@ export const environment = {
 
   /**
    * Base URL delle API REST in produzione.
-   * TODO: aggiornare con il dominio definitivo prima del primo deploy prod.
+   * Backend deployato su Render (stesso ambiente usato in sviluppo finche'
+   * non esiste un dominio dedicato).
    */
-  apiUrl: 'https://api.trentinoquest.example/api/v1',
+  apiUrl: 'https://backend-utj0.onrender.com/api/v1',
 
   /**
    * Endpoint di health check in produzione.
-   * TODO: aggiornare con il dominio definitivo prima del primo deploy prod.
+   * Vive a livello di root del server, fuori dal namespace /api/v1.
    */
-  healthCheckUrl: 'https://api.trentinoquest.example/health',
+  healthCheckUrl: 'https://backend-utj0.onrender.com/health',
 };

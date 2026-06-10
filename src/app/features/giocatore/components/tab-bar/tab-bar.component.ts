@@ -18,6 +18,7 @@ import { QuestType } from '@trentino-quest/shared-types';
 import type { PrimaryQuest } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { GeolocationService } from '../../../../core/services/geolocation/geolocation.service';
+import { haversineMeters } from '../../../../core/utils/geo';
 import { ScanModalComponent } from '../scan-modal/scan-modal.component';
 
 @Component({
@@ -89,15 +90,4 @@ export class TabBarComponent {
 
     return candidates[0]?.id ?? null;
   }
-}
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6_371_000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

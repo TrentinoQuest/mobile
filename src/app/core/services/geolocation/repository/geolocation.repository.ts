@@ -14,7 +14,7 @@
 // La conversione a signal reattivo Angular avviene nel service facade,
 // non qui: la repository resta agnostica rispetto al framework.
 
-import type { Position, PermissionState, GeoError } from '../geolocation types';
+import type { Position, PermissionState, GeoError } from '../geolocation.types';
 
 /**
  * Callback invocata a ogni nuovo fix GPS dal watch attivo.

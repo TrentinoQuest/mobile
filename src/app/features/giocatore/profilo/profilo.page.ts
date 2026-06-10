@@ -34,17 +34,18 @@ import {
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import type { LeagueCurrentView } from '@trentino-quest/shared-types';
 import { LeagueTier } from '@trentino-quest/shared-types';
+import { Preferences } from '@capacitor/preferences';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
+import { NOTIFICATIONS_PREF_KEY } from '../../../core/services/push-notification/push-notification.service';
+import { MAX_LEVEL, xpProgressPercent, xpToNextLevel } from '../../../core/utils/xp';
 import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
 import { ThemeSelectorComponent } from '../../../shared/components/theme-selector/theme-selector.component';
 import { environment } from '../../../../environments/environment';
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
-
-const XP_THRESHOLDS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 12000, 18000];
 
 const TIER_LABEL: Record<LeagueTier, string> = {
   [LeagueTier.PORFIDO]: 'Lega Porfido',
@@ -101,18 +102,17 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   );
 
   protected readonly xpToNextLevel = computed<number | null>(() => {
-    const lvl = this.level();
-    if (lvl >= 10) return null;
-    return XP_THRESHOLDS[lvl] - this.xp();
+    // Preferisci il valore autoritativo del backend, fallback alle soglie locali.
+    const fromBackend = this.player()?.xpToNextLevel;
+    if (typeof fromBackend === 'number') {
+      return this.level() >= MAX_LEVEL ? null : fromBackend;
+    }
+    return xpToNextLevel(this.level(), this.xp());
   });
 
-  protected readonly xpProgress = computed<number>(() => {
-    const lvl = this.level();
-    if (lvl >= 10) return 100;
-    const start = XP_THRESHOLDS[lvl - 1];
-    const end = XP_THRESHOLDS[lvl];
-    return Math.round(((this.xp() - start) / (end - start)) * 100);
-  });
+  protected readonly xpProgress = computed<number>(() =>
+    xpProgressPercent(this.level(), this.xp()),
+  );
 
   // Valore animato: parte da 0 e sale al reale via ngAfterViewInit
   protected readonly animatedXpProgress = signal(0);
@@ -177,7 +177,7 @@ export class ProfiloPage implements OnInit, AfterViewInit {
 
   protected navigateSocial(): void {
     void this.haptics.tapLight();
-    void this.router.navigate(['/giocatore/lega']);
+    void this.router.navigate(['/giocatore/social']);
   }
 
   protected navigateCoop(): void {
@@ -233,16 +233,21 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   }
 
   private async openNotifiche(): Promise<void> {
+    const { value: current } = await Preferences.get({ key: NOTIFICATIONS_PREF_KEY });
     const alert = await this.alertCtrl.create({
       header: 'Notifiche',
       inputs: [
-        { type: 'radio', label: 'Tutti gli eventi', value: 'all', checked: true },
-        { type: 'radio', label: 'Solo scoperte', value: 'discoveries' },
-        { type: 'radio', label: 'Disattivate', value: 'off' },
+        { type: 'radio', label: 'Attivate', value: 'all', checked: current !== 'off' },
+        { type: 'radio', label: 'Disattivate', value: 'off', checked: current === 'off' },
       ],
       buttons: [
         { text: 'Annulla', role: 'cancel' },
-        { text: 'Salva', handler: () => {} },
+        {
+          text: 'Salva',
+          handler: (value: string) => {
+            void Preferences.set({ key: NOTIFICATIONS_PREF_KEY, value });
+          },
+        },
       ],
     });
     await alert.present();
@@ -275,30 +280,45 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   }
 
   private async openCambiaPassword(): Promise<void> {
+    const email = this.auth.currentUser()?.email;
+    if (!email) return;
     const alert = await this.alertCtrl.create({
       header: 'Cambia password',
       message:
         "Ti invieremo un link per reimpostare la password all'indirizzo email associato al tuo account.",
       buttons: [
         { text: 'Annulla', role: 'cancel' },
-        { text: 'Invia email', handler: () => {} },
+        {
+          text: 'Invia email',
+          handler: () => {
+            this.auth.recoverPassword({ email }).subscribe({
+              next: () => void this.showPasswordEmailSent(),
+              // Il backend risponde sempre 202: anche in errore di rete
+              // mostriamo un messaggio neutro.
+              error: () => void this.showPasswordEmailSent(),
+            });
+          },
+        },
       ],
     });
     await alert.present();
   }
 
+  private async showPasswordEmailSent(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Email inviata',
+      message: 'Se il tuo account esiste, riceverai a breve le istruzioni per il reset.',
+      buttons: ['Chiudi'],
+    });
+    await alert.present();
+  }
+
   private async openLingua(): Promise<void> {
+    // Una sola lingua disponibile: niente finto "Salva", solo informazione.
     const alert = await this.alertCtrl.create({
       header: 'Lingua',
-      inputs: [
-        { type: 'radio', label: 'Italiano', value: 'it', checked: true },
-        { type: 'radio', label: 'English (prossimamente)', value: 'en', disabled: true },
-        { type: 'radio', label: 'Deutsch (prossimamente)', value: 'de', disabled: true },
-      ],
-      buttons: [
-        { text: 'Annulla', role: 'cancel' },
-        { text: 'Salva', handler: () => {} },
-      ],
+      message: "L'app è disponibile in italiano. English e Deutsch arriveranno prossimamente.",
+      buttons: ['Chiudi'],
     });
     await alert.present();
   }
@@ -316,20 +336,15 @@ export class ProfiloPage implements OnInit, AfterViewInit {
   }
 
   private async confirmEliminaAccount(): Promise<void> {
+    // L'API non espone ancora la cancellazione account: meglio essere
+    // onesti che fingere una cancellazione facendo solo logout.
     const alert = await this.alertCtrl.create({
       header: 'Elimina account',
       message:
-        'Questa azione è irreversibile. Tutti i tuoi progressi e collezionabili andranno persi.',
-      buttons: [
-        { text: 'Annulla', role: 'cancel' },
-        {
-          text: 'Elimina',
-          role: 'destructive',
-          handler: () => {
-            this.logout();
-          },
-        },
-      ],
+        "La cancellazione dell'account non è ancora disponibile dall'app. " +
+        'Scrivici a support@trentinoquest.it e provvederemo alla rimozione ' +
+        'di tutti i tuoi dati.',
+      buttons: ['Chiudi'],
     });
     await alert.present();
   }

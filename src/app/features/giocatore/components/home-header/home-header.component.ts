@@ -7,10 +7,8 @@ import type { GamificationResult } from '@trentino-quest/shared-types';
 import { Player, UserRole } from '@trentino-quest/shared-types';
 import { QuestService } from '../../../../core/services/quest/quest.service';
 import { AuthService } from '../../../../core/services/auth/auth.service';
-import { TqBadgeComponent } from '../../../../shared/components/tq-badge/tq-badge.component';
+import { xpProgressPercent } from '../../../../core/utils/xp';
 import { StreakMilestoneModalComponent } from '../streak-milestone-modal/streak-milestone-modal.component';
-
-const XP_LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 12000, 18000];
 
 // Circonferenza cerchio XP ring (r=23, viewBox 50x50)
 const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 23;
@@ -20,7 +18,7 @@ const XP_RING_CIRCUMFERENCE = 2 * Math.PI * 23;
   templateUrl: './home-header.component.html',
   styleUrls: ['./home-header.component.scss'],
   standalone: true,
-  imports: [IonIcon, TqBadgeComponent],
+  imports: [IonIcon],
 })
 export class HomeHeaderComponent {
   private readonly questService = inject(QuestService);
@@ -49,14 +47,7 @@ export class HomeHeaderComponent {
     () => this.player()?.streakShieldActive ?? false,
   );
 
-  private readonly xpProgress = computed<number>(() => {
-    const lvl = this.level();
-    if (lvl >= XP_LEVELS.length) return 100;
-    const start = XP_LEVELS[lvl - 1];
-    const end = XP_LEVELS[lvl];
-    if (end === start) return 100;
-    return Math.min(100, Math.max(0, Math.round(((this.xp() - start) / (end - start)) * 100)));
-  });
+  private readonly xpProgress = computed<number>(() => xpProgressPercent(this.level(), this.xp()));
 
   protected readonly xpRingOffset = computed<number>(
     () => XP_RING_CIRCUMFERENCE * (1 - this.xpProgress() / 100),

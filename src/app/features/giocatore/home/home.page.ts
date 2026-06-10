@@ -27,12 +27,13 @@ import {
   SecondaryQuest,
 } from '../../../core/services/quest/quest.types';
 import { HomeHeaderComponent } from '../components/home-header/home-header.component';
-import { PermissionBannerComponent } from '../../../shared/components/permission-banner/permission banner.component';
+import { PermissionBannerComponent } from '../../../shared/components/permission-banner/permission-banner.component';
 import { ThemeService } from '../../../core/services/theme/theme.service';
 import { buildGameMapStyle } from '../../../core/services/map/map-style';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { HeadingService } from '../../../core/services/heading/heading.service';
 import { MapSettingsService } from '../../../core/services/map/map-settings.service';
+import { haversineMeters } from '../../../core/utils/geo';
 import { TRENTINO_VALLEY_LINES } from './trentino-valley-lines.data';
 import { TRENTINO_MASK } from './trentino-mask.data';
 
@@ -295,22 +296,25 @@ export class HomePage implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.initMap();
     this.hasAutoCentered = false;
-    this.questService.loadQuests();
-    this.questService.loadCompletions();
-    this.refreshInterval = setInterval(() => {
-      this.questService.loadQuests(undefined, true);
-      this.questService.loadCompletions(undefined, undefined, true);
-    }, this.REFRESH_INTERVAL_MS);
+    // I dati vengono caricati da ionViewWillEnter (che scatta anche alla
+    // prima entrata): niente doppio fetch qui.
   }
 
   ionViewWillEnter(): void {
     setTimeout(() => this.map?.resize(), 100);
     this.questService.loadQuests(undefined, true);
     this.questService.loadCompletions(undefined, undefined, true);
+    this.startPolling();
+    // Su piattaforme senza permesso esplicito (rilevato via feature
+    // detection) la bussola parte subito; dove serve un gesto utente
+    // il prompt scattera' al primo tap sui controlli mappa.
     void this.headingService.start();
   }
 
   ionViewWillLeave(): void {
+    // Ferma il polling: le pagine tab restano in cache (IonicRouteStrategy)
+    // e senza questo continuerebbero a chiamare il backend in background.
+    this.stopPolling();
     this.headingService.stop();
     this.showFilterPanel.set(false);
     if (this.activeSheet) {
@@ -320,10 +324,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.refreshInterval !== null) {
-      clearInterval(this.refreshInterval);
-      this.refreshInterval = null;
-    }
+    this.stopPolling();
     this.headingService.stop();
     this.userMarker?.remove();
     this.userMarker = null;
@@ -333,7 +334,25 @@ export class HomePage implements AfterViewInit, OnDestroy {
     }
   }
 
+  private startPolling(): void {
+    if (this.refreshInterval !== null) return;
+    this.refreshInterval = setInterval(() => {
+      this.questService.loadQuests(undefined, true);
+      this.questService.loadCompletions(undefined, undefined, true);
+    }, this.REFRESH_INTERVAL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.refreshInterval !== null) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
+    }
+  }
+
   protected centerOnUser(): void {
+    // Gesto utente: occasione per chiedere il permesso bussola dove
+    // richiesto (DeviceOrientationEvent.requestPermission). Idempotente.
+    void this.headingService.start();
     const pos = this.geolocationService.position();
     if (!pos || !this.map) return;
     this.haptics.medium();
@@ -346,6 +365,8 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   protected resetNorth(): void {
+    // Gesto utente: vedi centerOnUser per il permesso bussola.
+    void this.headingService.start();
     this.haptics.light();
     this.map?.easeTo({ bearing: 0, pitch: this.INITIAL_PITCH, duration: 500 });
   }
@@ -890,15 +911,4 @@ function buildCirclePolygon(
     coords.push([lng + dLng, lat + dLat]);
   }
   return coords;
-}
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6_371_000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

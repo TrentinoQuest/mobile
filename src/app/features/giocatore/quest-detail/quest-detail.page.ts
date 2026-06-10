@@ -3,7 +3,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 // Librerie esterne
 import { IonContent, ModalController } from '@ionic/angular/standalone';
 // Import locali
@@ -19,6 +18,8 @@ import { GeolocationService } from '../../../core/services/geolocation/geolocati
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
+import { haversineMeters } from '../../../core/utils/geo';
+import { formatCheckInError } from '../../../core/utils/check-in-errors';
 import { ScanModalComponent } from '../components/scan-modal/scan-modal.component';
 import { CheckinSuccessModalComponent } from '../components/checkin-success-modal/checkin-success-modal.component';
 
@@ -194,34 +195,3 @@ const STATUS_LABELS: Record<PlayerQuestStatus, string> = {
   available: 'Da scoprire',
   locked: 'Bloccata',
 };
-
-function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6_371_000;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-const CHECK_IN_ERROR_MESSAGES: Record<string, string> = {
-  OUT_OF_CHECK_IN_RADIUS: "Sei troppo lontano. Avvicinati ancora un po'.",
-  OUT_OF_RANGE: 'Sei fuori dal raggio. Avvicinati alla quest.',
-  QUEST_ALREADY_COMPLETED: 'Hai già completato questa quest.',
-  QUEST_INACTIVE: 'Questa quest non è attualmente disponibile.',
-  OUT_OF_RANGE_ACCURACY: "GPS troppo impreciso. Spostati all'aperto e riprova.",
-  STALE_FIX: 'Fix GPS scaduto. Attendi un aggiornamento della posizione.',
-  GPS_REQUIRED: 'Posizione GPS obbligatoria per il check-in.',
-};
-
-function formatCheckInError(err: unknown): string {
-  if (err instanceof HttpErrorResponse) {
-    const code = (err.error as { error?: { code?: string } })?.error?.code;
-    if (code && CHECK_IN_ERROR_MESSAGES[code]) return CHECK_IN_ERROR_MESSAGES[code];
-    if (err.status === 0) return 'Connessione assente. Verifica la rete.';
-    if (err.status === 422) return 'Posizione non accettata dal server.';
-  }
-  return 'Errore durante il check-in. Riprova.';
-}

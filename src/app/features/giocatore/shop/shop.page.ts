@@ -13,42 +13,39 @@ import {
   ticketOutline,
   qrCodeOutline,
 } from 'ionicons/icons';
+import type {
+  CouponView as SharedCouponView,
+  OfferWithBusiness,
+  OfferWithRemaining as SharedOfferWithRemaining,
+} from '@trentino-quest/shared-types';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { extractErrorCode } from '../../../core/utils/http-error';
 import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
 import { environment } from '../../../../environments/environment';
 import QRCode from 'qrcode';
 
 type ShopTab = 'offerte' | 'coupon';
-type CouponStatus = 'active' | 'redeemed' | 'expired';
 
-interface OfferWithRemaining {
-  id: string;
-  businessId: string;
-  title: string;
-  description: string;
-  pointsCost: number;
-  status: string;
-  createdAt: string;
-  businessName: string;
-  businessType: string;
-  businessAddress: string;
-  remaining: number | null;
-}
+/**
+ * Offerta del mercato come restituita da GET /market/offers: secondo lo
+ * swagger e' OfferWithBusiness arricchita con `remaining`. (In shared-types
+ * OfferWithRemaining estende solo Offer, senza anagrafica business: qui
+ * serve la composizione.)
+ */
+type OfferWithRemaining = OfferWithBusiness & Pick<SharedOfferWithRemaining, 'remaining'>;
 
-interface CouponView {
-  id: string;
-  offerId: string;
+/**
+ * CouponView con offerTitle/businessName opzionali, come da swagger
+ * (in shared-types sono required ma il backend puo' ometterli).
+ */
+type CouponView = Omit<SharedCouponView, 'offerTitle' | 'businessName'> & {
   offerTitle?: string;
   businessName?: string;
-  token: string;
-  pointsCost: number;
-  status: CouponStatus;
-  purchasedAt: string;
-  expiresAt: string;
-  redeemedAt: string | null;
-}
+};
+
+type CouponStatus = CouponView['status'];
 
 @Component({
   selector: 'app-shop',
@@ -179,13 +176,15 @@ export class ShopPage implements OnInit, OnDestroy {
         this.authService.deductPoints(offer.pointsCost);
         this.activeTab.set('coupon');
         this.loadCoupons();
+        // Aggiorna anche le offerte: il campo remaining e' cambiato.
+        this.loadOffers();
         await this.openCoupon(coupon);
       },
       error: async (err) => {
         this.purchasing.set(null);
         void this.haptics.error();
         void this.audio.playError();
-        const code = (err?.error?.code as string | undefined) ?? '';
+        const code = extractErrorCode(err) ?? '';
         const msg =
           code === 'INSUFFICIENT_COINS'
             ? 'Monete insufficienti'
@@ -234,7 +233,14 @@ export class ShopPage implements OnInit, OnDestroy {
       if (diff <= 0) {
         this.countdownText.set('Scaduto');
         this.stopCountdown();
+        const expired = this.activeCoupon();
         this.activeCoupon.update((c) => (c ? { ...c, status: 'expired' } : c));
+        // Mantieni coerente anche la lista coupon, non solo il dettaglio.
+        if (expired) {
+          this.coupons.update((list) =>
+            list.map((c) => (c.id === expired.id ? { ...c, status: 'expired' as const } : c)),
+          );
+        }
         return;
       }
       const h = Math.floor(diff / 3_600_000);

@@ -11,7 +11,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { CoopPage } from '../../src/app/features/giocatore/coop/coop.page';
@@ -31,7 +31,11 @@ describe('CoopPage [integrazione/backend reale]', () => {
   let page: any;
   let partner: Awaited<ReturnType<typeof rawRegister>>;
 
-  beforeEach(async () => {
+  // UNA coppia A+B per l'intera suite (rate limit /auth/register: vedi
+  // helpers). L'ordine dei test rispetta lo stato condiviso: "zero sfide"
+  // gira prima delle creazioni; ogni test di creazione riapre lo sheet
+  // (che azzera tipo e partner selezionati).
+  beforeAll(async () => {
     // B (partner) via API raw
     partner = await rawRegister('coopB');
 
@@ -55,11 +59,24 @@ describe('CoopPage [integrazione/backend reale]', () => {
     expect(page.friends().length).toBeGreaterThanOrEqual(1);
   });
 
+  it('createChallenge senza amico selezionato: canCreate è false e non chiama il backend', async () => {
+    page['loadAll']();
+    await waitFor(() => !page.loading());
+    page['openCreateSheet'](); // azzera tipo e partner
+    page['selectType']('complete_10_quests');
+    // nessun partner selezionato
+    expect(page.canCreate()).toBe(false);
+    const before = page.challenges().length;
+    await page.createChallenge();
+    expect(page.challenges().length).toBe(before);
+  });
+
   it('createChallenge: crea una sfida co-op con un amico', async () => {
     page['loadAll']();
     await waitFor(() => page.friends().length > 0);
 
     const friend = page.friends()[0];
+    page['openCreateSheet']();
     page['selectType']('walk_50km');
     page['selectPartner'](friend.playerId);
     expect(page.canCreate()).toBe(true);
@@ -72,24 +89,15 @@ describe('CoopPage [integrazione/backend reale]', () => {
     expect(page.showCreateSheet()).toBe(false);
   });
 
-  it('createChallenge senza amico selezionato: canCreate è false e non chiama il backend', async () => {
-    page['loadAll']();
-    await waitFor(() => !page.loading());
-    page['selectType']('complete_10_quests');
-    // nessun partner selezionato
-    expect(page.canCreate()).toBe(false);
-    const before = page.challenges().length;
-    await page.createChallenge();
-    expect(page.challenges().length).toBe(before);
-  });
-
   it('la sfida creata è visibile anche al partner via API', async () => {
     page['loadAll']();
     await waitFor(() => page.friends().length > 0);
+    const before = page.challenges().length;
+    page['openCreateSheet']();
     page['selectType']('unlock_5_rare');
     page['selectPartner'](page.friends()[0].playerId);
     await page.createChallenge();
-    await waitFor(() => page.challenges().length > 0);
+    await waitFor(() => page.challenges().length > before);
 
     const partnerChallenges = await api<any[]>('GET', '/coop/challenges', { token: partner.token });
     expect(partnerChallenges.status).toBe(200);

@@ -45,7 +45,8 @@ async function initializeTheme(): Promise<void> {
  * - setOverlaysWebView(true): la WebView disegna SOTTO la status bar, cosi'
  *   la mappa va davvero a tutto schermo. Lo spazio in cima e' poi protetto
  *   nei layout via il token --tq-safe-top.
- * - Style.Light: icone/orologio chiari, leggibili sul nostro bg dark.
+ * - Lo stile delle icone (chiare/scure) e' gestito dal ThemeService in
+ *   base al tema effettivo, non qui.
  *
  * Tutto guardato da isNativePlatform(): su web i metodi sarebbero no-op o
  * genererebbero warning inutili.

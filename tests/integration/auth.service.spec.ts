@@ -5,46 +5,67 @@
  * - registrazione/login popolano i signal di stato e persistono i token;
  * - il refresh rinnova l'access token;
  * - logout azzera lo stato.
+ *
+ * Nota rate-limit: il backend limita /auth/register a 20 richieste / 15 min
+ * per IP. La suite registra UN solo account in beforeAll e lo riusa in tutti
+ * i test (login, refresh, recover) per restare ampiamente nel budget.
  */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import type { AuthResponse } from '@trentino-quest/shared-types';
 
 import { AuthService } from '../../src/app/core/services/auth/auth.service';
 import { clearAuthStorage, setupTestBed, uniquePlayer } from './helpers';
 
 describe('AuthService [integrazione/backend reale]', () => {
   let auth: AuthService;
+  let creds: ReturnType<typeof uniquePlayer>;
+  let registerRes: AuthResponse;
 
-  beforeEach(() => {
+  beforeAll(async () => {
     clearAuthStorage();
     setupTestBed();
     auth = TestBed.inject(AuthService);
+    creds = uniquePlayer('auth');
+    registerRes = await firstValueFrom(auth.registerPlayer(creds));
   });
 
-  it('registerPlayer: registra, popola currentUser e persiste i token', async () => {
-    const creds = uniquePlayer('auth');
-    const res = await firstValueFrom(auth.registerPlayer(creds));
-
+  it('registerPlayer: registra, popola currentUser e persiste i token', () => {
     // La response rispetta il contratto AuthResponse
-    expect(res.accessToken).toBeTruthy();
-    expect(res.refreshToken).toBeTruthy();
-    expect(res.user).toBeTruthy();
+    expect(registerRes.accessToken).toBeTruthy();
+    expect(registerRes.refreshToken).toBeTruthy();
+    expect(registerRes.user).toBeTruthy();
 
     // L'implementazione del service ha aggiornato lo stato reattivo...
     expect(auth.isAuthenticated()).toBe(true);
     expect(auth.currentUser()?.email).toBe(creds.email);
     expect(auth.userRole()).toBeTruthy();
 
-    // ...e ha messo l'access token in cache per l'interceptor
+    // ...e ha messo i token in cache per gli interceptor. Dopo un eventuale
+    // refresh i token cambiano, quindi verifichiamo solo che esistano.
+    expect(auth.getAccessToken()).toBeTruthy();
+    expect(auth.getRefreshToken()).toBeTruthy();
+  });
+
+  it('refreshAccessToken: rinnova l’access token usando il refresh token', async () => {
+    const oldToken = auth.getAccessToken();
+
+    const res = await firstValueFrom(auth.refreshAccessToken());
+    expect(res.accessToken).toBeTruthy();
+    // il nuovo token è effettivamente in uso dal service
     expect(auth.getAccessToken()).toBe(res.accessToken);
-    expect(auth.getRefreshToken()).toBe(res.refreshToken);
+    expect(oldToken).toBeTruthy();
+  });
+
+  it('recoverPassword: il backend risponde senza errori (202)', async () => {
+    // non deve lanciare
+    await expect(
+      firstValueFrom(auth.recoverPassword({ email: creds.email })),
+    ).resolves.not.toThrow();
   });
 
   it('login: autentica con credenziali valide e aggiorna lo stato', async () => {
-    const creds = uniquePlayer('auth');
-    await firstValueFrom(auth.registerPlayer(creds)); // crea l'account
-
     // nuovo TestBed pulito per simulare un login "da zero"
     clearAuthStorage();
     setupTestBed();
@@ -59,29 +80,7 @@ describe('AuthService [integrazione/backend reale]', () => {
     expect(auth2.currentUser()?.email).toBe(creds.email);
   });
 
-  it('refreshAccessToken: rinnova l’access token usando il refresh token', async () => {
-    const creds = uniquePlayer('auth');
-    await firstValueFrom(auth.registerPlayer(creds));
-    const oldToken = auth.getAccessToken();
-
-    const res = await firstValueFrom(auth.refreshAccessToken());
-    expect(res.accessToken).toBeTruthy();
-    // il nuovo token è effettivamente in uso dal service
-    expect(auth.getAccessToken()).toBe(res.accessToken);
-    expect(oldToken).toBeTruthy();
-  });
-
-  it('recoverPassword: il backend risponde senza errori (202)', async () => {
-    const creds = uniquePlayer('auth');
-    await firstValueFrom(auth.registerPlayer(creds));
-    // non deve lanciare
-    await expect(firstValueFrom(auth.recoverPassword({ email: creds.email }))).resolves.not.toThrow();
-  });
-
   it('login con password errata: il service propaga errore 401 e NON autentica', async () => {
-    const creds = uniquePlayer('auth');
-    await firstValueFrom(auth.registerPlayer(creds));
-
     clearAuthStorage();
     setupTestBed();
     const auth2 = TestBed.inject(AuthService);

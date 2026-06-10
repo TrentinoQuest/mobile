@@ -5,7 +5,7 @@
  * i computed (unlockedCount/totalCount) con i dati reali dell'endpoint.
  */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from '../../src/app/core/services/auth/auth.service';
@@ -15,7 +15,9 @@ import { clearAuthStorage, setupTestBed, uniquePlayer, waitFor } from './helpers
 describe('PlayerProfileService [integrazione/backend reale]', () => {
   let profile: PlayerProfileService;
 
-  beforeEach(async () => {
+  // UN solo player per la suite (rate limit registrazioni: vedi helpers).
+  // Nessun test modifica lo stato del player, quindi condividerlo e' sicuro.
+  beforeAll(async () => {
     clearAuthStorage();
     setupTestBed();
     const auth = TestBed.inject(AuthService);

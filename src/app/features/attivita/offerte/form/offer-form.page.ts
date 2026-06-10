@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -43,8 +43,26 @@ export class OfferFormPage implements OnInit {
   protected description = signal('');
   protected pointsCost = signal<number>(1);
 
+  // True dopo il primo prefill in edit mode: evita di sovrascrivere le
+  // modifiche dell'utente quando il signal offers si aggiorna.
+  private prefilled = false;
+
   constructor() {
     addIcons({ arrowBackOutline });
+
+    // Prefill reattivo: copre sia il caso "offerte gia' in memoria" sia il
+    // deep link a freddo, dove le offerte arrivano dopo loadOffers().
+    effect(() => {
+      const id = this.offerId();
+      if (!id || this.prefilled) return;
+      const existing = this.businessService.offers().find((o) => o.id === id);
+      if (existing) {
+        this.prefilled = true;
+        this.title.set(existing.title);
+        this.description.set(existing.description);
+        this.pointsCost.set(existing.pointsCost);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -52,13 +70,9 @@ export class OfferFormPage implements OnInit {
     if (id) {
       this.isEditMode.set(true);
       this.offerId.set(id);
-      // Prepopola dai dati già in memoria (evita chiamata extra)
-      const existing = this.businessService.offers().find((o) => o.id === id);
-      if (existing) {
-        this.title.set(existing.title);
-        this.description.set(existing.description);
-        this.pointsCost.set(existing.pointsCost);
-      }
+      // Deep link a freddo: se le offerte non sono in memoria, caricale
+      // (skip automatico se gia' inizializzate).
+      this.businessService.loadOffers();
     }
   }
 
@@ -98,7 +112,7 @@ export class OfferFormPage implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/attivita/offerte']);
+    void this.router.navigate(['/attivita/offerte']);
   }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {

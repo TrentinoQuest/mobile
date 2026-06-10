@@ -92,14 +92,18 @@ export class LoginPage {
         break;
       case UserRole.ADMIN:
         this.authService.logout();
+        // L'utente resta sulla pagina: sblocca il form.
+        this.submitting.set(false);
         await this.showInfoToast('Account amministratore. Usa il backoffice web.');
         break;
       case UserRole.MAINTENANCE:
         this.authService.logout();
+        this.submitting.set(false);
         await this.showInfoToast("Account operatore. Usa l'app dedicata.");
         break;
       default:
         this.authService.logout();
+        this.submitting.set(false);
         await this.showErrorToast('Tipo di account non supportato.');
     }
   }

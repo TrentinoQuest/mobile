@@ -86,7 +86,8 @@ export class ScanModalComponent implements OnInit {
 
   // Contatori derivati da questService (sempre caricato) invece che da profileService
   // (che viene azzerato con reset() subito dopo la scansione).
-  // Dopo addCompletion() il length è N+1, quindi N+1-1 = N = conta prima di questo unlock.
+  // Dopo lo scan il length dei completions è N+1, quindi N+1-1 = N = conta
+  // prima di questo unlock.
   protected readonly prevCount = computed(() =>
     Math.max(0, this.questService.completions().length - 1),
   );
@@ -117,9 +118,8 @@ export class ScanModalComponent implements OnInit {
     this.state.set('submitting');
     try {
       const result = await this.scanService.scanAndSubmit(this.questId);
-      // Aggiorna i signal reattivi: mappa → marker diventa 'discovered',
-      // header → punti/XP/streak aggiornati, senza attendere il prossimo loadCompletions.
-      this.questService.addCompletion(result.completion);
+      // QuestService.scan() (via ScanService) ha gia' aggiunto il completion
+      // al signal: la mappa reagisce da sola. Qui aggiorniamo solo il player.
       this.authService.updateAfterCompletion(result.totalPoints, result.gamification);
       this.scanResult.set(result);
       // Invalida cache per forzare reload alla prossima apertura album/profilo

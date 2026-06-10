@@ -2,18 +2,24 @@ import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { PushNotifications } from '@capacitor/push-notifications';
 import type { ActionPerformed, PushNotificationSchema } from '@capacitor/push-notifications';
+import { Preferences } from '@capacitor/preferences';
 import { ToastController } from '@ionic/angular/standalone';
 import { AuthService } from '../auth/auth.service';
 import { HapticsService } from '../haptics/haptics.service';
 import { AudioService } from '../audio.service';
-import { SocialService } from '../social/social.service';
+
+/**
+ * Chiave Preferences per la preferenza notifiche scelta dal profilo:
+ * 'all' (default) | 'off'. Quando 'off' i toast in foreground vengono
+ * soppressi (le notifiche di sistema dipendono dai permessi OS).
+ */
+export const NOTIFICATIONS_PREF_KEY = 'tq_notifications_pref';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
   private readonly auth = inject(AuthService);
   private readonly haptics = inject(HapticsService);
   private readonly audio = inject(AudioService);
-  private readonly social = inject(SocialService);
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
 
@@ -45,6 +51,10 @@ export class PushNotificationService {
   }
 
   private async handleForeground(notification: PushNotificationSchema): Promise<void> {
+    // Rispetta la preferenza notifiche scelta dall'utente nel profilo.
+    const { value } = await Preferences.get({ key: NOTIFICATIONS_PREF_KEY });
+    if (value === 'off') return;
+
     void this.haptics.tapLight();
     this.audio.playTap();
 
@@ -57,8 +67,6 @@ export class PushNotificationService {
       buttons: [{ icon: 'close-outline', role: 'cancel' }],
     });
     await toast.present();
-
-    this.social.incrementUnreadBadge();
   }
 
   private handleDeepLink(action: ActionPerformed): void {

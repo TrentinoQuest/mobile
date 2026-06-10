@@ -10,7 +10,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { AlbumPage } from '../../src/app/features/giocatore/album/album.page';
@@ -21,7 +21,11 @@ import { uiStubProviders } from './stubs';
 describe('TaccuinoPage / album [integrazione/backend reale]', () => {
   let page: any;
 
-  beforeEach(async () => {
+  // UN solo player per la suite (rate limit registrazioni: vedi helpers).
+  // L'ordine dei test rispetta le dipendenze di stato: il caricamento del
+  // quiz gira prima dell'invio della risposta, il load delle missioni prima
+  // del claim.
+  beforeAll(async () => {
     clearAuthStorage();
     setupTestBed([AlbumPage, ...uiStubProviders().providers]);
     const auth = TestBed.inject(AuthService);

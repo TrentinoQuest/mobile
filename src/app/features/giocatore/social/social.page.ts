@@ -6,7 +6,6 @@ import {
   ActionSheetController,
   ToastController,
 } from '@ionic/angular/standalone';
-import { NgClass } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
   heartOutline,
@@ -24,6 +23,8 @@ import {
   sendOutline,
 } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
+import type { FeedActivityItem } from '@trentino-quest/shared-types';
+import type { Friend, FriendRequest } from '../../../core/models/social.types';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { TqBadgeComponent } from '../../../shared/components/tq-badge/tq-badge.component';
@@ -32,32 +33,6 @@ import { environment } from '../../../../environments/environment';
 
 type SocialTab = 'feed' | 'amici' | 'richieste';
 type KudosEmoji = 'beer' | 'highfive' | 'star';
-
-interface FeedActivityItem {
-  type: 'quest_completion' | 'collectible_unlock';
-  playerId: string;
-  username: string;
-  questName?: string;
-  collectibleName?: string;
-  collectibleRarity?: string;
-  timestamp: string;
-  activityId: string;
-  kudosCount: number;
-  myKudos: boolean;
-}
-
-interface Friend {
-  friendshipId: string;
-  playerId: string;
-  username: string;
-}
-
-interface FriendRequest {
-  friendshipId: string;
-  requesterId: string;
-  username: string;
-  createdAt: string;
-}
 
 // Gradienti avatar deterministici (stessa palette di lega.page.ts)
 const AVATAR_GRADIENTS = [
@@ -74,7 +49,7 @@ const AVATAR_GRADIENTS = [
   templateUrl: './social.page.html',
   styleUrls: ['./social.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, NgClass, FormsModule, TqBadgeComponent, TqButtonComponent],
+  imports: [IonContent, IonIcon, FormsModule, TqBadgeComponent, TqButtonComponent],
 })
 export class SocialPage implements OnInit {
   private readonly http = inject(HttpClient);

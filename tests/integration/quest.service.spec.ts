@@ -9,7 +9,7 @@
  * - scan() con token non valido propaga l'errore applicativo del backend.
  */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from '../../src/app/core/services/auth/auth.service';
@@ -28,7 +28,10 @@ describe('QuestService [integrazione/backend reale]', () => {
   let quest: QuestService;
   let geo: FakeGeolocationService;
 
-  beforeEach(async () => {
+  // UN solo player per l'intera suite (rate limit registrazioni: vedi
+  // helpers). I test sono ordinati: "zero completamenti" gira PRIMA dei
+  // check-in, e i check-in usano quest diverse fra loro.
+  beforeAll(async () => {
     clearAuthStorage();
     setupTestBed();
     // Serve un player autenticato perché /quests richiede il Bearer token.

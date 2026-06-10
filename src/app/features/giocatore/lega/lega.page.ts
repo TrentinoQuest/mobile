@@ -28,27 +28,13 @@ import {
 } from 'ionicons/icons';
 import { LeagueTier } from '@trentino-quest/shared-types';
 import type { LeagueCurrentView, LeagueMemberView } from '@trentino-quest/shared-types';
+import type { Friend, FriendRequest } from '../../../core/models/social.types';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
-import { AudioService } from '../../../core/services/audio.service';
-import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { environment } from '../../../../environments/environment';
 
 // ─── Tipi ─────────────────────────────────────────────────────────────────────
 
 type LegaTab = 'classifica' | 'amici';
-
-interface Friend {
-  friendshipId: string;
-  playerId: string;
-  username: string;
-}
-
-interface FriendRequest {
-  friendshipId: string;
-  requesterId: string;
-  username: string;
-  createdAt: string;
-}
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
 
@@ -98,13 +84,12 @@ const SHORT_MONTHS = [
   templateUrl: './lega.page.html',
   styleUrls: ['./lega.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, NgClass, FormsModule, TqButtonComponent],
+  imports: [IonContent, IonIcon, NgClass, FormsModule],
 })
 export class LegaPage implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly haptics = inject(HapticsService);
-  private readonly audio = inject(AudioService);
   private readonly actionSheet = inject(ActionSheetController);
   private readonly toastCtrl = inject(ToastController);
 

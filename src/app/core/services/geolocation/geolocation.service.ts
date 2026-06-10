@@ -14,7 +14,7 @@
 
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
-import type { GeoError, GeoStatus, PermissionState, Position } from './geolocation types';
+import type { GeoError, GeoStatus, PermissionState, Position } from './geolocation.types';
 import { GeolocationRepository } from './repository/geolocation.repository';
 
 /**

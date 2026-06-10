@@ -1,4 +1,3 @@
-// src/app/shared/components/permission-banner/permission-banner.component.ts
 //
 // Banner persistente che invita l'utente a riabilitare il permesso GPS
 // quando questo e' stato negato.

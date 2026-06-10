@@ -46,6 +46,10 @@ export function setupTestBed(extra: Provider[] = []): void {
   // (es. per simulare un login "da zero" dopo la registrazione).
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
+    // Le suite registrano il player UNA volta in beforeAll e riusano i
+    // service tra i test (rate limit registrazioni): l'injector NON va
+    // distrutto dopo ogni test.
+    teardown: { destroyAfterEach: false },
     providers: [
       provideHttpClient(
         withInterceptors([authInterceptor, refreshInterceptor]),
@@ -111,32 +115,62 @@ export async function api<T = unknown>(
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (opts.body !== undefined) headers['Content-Type'] = 'application/json';
   if (opts.token) headers['Authorization'] = `Bearer ${opts.token}`;
-  const res = await fetch(`${environment.apiUrl}${path}`, {
-    method,
-    headers,
-    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-  });
-  const text = await res.text();
-  let data: unknown = null;
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = text;
+
+  // Il backend applica rate limit per endpoint (es. /auth/register:
+  // 20 richieste / 900s per IP). Su 429 riproviamo una volta dopo una
+  // breve attesa: copre gli sforamenti marginali senza far esplodere la
+  // durata della suite.
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${environment.apiUrl}${path}`, {
+      method,
+      headers,
+      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    });
+
+    if (res.status === 429 && attempt === 0) {
+      const reset = Number(res.headers.get('ratelimit-reset') ?? res.headers.get('retry-after'));
+      const waitMs = Math.min(Number.isFinite(reset) && reset > 0 ? reset * 1000 : 30_000, 45_000);
+      await new Promise((r) => setTimeout(r, waitMs));
+      continue;
     }
+
+    const text = await res.text();
+    let data: unknown = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
+    }
+    return { status: res.status, data: data as T };
   }
-  return { status: res.status, data: data as T };
 }
 
 /** Registra un player via API raw e restituisce token + user. */
 export async function rawRegister(tag = 'raw') {
   const creds = uniquePlayer(tag);
-  const { data } = await api<{ accessToken: string; refreshToken: string; user: any }>(
+  const { status, data } = await api<{ accessToken: string; refreshToken: string; user: any }>(
     'POST',
     '/auth/register',
     { body: creds },
   );
+  if (status === 429) {
+    throw new Error(
+      'rawRegister: rate limit del backend su /auth/register (20 reg / 15 min). Riprovare piu\' tardi.',
+    );
+  }
   return { creds, token: data.accessToken, user: data.user };
+}
+
+/** Login via API raw con credenziali esistenti, restituisce il token. */
+export async function rawLogin(creds: { email: string; password: string }) {
+  const { data } = await api<{ accessToken: string; refreshToken: string; user: any }>(
+    'POST',
+    '/auth/login',
+    { body: { email: creds.email, password: creds.password } },
+  );
+  return { token: data.accessToken, user: data.user };
 }
 
 /** Crea un'amicizia accettata fra due player (scaffolding). */
@@ -169,6 +203,32 @@ export async function rawEarnPoints(token: string, count: number): Promise<numbe
     if (r.status < 300) ok += 1;
   }
   return ok;
+}
+
+/**
+ * Esegue check-in finche' il saldo (totalPoints, la valuta del market) non
+ * raggiunge `target`. Non assume quanto vale un singolo check-in (l'economia
+ * coins e' decisa dal backend: ~10 coins a secondary, moltiplicatori streak
+ * inclusi): legge il saldo reale dalla CheckInResponse.
+ *
+ * @returns il saldo raggiunto (potrebbe restare < target se finiscono le
+ *          quest secondarie disponibili).
+ */
+export async function rawEarnAtLeast(token: string, target: number): Promise<number> {
+  const quests = await api<any[]>('GET', '/quests', { token });
+  const secs = (quests.data as any[]).filter((q) => q.type === 'secondary' && q.position);
+  let balance = 0;
+  for (const s of secs) {
+    if (balance >= target) break;
+    const r = await api<{ totalPoints?: number }>('POST', `/quests/${s.id}/check-in`, {
+      token,
+      body: { position: s.position, fix: { accuracy: 8, clientTimestamp: Date.now() } },
+    });
+    if (r.status < 300 && typeof r.data?.totalPoints === 'number') {
+      balance = r.data.totalPoints;
+    }
+  }
+  return balance;
 }
 
 /** Pulisce lo storage Preferences (localStorage) tra un test e l'altro. */

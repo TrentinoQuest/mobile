@@ -14,9 +14,9 @@ import { environment } from '../../../environments/environment';
  *   loro UI di conseguenza, anche se di solito l'utente sara gia su /offline).
  *
  * Esclusioni:
- * - Le chiamate verso /health non triggerano la navigazione, perche /health
- *   e' usato proprio dalla pagina /offline per verificare il ritorno online.
  * - Se siamo gia su /offline, non navighiamo di nuovo (evita re-render inutili).
+ *   (Il check di /health non passa da HttpClient: la OfflinePage usa fetch
+ *   nativo, quindi non serve escluderlo qui.)
  *
  * NOTA: questo interceptor gestisce solo errori "di rete" (status 0).
  * I 4xx e 5xx HTTP arrivano dal server raggiungibile e vengono lasciati
@@ -29,10 +29,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const isNetworkError = error.status === 0;
       const isOurBackend = req.url.startsWith(environment.apiUrl);
-      const isHealthCheck = req.url === environment.healthCheckUrl;
       const isAlreadyOffline = router.url === '/offline';
 
-      const shouldRedirect = isNetworkError && isOurBackend && !isHealthCheck && !isAlreadyOffline;
+      const shouldRedirect = isNetworkError && isOurBackend && !isAlreadyOffline;
 
       if (shouldRedirect) {
         // Navigazione fire-and-forget: non aspettiamo il completamento.

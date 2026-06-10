@@ -5,6 +5,7 @@ import { EMPTY, Observable } from 'rxjs';
 import { QuestRepository, QuestSearchFilter } from './repository/quest.repository';
 import { GeolocationService } from '../geolocation/geolocation.service';
 import { AuthService } from '../auth/auth.service';
+import { extractErrorCode, extractErrorMessage } from '../../utils/http-error';
 import {
   AnyQuest,
   CheckInRequest,
@@ -69,7 +70,11 @@ export class QuestService {
 
   private readonly _quests = signal<AnyQuest[]>([]);
   private readonly _completions = signal<Completion[]>([]);
-  private readonly _loading = signal<boolean>(false);
+  // Loading separati per evitare che il finalize di una chiamata spenga lo
+  // spinner mentre l'altra e' ancora in volo (quests e completions vengono
+  // caricati in parallelo dalla home).
+  private readonly _questsLoading = signal<boolean>(false);
+  private readonly _completionsLoading = signal<boolean>(false);
   private readonly _error = signal<string | null>(null);
 
   // Flag di "caricamento avvenuto almeno una volta con successo".
@@ -88,7 +93,7 @@ export class QuestService {
   readonly completions = this._completions.asReadonly();
 
   /** True quando una chiamata e' in corso. */
-  readonly loading = this._loading.asReadonly();
+  readonly loading = computed(() => this._questsLoading() || this._completionsLoading());
 
   /** Messaggio di errore corrente, null se nessun errore. */
   readonly error = this._error.asReadonly();
@@ -132,7 +137,7 @@ export class QuestService {
   loadQuests(filter?: QuestSearchFilter, force = false): void {
     if (this._questsInitialized && !force) return;
 
-    this._loading.set(true);
+    this._questsLoading.set(true);
     this._error.set(null);
 
     this.repository
@@ -146,7 +151,7 @@ export class QuestService {
           this._error.set(this.formatError(err, 'caricamento quest'));
           return EMPTY;
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => this._questsLoading.set(false)),
       )
       .subscribe();
   }
@@ -158,7 +163,7 @@ export class QuestService {
   loadCompletions(limit = 100, offset = 0, force = false): void {
     if (this._completionsInitialized && !force) return;
 
-    this._loading.set(true);
+    this._completionsLoading.set(true);
     this._error.set(null);
 
     this.repository
@@ -172,7 +177,7 @@ export class QuestService {
           this._error.set(this.formatError(err, 'caricamento completamenti'));
           return EMPTY;
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => this._completionsLoading.set(false)),
       )
       .subscribe();
   }
@@ -244,16 +249,6 @@ export class QuestService {
   }
 
   /**
-   * Aggiunge un completamento direttamente al signal senza rifare il fetch.
-   * Usato da ScanModalComponent dopo una scansione QR riuscita: il service
-   * HTTP è già stato chiamato da ScanService, qui aggiorniamo solo lo stato
-   * locale per non perdere reattività della mappa.
-   */
-  addCompletion(completion: Completion): void {
-    this._completions.update((current) => [...current, completion]);
-  }
-
-  /**
    * Reset completo dello stato. Utile in logout o cambio utente.
    * Resetta anche i flag di inizializzazione cosi' i prossimi load
    * partono da zero.
@@ -261,7 +256,8 @@ export class QuestService {
   reset(): void {
     this._quests.set([]);
     this._completions.set([]);
-    this._loading.set(false);
+    this._questsLoading.set(false);
+    this._completionsLoading.set(false);
     this._error.set(null);
     this._questsInitialized = false;
     this._completionsInitialized = false;
@@ -314,16 +310,16 @@ export class QuestService {
   private formatError(err: unknown, context: string): string {
     if (err instanceof HttpErrorResponse) {
       // Body strutturato dal backend (vedi schema Error in OpenAPI).
-      const body = err.error as { code?: string; message?: string } | null;
-
       // Priorita' 1: codice applicativo mappato.
-      if (body?.code && ERROR_CODE_MESSAGES[body.code]) {
-        return ERROR_CODE_MESSAGES[body.code];
+      const code = extractErrorCode(err);
+      if (code && ERROR_CODE_MESSAGES[code]) {
+        return ERROR_CODE_MESSAGES[code];
       }
 
       // Priorita' 2: messaggio dal backend (se presente e leggibile).
-      if (body?.message) {
-        return body.message;
+      const message = extractErrorMessage(err);
+      if (message) {
+        return message;
       }
 
       // Priorita' 3: messaggio per status HTTP.

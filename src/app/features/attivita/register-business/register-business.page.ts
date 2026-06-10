@@ -10,6 +10,7 @@ import {
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IonContent, IonIcon, IonSpinner, ToastController } from '@ionic/angular/standalone';
+import { Geolocation } from '@capacitor/geolocation';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
@@ -88,29 +89,25 @@ export class RegisterBusinessPage {
   }
 
   detectLocation(): void {
-    if (!navigator.geolocation) {
-      void this.showToast('Geolocalizzazione non supportata dal browser.', 'warning');
-      return;
-    }
     void this.haptics.tapMedium();
     this.detectingLocation.set(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    // Plugin Capacitor (non navigator.geolocation): stesso flusso di
+    // permessi nativi usato dal resto dell'app su entrambe le piattaforme.
+    Geolocation.getCurrentPosition({ timeout: 10000, maximumAge: 60000 })
+      .then((pos) => {
         this.detectedPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         this.locationDetected.set(true);
         this.detectingLocation.set(false);
         void this.haptics.success();
-      },
-      () => {
+      })
+      .catch(() => {
         this.detectingLocation.set(false);
         void this.haptics.error();
         void this.showToast(
           'Impossibile rilevare la posizione. Abilita la geolocalizzazione e riprova.',
           'warning',
         );
-      },
-      { timeout: 10000, maximumAge: 60000 },
-    );
+      });
   }
 
   async submit(): Promise<void> {

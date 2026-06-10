@@ -16,66 +16,46 @@ import {
   trophyOutline,
   walkOutline,
 } from 'ionicons/icons';
-import { Player, UserRole } from '@trentino-quest/shared-types';
+import { CoopChallengeType, Player, UserRole } from '@trentino-quest/shared-types';
+import type { CoopChallengeView } from '@trentino-quest/shared-types';
+import { Preferences } from '@capacitor/preferences';
+import type { Friend } from '../../../core/models/social.types';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { TqButtonComponent } from '../../../shared/components/tq-button/tq-button.component';
 import { environment } from '../../../../environments/environment';
 
-// ─── Tipi ─────────────────────────────────────────────────────────────────────
-
-interface CoopChallengeView {
-  id: string;
-  initiatorId: string;
-  partnerId: string;
-  type: 'walk_50km' | 'complete_10_quests' | 'unlock_5_rare';
-  title: string;
-  description: string;
-  targetValue: number;
-  initiatorProgress: number;
-  partnerProgress: number;
-  totalPercentage: number;
-  status: 'active' | 'completed' | 'expired';
-  startedAt: string;
-  expiresAt: string;
-  rewardCollectibleId: string | null;
-}
-
-interface Friend {
-  friendshipId: string;
-  playerId: string;
-  username: string;
-}
-
 // ─── Costanti ─────────────────────────────────────────────────────────────────
 
-const CHALLENGE_INFO: Record<
-  CoopChallengeView['type'],
-  { icon: string; label: string; desc: string }
-> = {
-  walk_50km: {
+const CHALLENGE_INFO: Record<CoopChallengeType, { icon: string; label: string; desc: string }> = {
+  [CoopChallengeType.WALK_50KM]: {
     icon: 'walk-outline',
     label: 'Cammina 50 km',
     desc: 'Accumulate 50 km camminando sul territorio',
   },
-  complete_10_quests: {
+  [CoopChallengeType.COMPLETE_10]: {
     icon: 'checkmark-done-outline',
     label: 'Completa 10 quest',
     desc: 'Completate insieme 10 quest nel Trentino',
   },
-  unlock_5_rare: {
+  [CoopChallengeType.UNLOCK_5_RARE]: {
     icon: 'star-outline',
     label: '5 collezionabili rari',
     desc: 'Sbloccate 5 collezionabili rari o superiori',
   },
 };
 
-const CHALLENGE_TYPES: CoopChallengeView['type'][] = [
-  'walk_50km',
-  'complete_10_quests',
-  'unlock_5_rare',
+const CHALLENGE_TYPES: CoopChallengeType[] = [
+  CoopChallengeType.WALK_50KM,
+  CoopChallengeType.COMPLETE_10,
+  CoopChallengeType.UNLOCK_5_RARE,
 ];
+
+// Chiavi Preferences per lo stato locale (coerente col resto dell'app:
+// niente localStorage, che su iOS WKWebView puo' essere svuotato dall'OS).
+const NUDGE_TIMES_KEY = 'tq_coop_nudges';
+const SEEN_CELEBRATIONS_KEY = 'tq_coop_seen';
 
 const AVATAR_GRADIENTS = [
   'linear-gradient(135deg,#5A8A3A,#2F4A1F)',
@@ -117,9 +97,13 @@ export class CoopPage implements OnInit {
   protected readonly friends = signal<Friend[]>([]);
   private readonly friendMap = signal<Map<string, string>>(new Map());
 
+  // Stato locale persistito in Preferences (caricato in ngOnInit)
+  private readonly nudgeTimes = signal<Map<string, number>>(new Map());
+  private readonly seenCelebrations = signal<Set<string>>(new Set());
+
   // ── Crea sfida ────────────────────────────────────────────────────────────
   protected readonly showCreateSheet = signal(false);
-  protected readonly selectedType = signal<CoopChallengeView['type'] | null>(null);
+  protected readonly selectedType = signal<CoopChallengeType | null>(null);
   protected readonly selectedPartnerId = signal<string | null>(null);
   protected readonly creating = signal(false);
   protected readonly canCreate = computed(
@@ -149,7 +133,41 @@ export class CoopPage implements OnInit {
       this.selectedPartnerId.set(state.partnerId);
       this.showCreateSheet.set(true);
     }
-    this.loadAll();
+    // Ripristina lo stato locale PRIMA di caricare le sfide: finishLoad()
+    // decide la celebrazione in base a seenCelebrations.
+    void this.restoreLocalState().then(() => this.loadAll());
+  }
+
+  private async restoreLocalState(): Promise<void> {
+    const [nudges, seen] = await Promise.all([
+      Preferences.get({ key: NUDGE_TIMES_KEY }),
+      Preferences.get({ key: SEEN_CELEBRATIONS_KEY }),
+    ]);
+    try {
+      if (nudges.value) {
+        const parsed = JSON.parse(nudges.value) as Record<string, number>;
+        this.nudgeTimes.set(new Map(Object.entries(parsed)));
+      }
+      if (seen.value) {
+        this.seenCelebrations.set(new Set(JSON.parse(seen.value) as string[]));
+      }
+    } catch {
+      // Dati corrotti: riparti da zero, non e' stato critico.
+    }
+  }
+
+  private persistNudgeTimes(): void {
+    void Preferences.set({
+      key: NUDGE_TIMES_KEY,
+      value: JSON.stringify(Object.fromEntries(this.nudgeTimes())),
+    });
+  }
+
+  private persistSeenCelebrations(): void {
+    void Preferences.set({
+      key: SEEN_CELEBRATIONS_KEY,
+      value: JSON.stringify([...this.seenCelebrations()]),
+    });
   }
 
   private loadAll(): void {
@@ -242,9 +260,9 @@ export class CoopPage implements OnInit {
   // ── Nudge ─────────────────────────────────────────────────────────────────
 
   protected canNudge(partnerId: string): boolean {
-    const last = localStorage.getItem(`nudge_last_${partnerId}`);
+    const last = this.nudgeTimes().get(partnerId);
     if (!last) return true;
-    return Date.now() - parseInt(last) > MS_24H;
+    return Date.now() - last > MS_24H;
   }
 
   protected async sendNudge(c: CoopChallengeView): Promise<void> {
@@ -252,7 +270,8 @@ export class CoopPage implements OnInit {
     if (!this.canNudge(pid)) return;
 
     void this.haptics.warning();
-    localStorage.setItem(`nudge_last_${pid}`, String(Date.now()));
+    this.nudgeTimes.update((m) => new Map(m).set(pid, Date.now()));
+    this.persistNudgeTimes();
 
     this.http.post(`${environment.apiUrl}/coop/nudge/${pid}`, {}).subscribe({
       next: async () => {
@@ -264,7 +283,13 @@ export class CoopPage implements OnInit {
         await toast.present();
       },
       error: () => {
-        localStorage.removeItem(`nudge_last_${pid}`);
+        // Invio fallito: annulla il cooldown cosi' l'utente puo' riprovare.
+        this.nudgeTimes.update((m) => {
+          const next = new Map(m);
+          next.delete(pid);
+          return next;
+        });
+        this.persistNudgeTimes();
       },
     });
   }
@@ -283,7 +308,7 @@ export class CoopPage implements OnInit {
     this.showCreateSheet.set(false);
   }
 
-  protected selectType(type: CoopChallengeView['type']): void {
+  protected selectType(type: CoopChallengeType): void {
     void this.haptics.tapLight();
     this.selectedType.set(type);
   }
@@ -339,10 +364,11 @@ export class CoopPage implements OnInit {
   // ── Celebrate ─────────────────────────────────────────────────────────────
 
   private celebrateSeen(id: string): boolean {
-    return localStorage.getItem(`coop_seen_${id}`) === 'true';
+    return this.seenCelebrations().has(id);
   }
 
   private markCelebrateSeen(id: string): void {
-    localStorage.setItem(`coop_seen_${id}`, 'true');
+    this.seenCelebrations.update((s) => new Set(s).add(id));
+    this.persistSeenCelebrations();
   }
 }

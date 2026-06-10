@@ -69,6 +69,7 @@ testem.log
 .DS_Store
 Thumbs.db
 .claude
+DESIGN.md
 design/
 android/
 ios/

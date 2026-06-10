@@ -144,18 +144,19 @@ export class AuthService {
   /**
    * Termina la sessione corrente.
    *
-   * Strategia "fire and forget": cancelliamo immediatamente lo stato locale
-   * e mandiamo la chiamata di logout al backend in background. Se il backend
-   * non riceve la chiamata, il refresh token resta nel DB ma l'access token
-   * scade comunque entro 15 minuti.
+   * Strategia "fire and forget": inviamo la chiamata di logout al backend
+   * PRIMA di cancellare lo stato locale, cosi' l'authInterceptor allega
+   * ancora l'access token corrente (la revoca server-side del refresh token
+   * richiede la richiesta autenticata). Subito dopo cancelliamo lo stato
+   * locale senza aspettare la risposta: se il backend non riceve la
+   * chiamata, il refresh token resta nel DB ma l'access token scade
+   * comunque entro 15 minuti.
    */
   logout(): void {
     const refreshToken = this.refreshTokenCache;
 
-    // 1. Cancella stato locale immediatamente
-    this.handleLogoutSuccess();
-
-    // 2. Notifica il backend in background, senza aspettare ne gestire errori
+    // 1. Notifica il backend (la subscribe costruisce la richiesta ORA,
+    //    col token ancora in cache), senza aspettare ne gestire errori.
     if (refreshToken) {
       const body: LogoutRequest = { refreshToken };
       this.http.post<void>(`${environment.apiUrl}/auth/logout`, body).subscribe({
@@ -165,6 +166,9 @@ export class AuthService {
         },
       });
     }
+
+    // 2. Cancella stato locale immediatamente
+    this.handleLogoutSuccess();
   }
 
   /**
@@ -197,12 +201,40 @@ export class AuthService {
     });
   }
 
+  /** Accredita monete (es. reward quiz lore), mantiene il signal sincronizzato. */
+  addPoints(amount: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = { ...player, totalPoints: player.totalPoints + amount };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
   /** Scala totalPoints dopo un acquisto al market, mantiene il signal sincronizzato. */
   deductPoints(amount: number): void {
     const user = this._currentUser();
     if (!user || user.role !== UserRole.PLAYER) return;
     const player = user as Player;
     const updated: Player = { ...player, totalPoints: Math.max(0, player.totalPoints - amount) };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
+  /**
+   * Sincronizza valuta e XP del player con i totali restituiti dal backend
+   * (es. CompleteDailyQuestResponse, LoreAnswerResponse). A differenza di
+   * updateAfterCompletion non richiede un GamificationResult completo.
+   */
+  updateWallet(totalPoints: number, totalXp?: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = {
+      ...player,
+      totalPoints,
+      xp: totalXp ?? player.xp,
+    };
     this._currentUser.set(updated);
     void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
   }
@@ -283,16 +315,9 @@ export class AuthService {
       return;
     }
 
-    // Verifica che l'access token non sia gia scaduto localmente.
-    const expiresAt = AuthService.decodeJwtExpiration(accessToken.value);
-    const isExpired = expiresAt !== null && expiresAt < Date.now();
-
-    if (isExpired) {
-      // Access token scaduto: in teoria potremmo provare a refresharlo qui,
-      // ma per semplicita lasciamo che il flusso normale lo faccia alla
-      // prima richiesta. Per ora, manteniamo i token in memoria.
-      // Il refreshInterceptor li rinnovera al primo 401.
-    }
+    // NOTA: non verifichiamo la scadenza locale dell'access token. Anche se
+    // scaduto lo manteniamo in memoria: il refreshInterceptor lo rinnovera'
+    // automaticamente al primo 401.
 
     // Carica tutto in memoria e aggiorna i Signal
     try {
@@ -424,35 +449,5 @@ export class AuthService {
       Preferences.remove({ key: AuthService.KEY_REFRESH_TOKEN }),
       Preferences.remove({ key: AuthService.KEY_USER }),
     ]);
-  }
-
-  // ===========================================================================
-  // 9. UTILITY — DECODIFICA JWT
-  // ===========================================================================
-
-  /**
-   * Decodifica un JWT e ritorna il timestamp di scadenza in millisecondi.
-   *
-   * NOTA: questa funzione NON valida la firma del token. Si limita a leggere
-   * il payload (che e' base64-encoded ma non cifrato). La validazione della
-   * firma e' competenza esclusiva del backend.
-   *
-   * @param token JWT da decodificare
-   * @returns timestamp di scadenza in millisecondi (Date.now() compatible),
-   *          oppure null se il token e' malformato.
-   */
-  private static decodeJwtExpiration(token: string): number | null {
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return null;
-
-      const payload = JSON.parse(atob(parts[1])) as { exp?: number };
-      if (typeof payload.exp !== 'number') return null;
-
-      // exp e' in secondi Unix, convertiamo in millisecondi
-      return payload.exp * 1000;
-    } catch {
-      return null;
-    }
   }
 }

@@ -16,7 +16,10 @@ export class PlayerProfileService {
 
   private readonly _collection = signal<CollectibleEntry[]>([]);
   private readonly _progress = signal<ProgressSummary | null>(null);
-  private readonly _loading = signal(false);
+  // Loading separati: collezione e progressi vengono caricati in parallelo,
+  // un finalize non deve spegnere lo spinner dell'altra chiamata.
+  private readonly _collectionLoading = signal(false);
+  private readonly _progressLoading = signal(false);
   private readonly _error = signal<string | null>(null);
 
   private _collectionInitialized = false;
@@ -24,7 +27,7 @@ export class PlayerProfileService {
 
   readonly collection = this._collection.asReadonly();
   readonly progress = this._progress.asReadonly();
-  readonly loading = this._loading.asReadonly();
+  readonly loading = computed(() => this._collectionLoading() || this._progressLoading());
   readonly error = this._error.asReadonly();
 
   readonly unlockedCount = computed(() => this._collection().length);
@@ -32,7 +35,7 @@ export class PlayerProfileService {
 
   loadCollection(force = false): void {
     if (this._collectionInitialized && !force) return;
-    this._loading.set(true);
+    this._collectionLoading.set(true);
     this._error.set(null);
     this.repository
       .getCollection()
@@ -45,14 +48,14 @@ export class PlayerProfileService {
           this._error.set(this.formatError(err, 'caricamento collezione'));
           return EMPTY;
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => this._collectionLoading.set(false)),
       )
       .subscribe();
   }
 
   loadProgress(zone?: string, force = false): void {
     if (this._progressInitialized && !force) return;
-    this._loading.set(true);
+    this._progressLoading.set(true);
     this._error.set(null);
     this.repository
       .getProgress(zone)
@@ -65,7 +68,7 @@ export class PlayerProfileService {
           this._error.set(this.formatError(err, 'caricamento progressi'));
           return EMPTY;
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => this._progressLoading.set(false)),
       )
       .subscribe();
   }
@@ -73,7 +76,8 @@ export class PlayerProfileService {
   reset(): void {
     this._collection.set([]);
     this._progress.set(null);
-    this._loading.set(false);
+    this._collectionLoading.set(false);
+    this._progressLoading.set(false);
     this._error.set(null);
     this._collectionInitialized = false;
     this._progressInitialized = false;

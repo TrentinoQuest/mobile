@@ -22,7 +22,7 @@
 
 import { Injectable } from '@angular/core';
 import { Geolocation, type Position as CapacitorPosition } from '@capacitor/geolocation';
-import type { Position, PermissionState, GeoError, GeoErrorCode } from '../geolocation types';
+import type { Position, PermissionState, GeoError, GeoErrorCode } from '../geolocation.types';
 import { GeolocationRepository, WatchCallback } from './geolocation.repository';
 
 const POSITION_OPTIONS = {

@@ -6,79 +6,62 @@
  * - invio richiesta di amicizia (per username) + accettazione;
  * - invio kudos su un'attività reale (completamento di un amico).
  *
- * Usa due player reali (A e B) per esercitare i flussi relazionali.
+ * Usa due player reali (A e B), registrati UNA volta in beforeAll (rate
+ * limit /auth/register: 20 / 15 min) e riusati nei test via login.
+ * L'ordine dei test rispetta lo stato: "liste vuote" gira prima che A e B
+ * diventino amici.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 
 import { SocialPage } from '../../src/app/features/giocatore/social/social.page';
 import { AuthService } from '../../src/app/core/services/auth/auth.service';
-import { QuestService } from '../../src/app/core/services/quest/quest.service';
-import { GeolocationService } from '../../src/app/core/services/geolocation/geolocation.service';
-import { SecondaryQuest } from '../../src/app/core/services/quest/quest.types';
-import {
-  clearAuthStorage,
-  FakeGeolocationService,
-  setupTestBed,
-  uniquePlayer,
-  waitFor,
-} from './helpers';
+import { api, clearAuthStorage, rawRegister, setupTestBed, waitFor } from './helpers';
 import { uiStubProviders } from './stubs';
 
-/** Registra un player isolato (TestBed pulito) e ritorna l'AuthService. */
-async function freshPlayer(tag: string) {
+/** TestBed pulito + login con credenziali esistenti; ritorna la pagina. */
+async function loginPage(creds: { email: string; password: string }) {
   clearAuthStorage();
   setupTestBed([SocialPage, ...uiStubProviders().providers]);
   const auth = TestBed.inject(AuthService);
-  const creds = uniquePlayer(tag);
-  const res = await firstValueFrom(auth.registerPlayer(creds));
-  return { auth, creds, user: res.user, page: TestBed.inject(SocialPage) as any };
+  await firstValueFrom(auth.login({ email: creds.email, password: creds.password }));
+  return TestBed.inject(SocialPage) as any;
 }
 
 describe('SocialPage [integrazione/backend reale]', () => {
-  let A: Awaited<ReturnType<typeof freshPlayer>>;
+  let A: Awaited<ReturnType<typeof rawRegister>>;
+  let B: Awaited<ReturnType<typeof rawRegister>>;
 
-  beforeEach(async () => {
-    A = await freshPlayer('socA');
+  beforeAll(async () => {
+    A = await rawRegister('socA');
+    B = await rawRegister('socB');
   });
 
   it('carica feed, amici e richieste senza errori (player nuovo = liste vuote)', async () => {
-    A.page['loadFeed']();
-    A.page['loadFriends']();
-    A.page['loadRequests']();
-    await waitFor(() => !A.page.feedLoading() && !A.page.friendsLoading());
+    const page = await loginPage(A.creds);
+    page['loadFeed']();
+    page['loadFriends']();
+    page['loadRequests']();
+    await waitFor(() => !page.feedLoading() && !page.friendsLoading());
 
-    expect(Array.isArray(A.page.feed())).toBe(true);
-    expect(A.page.friends()).toEqual([]);
-    expect(A.page.requests()).toEqual([]);
+    expect(Array.isArray(page.feed())).toBe(true);
+    expect(page.friends()).toEqual([]);
+    expect(page.requests()).toEqual([]);
   });
 
   it('richiesta di amicizia per username + accettazione (flusso A→B)', async () => {
-    // B esiste già; ne creo uno e ne ricavo username
-    const bCreds = uniquePlayer('socB');
-    {
-      clearAuthStorage();
-      setupTestBed([SocialPage, ...uiStubProviders().providers]);
-      await firstValueFrom(TestBed.inject(AuthService).registerPlayer(bCreds));
-    }
-
     // A invia la richiesta a B
-    A = await freshPlayer('socA');
-    A.page.searchQuery.set(bCreds.username);
-    A.page['sendFriendRequest']();
-    await waitFor(() => A.page.requestSent() || !!A.page.requestError());
-    expect(A.page.requestError()).toBe('');
-    expect(A.page.requestSent()).toBe(true);
+    const aPage = await loginPage(A.creds);
+    aPage.searchQuery.set(B.creds.username);
+    aPage['sendFriendRequest']();
+    await waitFor(() => aPage.requestSent() || !!aPage.requestError());
+    expect(aPage.requestError()).toBe('');
+    expect(aPage.requestSent()).toBe(true);
 
     // B accede, vede la richiesta e la accetta
-    clearAuthStorage();
-    setupTestBed([SocialPage, ...uiStubProviders().providers]);
-    await firstValueFrom(
-      TestBed.inject(AuthService).login({ email: bCreds.email, password: bCreds.password }),
-    );
-    const bPage = TestBed.inject(SocialPage) as any;
+    const bPage = await loginPage(B.creds);
     bPage['loadRequests']();
     await waitFor(() => bPage.requests().length > 0);
 
@@ -94,38 +77,31 @@ describe('SocialPage [integrazione/backend reale]', () => {
   });
 
   it('invia kudos su un completamento reale di un amico', async () => {
-    // B si registra e completa una quest secondaria => genera un'attività
-    const bCreds = uniquePlayer('socKB');
-    clearAuthStorage();
-    setupTestBed([
-      SocialPage,
-      { provide: GeolocationService, useClass: FakeGeolocationService },
-      ...uiStubProviders().providers,
-    ]);
-    const bAuth = TestBed.inject(AuthService);
-    const bUser = (await firstValueFrom(bAuth.registerPlayer(bCreds))).user;
-    const bQuest = TestBed.inject(QuestService);
-    const bGeo = TestBed.inject(GeolocationService) as unknown as FakeGeolocationService;
-    bQuest.loadQuests();
-    await waitFor(() => bQuest.secondaryQuests().length > 0);
-    const target = bQuest.secondaryQuests()[0] as SecondaryQuest;
-    bGeo.setFix(8);
-    const completion = await firstValueFrom(
-      bQuest.checkIn(target.id, { position: { lat: target.position.lat, lng: target.position.lng } }),
-    );
+    // B completa una quest secondaria via API raw => genera un'attività
+    const quests = await api<any[]>('GET', '/quests', { token: B.token });
+    const target = (quests.data as any[]).find((q) => q.type === 'secondary' && q.position);
+    expect(target).toBeTruthy();
+    const checkIn = await api<any>('POST', `/quests/${target.id}/check-in`, {
+      token: B.token,
+      body: {
+        position: target.position,
+        fix: { accuracy: 8, clientTimestamp: Date.now() },
+      },
+    });
+    expect(checkIn.status).toBeLessThan(300);
 
-    // A invia un kudos sull'attività di B
-    A = await freshPlayer('socKA');
+    // A invia un kudos sull'attività di B (sono amici dal test precedente)
+    const aPage = await loginPage(A.creds);
     const activityItem = {
-      activityId: completion.completion.id,
+      activityId: checkIn.data.completion.id,
       type: 'quest_completion',
-      playerId: (bUser as any).id ?? (bUser as any)._id,
-      username: bCreds.username,
+      playerId: (B.user as any).id ?? (B.user as any)._id,
+      username: B.creds.username,
     };
-    A.page.sendKudos(activityItem);
+    aPage.sendKudos(activityItem);
     // dopo il completamento della POST, il flag "pending" viene rimosso
-    await waitFor(() => !A.page['pendingKudos']().has(activityItem.activityId));
+    await waitFor(() => !aPage['pendingKudos']().has(activityItem.activityId));
     // l'aggiornamento ottimistico segna il kudos come inviato
-    expect(A.page['optimisticKudos']().get(activityItem.activityId)).toBe(true);
+    expect(aPage['optimisticKudos']().get(activityItem.activityId)).toBe(true);
   });
 });

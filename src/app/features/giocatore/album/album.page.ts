@@ -30,9 +30,11 @@ import type {
   LoreAnswerResponse,
   LoreQuestionView,
 } from '@trentino-quest/shared-types';
+import { Preferences } from '@capacitor/preferences';
 import { PlayerProfileService } from '../../../core/services/player-profile/player-profile.service';
 import { QuestService } from '../../../core/services/quest/quest.service';
 import { GeolocationService } from '../../../core/services/geolocation/geolocation.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { HapticsService } from '../../../core/services/haptics/haptics.service';
 import { AudioService } from '../../../core/services/audio.service';
 import { CollectibleDetailModalComponent } from '../components/collectible-detail-modal/collectible-detail-modal.component';
@@ -86,6 +88,7 @@ export class AlbumPage implements OnInit, OnDestroy {
   private readonly profileService = inject(PlayerProfileService);
   private readonly questService = inject(QuestService);
   private readonly geoService = inject(GeolocationService);
+  private readonly authService = inject(AuthService);
   private readonly haptics = inject(HapticsService);
   private readonly audio = inject(AudioService);
   private readonly modalCtrl = inject(ModalController);
@@ -211,6 +214,11 @@ export class AlbumPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.profileService.loadCollection();
     this.profileService.loadProgress();
+    // Il conteggio totale e le card "locked" derivano dalle PrimaryQuest con
+    // collectibleId: se si entra nel Taccuino senza prima passare dalla mappa,
+    // quests() sarebbe vuoto e l'album risulterebbe vuoto. Idempotente: il
+    // QuestService salta la chiamata se le quest sono gia' state caricate.
+    this.questService.loadQuests();
   }
 
   ngOnDestroy(): void {
@@ -320,6 +328,8 @@ export class AlbumPage implements OnInit, OnDestroy {
             void this.haptics.success();
             this.audio.playSuccess();
             this.triggerQuizReward(res.coinsAwarded);
+            // Sincronizza il wallet: l'header mostra subito le nuove monete.
+            this.authService.addPoints(res.coinsAwarded);
           } else {
             void this.haptics.error();
             this.audio.playError();
@@ -336,12 +346,17 @@ export class AlbumPage implements OnInit, OnDestroy {
   }
 
   protected saveMapFragment(hint: string): void {
-    const saved = JSON.parse(localStorage.getItem('tq_map_fragments') ?? '[]') as string[];
-    if (!saved.includes(hint)) {
-      saved.push(hint);
-      localStorage.setItem('tq_map_fragments', JSON.stringify(saved));
-    }
     void this.haptics.tapLight();
+    // Persistenza coerente col resto dell'app: Capacitor Preferences
+    // (localStorage su iOS WKWebView puo' essere svuotato dal sistema).
+    void (async () => {
+      const { value } = await Preferences.get({ key: 'tq_map_fragments' });
+      const saved = JSON.parse(value ?? '[]') as string[];
+      if (!saved.includes(hint)) {
+        saved.push(hint);
+        await Preferences.set({ key: 'tq_map_fragments', value: JSON.stringify(saved) });
+      }
+    })();
   }
 
   private startQuizCountdown(): void {
@@ -408,6 +423,9 @@ export class AlbumPage implements OnInit, OnDestroy {
           void this.haptics.success();
           this.audio.playSuccess();
           this.triggerMissionReward(type);
+          // Sincronizza monete e XP con i totali restituiti dal backend:
+          // header e profilo si aggiornano senza attendere un reload.
+          this.authService.updateWallet(res.totalPoints, res.totalXp);
           // Segna come riscosso localmente
           const claimed = new Set(this.claimedMissions());
           claimed.add(type);
@@ -469,11 +487,6 @@ export class AlbumPage implements OnInit, OnDestroy {
   // ── Utility ─────────────────────────────────────────────────────────────────
 
   protected missionBorderClass(m: DailyQuestItem): string {
-    if (m.completed) return 'mission-card--completed';
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0);
-    if (now > midnight) return 'mission-card--expired';
-    return '';
+    return m.completed ? 'mission-card--completed' : '';
   }
 }

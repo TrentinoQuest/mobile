@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   CapacitorBarcodeScanner,
@@ -8,7 +7,8 @@ import {
 } from '@capacitor/barcode-scanner';
 import type { ScanQrResponse } from '@trentino-quest/shared-types';
 import { GeolocationService } from '../geolocation/geolocation.service';
-import { environment } from '../../../../environments/environment';
+import { QuestService } from '../quest/quest.service';
+import { extractErrorCode } from '../../utils/http-error';
 
 export interface ScanError {
   code: string;
@@ -22,14 +22,16 @@ export interface ScanError {
  *   1. Apertura scanner nativo Capacitor
  *   2. Il contenuto del QR è il qrToken grezzo (stringa pura, non JSON)
  *   3. Lettura posizione GPS dal GeolocationService
- *   4. Chiamata POST /quests/{questId}/scan con token + fix GPS
+ *   4. Delega a QuestService.scan() per POST /quests/{questId}/scan
+ *      (il service arricchisce il body col fix anti-cheat e aggiorna
+ *      automaticamente il signal dei completamenti)
  *
  * Il questId viene passato dal chiamante (popup della quest aperta),
  * non è deducibile dal QR da solo.
  */
 @Injectable({ providedIn: 'root' })
 export class ScanService {
-  private readonly http = inject(HttpClient);
+  private readonly questService = inject(QuestService);
   private readonly geoService = inject(GeolocationService);
 
   private readonly ERROR_MESSAGES: Record<string, string> = {
@@ -37,6 +39,7 @@ export class ScanService {
     QUEST_ALREADY_COMPLETED: 'Hai già completato questa quest.',
     OUT_OF_VALIDATION_RADIUS: 'Sei troppo lontano dal QR code.',
     QR_QUEST_MISMATCH: 'QR code non riconosciuto.',
+    QR_EXPIRED: "Il QR e' scaduto o e' stato sostituito.",
     QUEST_NOT_PLACED: 'Quest non ancora disponibile sul territorio.',
     COLLECTIBLE_MISSING: 'Errore di configurazione della quest.',
     OUT_OF_RANGE_ACCURACY: 'GPS troppo impreciso. Spostati in uno spazio aperto.',
@@ -80,13 +83,12 @@ export class ScanService {
     }
 
     return firstValueFrom(
-      this.http.post<ScanQrResponse>(`${environment.apiUrl}/quests/${questId}/scan`, {
+      this.questService.scan(questId, {
         qrToken,
         position: { lat: position.lat, lng: position.lng },
-        fix: { accuracy: position.accuracy, clientTimestamp: position.clientTimestamp },
       }),
     ).catch((err: unknown) => {
-      const code = (err as { error?: { error?: { code?: string } } })?.error?.error?.code;
+      const code = extractErrorCode(err);
       const message =
         (code && this.ERROR_MESSAGES[code]) ?? 'Errore durante la scansione. Riprova.';
       throw { code: code ?? 'UNKNOWN', message } satisfies ScanError;

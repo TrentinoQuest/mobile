@@ -32,4 +32,31 @@ g['Headers'] = UndiciHeaders;
 g['Request'] = UndiciRequest;
 g['Response'] = UndiciResponse;
 
+/**
+ * Storage in-memory stabile al posto del localStorage di jsdom.
+ *
+ * Capacitor Preferences (web) legge `window.localStorage` a ogni chiamata;
+ * i write fire-and-forget dell'app (es. persistenza token post-login) possono
+ * completare DOPO che jsdom ha smontato l'ambiente del file di test, quando
+ * `window.localStorage` non esiste piu' -> unhandled rejection
+ * "Cannot read properties of undefined (reading 'setItem')".
+ * Un oggetto nostro, definito su window e globalThis, resta valido per tutta
+ * la sessione.
+ */
+const memStore = new Map<string, string>();
+const memStorage: Storage = {
+  get length() {
+    return memStore.size;
+  },
+  clear: () => memStore.clear(),
+  getItem: (key: string) => memStore.get(key) ?? null,
+  key: (index: number) => [...memStore.keys()][index] ?? null,
+  removeItem: (key: string) => void memStore.delete(key),
+  setItem: (key: string, value: string) => void memStore.set(key, String(value)),
+};
+Object.defineProperty(globalThis, 'localStorage', { value: memStorage, configurable: true });
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', { value: memStorage, configurable: true });
+}
+
 getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
