@@ -71,8 +71,9 @@ Thumbs.db
 .claude
 DESIGN.md
 design/
-ios/
 docs/
 
-# La cartella android/ è versionata; i file sensibili (google-services.json,
-# local.properties, keystore) restano esclusi via android/.gitignore.
+# Le cartelle android/ e ios/ sono versionate; i file sensibili
+# (google-services.json e GoogleService-Info.plist con le API key Firebase,
+# local.properties, keystore) restano esclusi via android/.gitignore e
+# ios/.gitignore. I file reali vengono consegnati separatamente (vedi BUILD.md).

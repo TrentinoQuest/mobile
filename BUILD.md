@@ -95,3 +95,14 @@ l'installazione da origini sconosciute).
 - **L'app si avvia ma non carica i dati** → l'app parla col backend
   deployato (URL in `src/environments/environment.prod.ts`): serve una
   connessione a internet sul dispositivo.
+
+## Build iOS
+
+Anche la cartella `ios/` è versionata. Come per Android, il file con i dati
+sensibili — `GoogleService-Info.plist` (API key Firebase) — **non è incluso
+nel repository**: viene consegnato separatamente, insieme alle istruzioni
+dettagliate di build per iOS, e va copiato in `ios/App/App/`.
+
+Il flusso è analogo a quello Android (`npm install && npm run build &&
+npx cap sync ios`), ma la compilazione finale avviene con **Xcode su
+macOS**. Vedi le istruzioni allegate al file consegnato separatamente.
