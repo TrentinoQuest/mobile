@@ -389,7 +389,8 @@
 .coupon-detail {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  /* Sopra la tab bar del giocatore (--tq-z-tab-bar: 1020), come ogni modale. */
+  z-index: var(--tq-z-modal);
 
   &__backdrop {
     position: absolute;

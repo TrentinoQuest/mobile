@@ -71,25 +71,22 @@
       }
     </div>
 
-    @if (c.status === 'active') {
-    <tq-button iconStart="checkmark-circle" (tapped)="redeem()">Riscatta coupon</tq-button>
-    }
-    <tq-button
-      [variant]="c.status === 'active' ? 'ghost' : 'secondary'"
-      iconStart="scan-outline"
-      (tapped)="reset()"
-    >
-      Scansiona un altro
-    </tq-button>
-    }
-    }
-
-    <!-- REDEEMING -->
-    @case ('redeeming') {
-    <div class="coupon-scan__pending">
-      <ion-icon class="coupon-scan__spinner" name="ticket-outline"></ion-icon>
-      <p class="coupon-scan__pending-text">Riscatto in corso…</p>
+    <div class="coupon-scan__actions">
+      @if (c.status === 'active') {
+      <tq-button iconStart="checkmark-circle" [loading]="redeeming()" (tapped)="redeem()">
+        Riscatta coupon
+      </tq-button>
+      }
+      <tq-button
+        [variant]="c.status === 'active' ? 'ghost' : 'secondary'"
+        iconStart="scan-outline"
+        [disabled]="redeeming()"
+        (tapped)="reset()"
+      >
+        Scansiona un altro
+      </tq-button>
     </div>
+    }
     }
 
     <!-- SUCCESS -->

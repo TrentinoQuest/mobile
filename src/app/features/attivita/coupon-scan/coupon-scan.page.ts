@@ -30,12 +30,13 @@ import { extractErrorCode, extractErrorMessage } from '../../../core/utils/http-
  * Stato della macchina del flusso cassiere:
  * - idle:      schermata iniziale, in attesa di scansione
  * - verifying: scansione fatta, GET di verifica in corso
- * - verified:  coupon verificato, mostra le info (riscattabile se active)
- * - redeeming: POST di riscatto in corso
+ * - verified:  coupon verificato, mostra le info (riscattabile se active);
+ *              il POST di riscatto avviene in-place (spinner nel bottone,
+ *              signal `redeeming`) senza cambiare schermata
  * - success:   coupon riscattato con successo
  * - error:     errore di verifica/riscatto, con possibilità di riprovare
  */
-type ScanState = 'idle' | 'verifying' | 'verified' | 'redeeming' | 'success' | 'error';
+type ScanState = 'idle' | 'verifying' | 'verified' | 'success' | 'error';
 
 /** Messaggi UI per i codici errore applicativi della pipeline coupon. */
 const COUPON_ERROR_MESSAGES: Record<string, string> = {
@@ -71,6 +72,8 @@ export class CouponScanPage {
   protected readonly state = signal<ScanState>('idle');
   protected readonly coupon = signal<CouponRedeemInfo | null>(null);
   protected readonly errorMessage = signal<string>('');
+  /** POST di riscatto in corso: spinner inline nel bottone "Riscatta". */
+  protected readonly redeeming = signal(false);
 
   constructor() {
     addIcons({
@@ -112,15 +115,17 @@ export class CouponScanPage {
   /** Riscatta il coupon verificato (abilitato solo se status === 'active'). */
   async redeem(): Promise<void> {
     const current = this.coupon();
-    if (!current || current.status !== 'active') return;
+    if (!current || current.status !== 'active' || this.redeeming()) return;
 
-    this.state.set('redeeming');
+    this.redeeming.set(true);
     try {
       await firstValueFrom(this.businessService.redeemCoupon(current.token));
       void this.haptics.success();
       this.state.set('success');
     } catch (err) {
       this.fail(this.messageFor(err));
+    } finally {
+      this.redeeming.set(false);
     }
   }
 

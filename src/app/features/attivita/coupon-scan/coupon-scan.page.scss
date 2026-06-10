@@ -90,14 +90,24 @@
     flex-direction: column;
     gap: var(--space-12);
     border: 2px solid var(--color-border);
+    animation: coupon-card-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 
     &--active {
       border-color: var(--color-primary);
+      box-shadow: 0 8px 24px -10px rgba(var(--color-primary-rgb), 0.35);
     }
 
     &--invalid {
       opacity: 0.85;
     }
+  }
+
+  // Azioni sotto la card: entrano subito dopo di lei
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    animation: coupon-fade-up 320ms ease-out 140ms both;
   }
 
   &__card-badge {
@@ -113,6 +123,7 @@
     letter-spacing: 0.04em;
     background: var(--color-bg);
     color: var(--color-text-secondary);
+    animation: coupon-badge-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) 180ms both;
 
     ion-icon {
       font-size: 16px;
@@ -241,6 +252,7 @@
     font-weight: 700;
     color: var(--color-text-primary);
     margin: 0;
+    animation: coupon-fade-up 360ms ease-out 480ms both;
   }
 
   &__outcome-text {
@@ -248,6 +260,12 @@
     color: var(--color-text-secondary);
     margin: 0;
     max-width: 30ch;
+    animation: coupon-fade-up 360ms ease-out 720ms both;
+  }
+
+  // Bottone in coda alle schermate di esito: entra per ultimo
+  &__outcome + tq-button {
+    animation: coupon-fade-up 360ms ease-out 840ms both;
   }
 
   // Ricevuta dell'offerta validata (solo success)
@@ -262,6 +280,7 @@
     background: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
+    animation: coupon-fade-up 360ms ease-out 600ms both;
   }
 
   &__receipt-offer {
@@ -331,6 +350,39 @@
   }
 }
 
+@keyframes coupon-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes coupon-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes coupon-badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes coupon-seal-shake {
   0%,
   100% {
@@ -354,9 +406,18 @@
 @media (prefers-reduced-motion: reduce) {
   .coupon-scan {
     &__check-svg,
-    &__seal {
+    &__seal,
+    &__card,
+    &__card-badge,
+    &__actions,
+    &__outcome-title,
+    &__outcome-text,
+    &__receipt {
       animation: none;
       transform: none;
+    }
+    &__outcome + tq-button {
+      animation: none;
     }
     &__check-circle,
     &__check-mark {
