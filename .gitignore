@@ -71,6 +71,8 @@ Thumbs.db
 .claude
 DESIGN.md
 design/
-android/
 ios/
 docs/
+
+# La cartella android/ è versionata; i file sensibili (google-services.json,
+# local.properties, keystore) restano esclusi via android/.gitignore.
