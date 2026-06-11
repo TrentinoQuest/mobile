@@ -1,0 +1,112 @@
+.qr-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-24) var(--space-24) var(--space-16);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Angoli viewfinder — brand primario */
+
+.qr-card__corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--color-primary);
+  border-style: solid;
+
+  &--tl {
+    top: 14px;
+    left: 14px;
+    border-width: 2.5px 0 0 2.5px;
+    border-radius: 4px 0 0 0;
+  }
+  &--tr {
+    top: 14px;
+    right: 14px;
+    border-width: 2.5px 2.5px 0 0;
+    border-radius: 0 4px 0 0;
+  }
+  &--bl {
+    bottom: 14px;
+    left: 14px;
+    border-width: 0 0 2.5px 2.5px;
+    border-radius: 0 0 0 4px;
+  }
+  &--br {
+    bottom: 14px;
+    right: 14px;
+    border-width: 0 2.5px 2.5px 0;
+    border-radius: 0 0 4px 0;
+  }
+}
+
+/* Label superiore */
+
+.qr-card__label-top {
+  font-size: var(--font-micro);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-text-disabled);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+/* Canvas e glow */
+
+.qr-card__canvas-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.qr-card__canvas {
+  display: block;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08);
+}
+
+.qr-card__glow {
+  position: absolute;
+  inset: -24px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(var(--color-accent-rgb), 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ID */
+
+.qr-card__id {
+  font-size: var(--font-micro);
+  font-weight: 600;
+  color: var(--color-text-disabled);
+  letter-spacing: 0.5px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+/* Label inferiore */
+
+.qr-card__label-bottom {
+  font-size: var(--font-micro);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-text-disabled);
+  text-transform: uppercase;
+  opacity: 0.5;
+  position: relative;
+  z-index: 1;
+}

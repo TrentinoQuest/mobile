@@ -1,0 +1,154 @@
+.offerte-page {
+  --background: var(--color-bg);
+
+  &__container {
+    padding: calc(env(safe-area-inset-top) + var(--space-24)) var(--space-16)
+      calc(96px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+
+  &__eyebrow {
+    font-size: var(--font-micro);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-disabled);
+    margin: 0 0 var(--space-4);
+    padding-left: var(--space-8);
+  }
+
+  &__title {
+    font-size: var(--font-h1);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+    padding-left: var(--space-8);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-48) var(--space-24);
+    text-align: center;
+    gap: var(--space-8);
+  }
+
+  &__empty-text {
+    font-size: var(--font-body);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  &__empty-hint {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  &__error {
+    font-size: var(--font-body);
+    color: var(--color-error);
+    text-align: center;
+  }
+
+  &__fab {
+    --background: var(--color-primary);
+    --color: #ffffff;
+    margin-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ─── Card offerta ────────────────────────────────────────────────────────── */
+
+.offerta-sliding {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.offerta-card {
+  --background: var(--color-surface);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --border-style: none;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+
+  &--archived {
+    opacity: 0.5;
+  }
+
+  &--skeleton {
+    height: 90px;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-lg);
+    animation: skeleton-pulse 1.4s ease infinite;
+  }
+
+  &__content {
+    padding: var(--space-16);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  &__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-8);
+  }
+
+  &__title {
+    font-size: var(--font-body);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    flex: 1;
+  }
+
+  &__badge {
+    font-size: var(--font-micro);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+
+    &--active {
+      background: var(--color-primary-ultra);
+      color: var(--color-primary);
+    }
+
+    &--archived {
+      background: var(--color-surface-2);
+      color: var(--color-text-disabled);
+    }
+  }
+
+  &__desc {
+    font-size: var(--font-small);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--line-height-normal);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__cost {
+    font-size: var(--font-small);
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+}

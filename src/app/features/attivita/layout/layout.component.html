@@ -1,0 +1,48 @@
+<!-- Shell layout attività locale: outlet + tab bar condizionale -->
+<div class="attivita-shell">
+  <main class="attivita-shell__outlet">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!--
+    Tab bar: visibile solo sulle route "approved" (home, offerte, profilo).
+    Le route pending/rejected non hanno link attivi nella tab bar,
+    quindi appare visivamente vuota — ma per semplicità la nascondiamo
+    direttamente con routerLinkActive + classe condizionale.
+    Il padding-bottom è gestito da ogni pagina figlia individualmente.
+  -->
+  <nav class="attivita-tab-bar">
+    <a
+      class="attivita-tab-bar__item"
+      routerLink="home"
+      routerLinkActive="attivita-tab-bar__item--active"
+      aria-label="Home"
+    >
+      <ion-icon name="home-outline"></ion-icon>
+    </a>
+    <a
+      class="attivita-tab-bar__item"
+      routerLink="offerte"
+      routerLinkActive="attivita-tab-bar__item--active"
+      aria-label="Offerte"
+    >
+      <ion-icon name="pricetags-outline"></ion-icon>
+    </a>
+    <a
+      class="attivita-tab-bar__item"
+      routerLink="coupon"
+      routerLinkActive="attivita-tab-bar__item--active"
+      aria-label="Valida coupon"
+    >
+      <ion-icon name="qr-code-outline"></ion-icon>
+    </a>
+    <a
+      class="attivita-tab-bar__item"
+      routerLink="profilo"
+      routerLinkActive="attivita-tab-bar__item--active"
+      aria-label="Profilo"
+    >
+      <ion-icon name="person-outline"></ion-icon>
+    </a>
+  </nav>
+</div>

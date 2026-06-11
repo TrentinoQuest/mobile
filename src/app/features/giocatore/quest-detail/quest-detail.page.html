@@ -1,0 +1,182 @@
+<ion-content [fullscreen]="true" [scrollY]="true" class="quest-detail">
+  @if (quest(); as q) {
+  <!-- Glow atmosferico dietro l'hero -->
+  <div class="quest-detail__bg quest-detail__bg--{{ status() }}" aria-hidden="true"></div>
+
+  <div class="quest-detail__inner">
+    <!-- Top bar -->
+    <div class="quest-detail__topbar">
+      <button class="quest-detail__back" type="button" aria-label="Indietro" (click)="back()">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M15 6l-6 6 6 6" />
+        </svg>
+      </button>
+      <span class="quest-detail__status quest-detail__status--{{ status() }}">
+        {{ statusLabel() }}
+      </span>
+    </div>
+
+    <!-- Hero icona tipo -->
+    <div class="quest-detail__hero">
+      <div class="quest-detail__emblem quest-detail__emblem--{{ status() }}">
+        @if (status() === 'discovered') {
+        <svg
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 12l2 2 4-4" />
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+        } @else if (q.type === QuestType.PRIMARY) {
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M5 4h14a2 2 0 012 2v3H3V6a2 2 0 012-2zm-2 7h18v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9zm9 2v3h2v-3h-2z"
+          />
+        </svg>
+        } @else {
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+          />
+        </svg>
+        }
+      </div>
+    </div>
+
+    <!-- Titolo + tipo -->
+    <h1 class="quest-detail__title">{{ q.name }}</h1>
+    <p class="quest-detail__type">{{ typeLabel() }}</p>
+
+    <!-- Descrizione -->
+    <p class="quest-detail__desc">{{ q.description }}</p>
+
+    <!-- Ricompensa -->
+    <div class="quest-detail__reward">
+      <span class="quest-detail__reward-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2l2.9 6.3 6.8.7-5.1 4.6 1.5 6.7L12 17.5 5.9 20.3l1.5-6.7L2.3 9l6.8-.7L12 2z"
+          />
+        </svg>
+      </span>
+      <span class="quest-detail__reward-value">{{ q.basePoints | number: '1.0-0' }}</span>
+      <span class="quest-detail__reward-label">punti</span>
+    </div>
+
+    <!-- ===================== Azioni ===================== -->
+    <div class="quest-detail__actions">
+      <!-- Primary: scansiona QR -->
+      @if (q.type === QuestType.PRIMARY && status() === 'available') {
+      <button class="quest-detail__cta" type="button" (click)="openScanModal()">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M9 4h6l1.5 3H20a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h3.5L9 4z"
+          />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+        Scansiona QR
+      </button>
+      }
+
+      <!-- Secondary: check-in -->
+      @if (q.type === QuestType.SECONDARY && status() === 'available') { @if (checkInState() ===
+      'idle') {
+      <div class="quest-detail__distance" [class.quest-detail__distance--inrange]="isInRange()">
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+        </svg>
+        {{ distanceLabel() }}
+      </div>
+      <button
+        class="quest-detail__cta"
+        [class.quest-detail__cta--disabled]="!isInRange()"
+        [disabled]="!isInRange()"
+        type="button"
+        (click)="checkIn()"
+      >
+        {{ isInRange() ? 'Check-in' : 'Avvicinati al luogo' }}
+      </button>
+      } @if (checkInState() === 'loading') {
+      <div class="quest-detail__loading">
+        <span class="quest-detail__spinner"></span> Verifica in corso…
+      </div>
+      } @if (checkInState() === 'error') {
+      <div class="quest-detail__error">{{ checkInError() }}</div>
+      <button class="quest-detail__retry" type="button" (click)="retryCheckIn()">Riprova</button>
+      } }
+
+      <!-- Già scoperta -->
+      @if (status() === 'discovered') {
+      <div class="quest-detail__done">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 12l2 2 4-4" />
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+        Quest completata
+      </div>
+      }
+    </div>
+  </div>
+  } @else {
+  <!-- Quest non trovata / in caricamento -->
+  <div class="quest-detail__inner quest-detail__inner--empty">
+    <button class="quest-detail__back" type="button" aria-label="Indietro" (click)="back()">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M15 6l-6 6 6 6" />
+      </svg>
+    </button>
+    <p class="quest-detail__empty-text">Quest non trovata.</p>
+  </div>
+  }
+</ion-content>

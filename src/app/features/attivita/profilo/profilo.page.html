@@ -1,0 +1,64 @@
+<ion-content class="profilo-page" fullscreen>
+  <div class="profilo-page__container">
+    <header class="profilo-page__header">
+      <p class="profilo-page__eyebrow">Impostazioni</p>
+      <h1 class="profilo-page__title">Profilo attività</h1>
+    </header>
+
+    <form class="profilo-page__form" (ngSubmit)="save()">
+      <div class="profilo-page__field">
+        <label class="profilo-page__label" for="businessName">Nome attività</label>
+        <ion-input
+          id="businessName"
+          class="profilo-page__input"
+          [value]="businessName()"
+          (ionInput)="businessName.set($any($event.target).value)"
+          placeholder="Es. Alla Trota"
+          type="text"
+          fill="outline"
+        ></ion-input>
+      </div>
+
+      <div class="profilo-page__field">
+        <label class="profilo-page__label" for="businessType">Tipo di attività</label>
+        <ion-select
+          id="businessType"
+          class="profilo-page__select"
+          [value]="businessType()"
+          (ionChange)="businessType.set($any($event.detail.value))"
+          interface="action-sheet"
+          fill="outline"
+        >
+          @for (type of businessTypes; track type.value) {
+          <ion-select-option [value]="type.value">{{ type.label }}</ion-select-option>
+          }
+        </ion-select>
+      </div>
+
+      <div class="profilo-page__field">
+        <label class="profilo-page__label" for="address">Indirizzo</label>
+        <ion-input
+          id="address"
+          class="profilo-page__input"
+          [value]="address()"
+          (ionInput)="address.set($any($event.target).value)"
+          placeholder="Es. Via Roma 1, Trento"
+          type="text"
+          fill="outline"
+        ></ion-input>
+      </div>
+
+      @if (businessService.error()) {
+      <p class="profilo-page__error">{{ businessService.error() }}</p>
+      }
+
+      <tq-button [loading]="saving()" (tapped)="save()"> Salva modifiche </tq-button>
+    </form>
+
+    <div class="profilo-page__logout-section">
+      <tq-button variant="secondary" iconStart="log-out-outline" (tapped)="logout()">
+        Esci dall'account
+      </tq-button>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,71 @@
+<ion-content class="offerte-page" fullscreen>
+  <div class="offerte-page__container">
+    <header class="offerte-page__header">
+      <p class="offerte-page__eyebrow">Gestione</p>
+      <h1 class="offerte-page__title">Le tue offerte</h1>
+    </header>
+
+    @if (businessService.loading() && businessService.offers().length === 0) {
+    <!-- Skeleton loading -->
+    <div class="offerte-page__list">
+      @for (i of [1, 2, 3]; track i) {
+      <div class="offerta-card offerta-card--skeleton"></div>
+      }
+    </div>
+    } @else if (businessService.offers().length === 0) {
+    <!-- Empty state -->
+    <div class="offerte-page__empty">
+      <p class="offerte-page__empty-text">Nessuna offerta ancora creata.</p>
+      <p class="offerte-page__empty-hint">
+        Tocca il pulsante + per aggiungere la tua prima offerta.
+      </p>
+    </div>
+    } @else {
+    <div class="offerte-page__list">
+      @for (offer of businessService.offers(); track offer.id) {
+      <ion-item-sliding class="offerta-sliding">
+        <ion-item
+          class="offerta-card"
+          [class.offerta-card--archived]="offer.status === 'archived'"
+          button
+          detail="false"
+          (click)="navigateToEdit(offer)"
+        >
+          <div class="offerta-card__content">
+            <div class="offerta-card__top">
+              <span class="offerta-card__title">{{ offer.title }}</span>
+              <span
+                class="offerta-card__badge"
+                [class.offerta-card__badge--active]="offer.status === 'active'"
+                [class.offerta-card__badge--archived]="offer.status === 'archived'"
+              >
+                {{ offer.status === 'active' ? 'Attiva' : 'Archiviata' }}
+              </span>
+            </div>
+            <p class="offerta-card__desc">{{ offer.description }}</p>
+            <span class="offerta-card__cost">{{ offer.pointsCost }} pt</span>
+          </div>
+        </ion-item>
+
+        @if (offer.status === 'active') {
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="archiveOffer(offer)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+        }
+      </ion-item-sliding>
+      }
+    </div>
+    } @if (businessService.error()) {
+    <p class="offerte-page__error">{{ businessService.error() }}</p>
+    }
+  </div>
+
+  <!-- FAB nuova offerta -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button class="offerte-page__fab" (click)="navigateToNew()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

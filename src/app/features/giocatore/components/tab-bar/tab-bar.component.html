@@ -1,0 +1,49 @@
+<nav class="tab-bar" aria-label="Navigazione giocatore">
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/home"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Esplora"
+    (click)="handleTabTap()"
+  >
+    <ion-icon name="map-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="map" class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
+  </a>
+
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/album"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Taccuino"
+    (click)="handleTabTap()"
+  >
+    <ion-icon name="book-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="book" class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
+  </a>
+
+  <button type="button" class="tab-bar__fab" (click)="openScanModal()" aria-label="Scansiona QR">
+    <ion-icon name="qr-code" class="tab-bar__fab-icon"></ion-icon>
+  </button>
+
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/lega"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Lega"
+    (click)="handleTabTap()"
+  >
+    <ion-icon name="trophy-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="trophy" class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
+  </a>
+
+  <a
+    class="tab-bar__tab"
+    routerLink="/giocatore/shop"
+    routerLinkActive="tab-bar__tab--active"
+    aria-label="Shop"
+    (click)="handleTabTap()"
+  >
+    <ion-icon name="bag-outline" class="tab-bar__icon tab-bar__icon--inactive"></ion-icon>
+    <ion-icon name="bag" class="tab-bar__icon tab-bar__icon--filled"></ion-icon>
+  </a>
+</nav>

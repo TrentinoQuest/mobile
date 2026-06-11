@@ -1,0 +1,697 @@
+/* ============================================================================
+ * HomePage — mappa 3D full-bleed + overlay UI gamificata
+ * ============================================================================
+ * Gli stili degli elementi iniettati da MapLibre (marker, popup) vivono in
+ * global.scss (MapLibre li monta fuori dall'albero Angular).
+ *
+ * Qui vivono:
+ * - Config ion-content + container mappa
+ * - Cluster controlli mappa (bussola, zoom, locate)
+ * - HUD obiettivo persistente ("cosa fare ora")
+ * - Toast di prossimita' (pill transitoria in alto)
+ *
+ * Tutti gli offset usano i token parametrici di variables.scss
+ * (--tq-safe-*, --tq-above-tab-bar): zero numeri magici, adattivo a
+ * qualsiasi telefono (notch, Dynamic Island, home indicator).
+ * ========================================================================== */
+
+.home {
+  --background: var(--tq-bg);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.home__map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--tq-bg);
+  z-index: var(--tq-z-map);
+}
+
+/* ----------------------------------------------------------------------------
+ * Override MapLibre
+ * --------------------------------------------------------------------------*/
+.home {
+  /* Crediti/logo MapLibre nascosti: la mappa e' il campo da gioco. */
+  ::ng-deep .maplibregl-ctrl-attrib,
+  ::ng-deep .maplibregl-ctrl-bottom-left,
+  ::ng-deep .maplibregl-ctrl-bottom-right {
+    display: none !important;
+  }
+
+  /* Cursore coerente col drag della mappa. */
+  ::ng-deep .maplibregl-canvas-container canvas {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * Permission banner GPS — flotta in cima, rispetta la safe area
+ * --------------------------------------------------------------------------*/
+.home app-permission-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--tq-z-map-overlay);
+  padding-top: var(--tq-safe-top);
+}
+
+/* ============================================================================
+ * MAP FAB — bottoni floating sulla mappa
+ * Spec CLAUDE.md Task 2: 48×48, border-radius full, surface bg, shadow-md.
+ * ========================================================================== */
+
+.home__fabs {
+  position: fixed;
+  z-index: var(--tq-z-map-overlay);
+  /* 80px sopra la tab bar: 56px obiettivo + 24px gap */
+  bottom: calc(var(--tq-above-tab-bar) + 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+
+  &--left {
+    left: calc(var(--tq-safe-left) + var(--space-16));
+  }
+
+  &--right {
+    right: calc(var(--tq-safe-right) + var(--space-16));
+  }
+}
+
+.map-fab {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+
+  ion-icon,
+  svg {
+    font-size: 24px;
+    color: var(--color-text-primary);
+    overflow: visible;
+  }
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.18);
+  }
+
+  &--active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+
+    ion-icon,
+    svg {
+      color: #ffffff;
+    }
+  }
+}
+
+.map-fab__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  border: 1.5px solid var(--color-surface);
+}
+
+/* ============================================================================
+ * PANNELLO FILTRI
+ * ========================================================================== */
+
+.filter-panel {
+  position: fixed;
+  /* A destra del gruppo FAB sinistro, allineato al FAB options (quello in basso) */
+  left: calc(var(--tq-safe-left) + var(--space-16) + 52px + var(--space-8));
+  bottom: calc(var(--tq-above-tab-bar) + 80px);
+  z-index: var(--tq-z-map-overlay);
+  background: var(--color-surface);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  animation: filterPanelIn 150ms ease-out both;
+  transform-origin: bottom left;
+}
+
+@keyframes filterPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.filter-panel__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  padding: var(--space-12) var(--space-16);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 100ms ease;
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+
+  &:active {
+    background: var(--color-surface-2);
+  }
+
+  &--active {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+}
+
+.filter-panel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+
+  &--primary {
+    background: var(--color-primary);
+  }
+  &--secondary {
+    background: var(--color-accent);
+  }
+  &--completed {
+    background: var(--color-success);
+  }
+}
+
+/* ============================================================================
+ * HUD OBIETTIVO — guida persistente "cosa fare ora"
+ * Full-width sotto i FAB, che ora partono da 64px sopra la tab bar
+ * ============================================================================ */
+.home__objective {
+  position: fixed;
+  bottom: var(--tq-above-tab-bar);
+  left: var(--space-16);
+  right: var(--space-16);
+  z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.1);
+
+  -webkit-tap-highlight-color: transparent;
+  animation: objectiveEnter 300ms ease-out both;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    background 200ms ease,
+    border-color 200ms ease;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  &--inrange {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 6px 0 var(--color-primary-shadow);
+    padding: 14px var(--space-16);
+
+    &:active {
+      box-shadow: 0 1px 0 var(--color-primary-shadow);
+    }
+  }
+
+  &--empty {
+    cursor: default;
+  }
+}
+
+@keyframes objectiveEnter {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0px;
+  }
+}
+
+.home__objective__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-2);
+  border: none;
+  color: var(--color-accent);
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  .home__objective--inrange & {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: #ffffff;
+  }
+
+  .home__objective--empty & {
+    background: var(--color-surface-2);
+    border: none;
+    color: var(--color-text-disabled);
+  }
+}
+
+[data-theme='dark'] .home__objective--inrange {
+  background: var(--color-primary-shadow);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+.home__objective__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.home__objective__label {
+  font-size: var(--font-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+
+  .home__objective--inrange & {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .home__objective--empty & {
+    color: var(--color-text-disabled);
+  }
+}
+
+.home__objective__name {
+  font-size: var(--font-small);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .home__objective--inrange & {
+    color: #ffffff;
+  }
+
+  .home__objective--empty & {
+    white-space: normal;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+  }
+}
+
+.home__objective__cta {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.home__objective__dist {
+  font-size: var(--font-small);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+
+  .home__objective--inrange & {
+    color: rgba(255, 255, 255, 0.75);
+  }
+}
+
+.home__objective__action {
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.home__objective__arrow {
+  color: var(--color-text-disabled);
+
+  .home__objective--inrange & {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* ============================================================================
+ * TOAST DI PROSSIMITA' — pill transitoria in alto-centro
+ * ============================================================================ */
+.home__proximity-toast {
+  position: fixed;
+  top: calc(var(--tq-safe-top) + 80px);
+  left: var(--space-16);
+  right: var(--space-16);
+  z-index: var(--tq-z-map-overlay);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-lg);
+
+  background: var(--color-surface);
+  border: none;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+
+  animation: objectiveEnter 300ms ease-out both;
+
+  &--inrange {
+    background: var(--color-primary);
+    box-shadow: 0 4px 0 var(--color-primary-shadow);
+
+    .home__proximity-toast__icon {
+      background: rgba(255, 255, 255, 0.22);
+      border: none;
+      color: #ffffff;
+    }
+
+    .home__proximity-toast__label {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .home__proximity-toast__name {
+      color: #ffffff;
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.22);
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: var(--font-micro);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+  }
+
+  &__name {
+    font-size: var(--font-small);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__action {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    border: none;
+    color: #ffffff;
+    font-size: var(--font-micro);
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 120ms ease;
+    white-space: nowrap;
+
+    &:active {
+      opacity: 0.8;
+    }
+  }
+
+  &__dismiss {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-disabled);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: color 150ms ease;
+
+    &:active {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+/* ============================================================================
+ * BOTTOM SHEET "QUEST VICINE"
+ * ============================================================================
+ * ion-modal in modalità sheet. I CSS custom props configurano lo shadow DOM
+ * del modal; .nearby (contenuto proiettato dall'ng-template) eredita
+ * l'encapsulation del componente, quindi gli stili scoped lo raggiungono.
+ * ========================================================================== */
+.nearby-sheet {
+  --background: var(--color-surface);
+  --border-radius: var(--radius-lg);
+  --handle-background: var(--color-border);
+  --backdrop-opacity: 0.3;
+}
+
+.nearby {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) var(--space-24) 0;
+  background: var(--color-surface);
+}
+
+.nearby__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-12) 0 var(--space-16);
+}
+
+.nearby__title {
+  margin: 0;
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.nearby__sub {
+  margin: 4px 0 0;
+  font-size: var(--font-micro);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  text-transform: uppercase;
+}
+
+.nearby__close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 100ms ease;
+
+  &:active {
+    background: var(--color-border);
+  }
+}
+
+.nearby__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-bottom: calc(var(--tq-safe-bottom) + var(--space-24));
+}
+
+.nearby__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  &--available {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 0 var(--color-primary-shadow);
+
+    &:active {
+      box-shadow: 0 0px 0 var(--color-primary-shadow);
+    }
+
+    .nearby__row-name {
+      color: #ffffff;
+    }
+    .nearby__row-meta {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .nearby__row-dist {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .nearby__row-icon {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+    }
+  }
+
+  &--discovered {
+    opacity: 0.7;
+
+    .nearby__row-icon {
+      background: rgba(var(--color-success-rgb), 0.1);
+      border-color: rgba(var(--color-success-rgb), 0.25);
+      color: var(--color-success);
+    }
+  }
+}
+
+.nearby__row-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.nearby__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nearby__row-name {
+  font-size: var(--font-small);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby__row-meta {
+  font-size: var(--font-micro);
+  color: var(--color-text-secondary);
+}
+
+.nearby__row-dist {
+  flex-shrink: 0;
+  font-size: var(--font-micro);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.nearby__empty {
+  padding: var(--space-32) var(--space-16);
+  text-align: center;
+  font-size: var(--font-small);
+  color: var(--color-text-disabled);
+}

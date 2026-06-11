@@ -1,0 +1,408 @@
+.profilo {
+  --background: var(--color-bg);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+/* ─── Header gradiente ───────────────────────────────────────────────────── */
+
+.profilo__header {
+  background: linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  padding: calc(var(--space-32) + env(safe-area-inset-top)) var(--space-24) var(--space-32);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  position: relative;
+
+  /* Estende il gradiente verso l'alto: copre l'overscroll iOS senza
+     toccare --background di ion-content (che resterebbe un colore piatto) */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 600px;
+    background: var(--color-primary);
+  }
+}
+
+.profilo__social-btn {
+  position: absolute;
+  top: calc(var(--space-16) + env(safe-area-inset-top));
+  right: var(--space-24);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: var(--color-primary);
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+
+  ion-icon {
+    font-size: 22px;
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow: 0 0px 0 rgba(0, 0, 0, 0.15);
+  }
+}
+
+.profilo__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: var(--space-4);
+  /* Ring pulito via box-shadow: nessuna interazione con border-radius */
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.55),
+    0 4px 16px rgba(0, 0, 0, 0.22);
+}
+
+.profilo__username {
+  margin: 0;
+  font-size: var(--font-h1);
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+
+.profilo__level-title {
+  margin: 0;
+  font-size: var(--font-h3);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}
+
+/* ─── Stats floating card ────────────────────────────────────────────────── */
+
+.profilo__stats-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
+  margin: -24px var(--space-24) 0;
+  padding: var(--space-16);
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.profilo__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.profilo__stat-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profilo__stat-icon {
+  font-size: 18px;
+  color: var(--color-primary);
+
+  &--accent {
+    color: var(--color-accent);
+  }
+}
+
+.profilo__stat-number {
+  font-family: var(--tq-font-display);
+  font-size: var(--font-h1);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.profilo__stat-label {
+  font-size: var(--font-micro);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profilo__stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ─── Body contenuto ─────────────────────────────────────────────────────── */
+
+.profilo__body {
+  padding: var(--space-24) var(--space-24) calc(var(--space-32) + 80px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+/* ─── Card generica ──────────────────────────────────────────────────────── */
+
+.profilo__card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+  padding: var(--space-16);
+}
+
+.profilo__card-title {
+  font-size: var(--font-h3);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* ─── Card XP ────────────────────────────────────────────────────────────── */
+
+.profilo__xp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-12);
+}
+
+.profilo__xp-percent {
+  font-size: var(--font-small);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.profilo__xp-track {
+  height: 8px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+}
+
+.profilo__xp-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  transition: width 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 0;
+}
+
+.profilo__xp-sub {
+  margin: 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+
+  &--max {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    color: var(--color-accent);
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+/* ─── Card streak ────────────────────────────────────────────────────────── */
+
+.profilo__streak-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profilo__streak-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.profilo__streak-flame {
+  font-size: 32px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.profilo__streak-count {
+  font-size: var(--font-display);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.profilo__streak-label {
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.profilo__streak-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-8);
+}
+
+.profilo__streak-record {
+  margin: 0;
+  font-size: var(--font-small);
+  color: var(--color-text-secondary);
+}
+
+/* ─── Impostazioni ───────────────────────────────────────────────────────── */
+
+.profilo__settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.profilo__settings-group {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.profilo__settings-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease;
+
+  &:active {
+    background: var(--color-surface-2);
+  }
+
+  &--last {
+    border-bottom: none;
+  }
+
+  &--toggle {
+    cursor: default;
+    &:active {
+      background: transparent;
+    }
+  }
+
+  &--danger {
+    &:active {
+      background: rgba(214, 40, 40, 0.05);
+    }
+  }
+}
+
+.profilo__settings-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  border: none;
+  box-shadow: 0 3px 0 var(--color-primary-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 18px;
+    color: #ffffff;
+  }
+
+  &--danger {
+    background: var(--color-error);
+    box-shadow: 0 3px 0 rgba(180, 28, 28, 0.5);
+    ion-icon {
+      color: #ffffff;
+    }
+  }
+}
+
+.profilo__settings-label {
+  flex: 1;
+  font-size: var(--font-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+
+  &--danger {
+    color: var(--color-error);
+  }
+}
+
+.profilo__settings-chevron {
+  font-size: 16px;
+  color: var(--color-text-disabled);
+  flex-shrink: 0;
+}
+
+.profilo__toggle {
+  flex-shrink: 0;
+  --track-background-checked: var(--color-primary);
+  --handle-background-checked: #fff;
+}
+
+.profilo__settings-row--theme {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-12);
+}
+
+.profilo__theme-sel {
+  flex-shrink: 0;
+  width: 172px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+
+.profilo__version {
+  margin: var(--space-8) 0 0;
+  text-align: center;
+  font-size: var(--font-micro);
+  color: var(--color-text-disabled);
+  letter-spacing: 0.08em;
+}
+
+/* ─── Dark mode: header meno abbagliante ─────────────────────────────────── */
+
+[data-theme='dark'] .profilo__header {
+  background: linear-gradient(160deg, var(--color-primary-shadow) 0%, var(--color-primary) 100%);
+
+  &::before {
+    background: var(--color-primary-shadow);
+  }
+}

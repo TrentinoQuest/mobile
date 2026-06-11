@@ -1,6 +1,6 @@
 {
   "root": true,
-  "ignorePatterns": ["projects/**/*"],
+  "ignorePatterns": ["projects/**/*", "src/**/*.data.ts"],
   "overrides": [
     {
       "files": ["*.ts"],
@@ -10,7 +10,8 @@
       },
       "extends": [
         "plugin:@angular-eslint/recommended",
-        "plugin:@angular-eslint/template/process-inline-templates"
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "plugin:prettier/recommended"
       ],
       "rules": {
         "@angular-eslint/component-class-suffix": [
@@ -23,7 +24,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "app",
+            "prefix": ["app", "tq"],
             "style": "kebab-case"
           }
         ],
@@ -31,10 +32,11 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "app",
+            "prefix": ["app", "tq"],
             "style": "camelCase"
           }
-        ]
+        ],
+        "prettier/prettier": "error"
       }
     },
     {

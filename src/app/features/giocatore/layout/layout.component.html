@@ -1,0 +1,20 @@
+<!--
+  Layout shell del giocatore.
+  Struttura minima: outlet + tab bar persistente.
+  Tutto il resto (background, contenuto) e' responsabilita' delle pagine figlie.
+-->
+<div class="player-shell">
+  <!--
+    Outlet: Angular inietta qui la pagina della tab attiva.
+    La pagina figlia e' tipicamente un <ion-content> a tutto schermo.
+  -->
+  <main class="player-shell__outlet">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!--
+    Tab bar persistente: una sola istanza per tutta la sezione giocatore.
+    Si posiziona in fixed bottom via CSS interno del componente.
+  -->
+  <app-tab-bar class="player-shell__tab-bar"></app-tab-bar>
+</div>

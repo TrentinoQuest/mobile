@@ -1,0 +1,255 @@
+<ion-content [fullscreen]="true" class="auth-page">
+  <div class="auth-page__body">
+    <!-- Back -->
+    <div class="auth-page__topbar">
+      <button class="auth-page__back-btn" type="button" (click)="goBack()" aria-label="Indietro">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="auth-page__hero">
+      <div class="auth-page__compass" aria-hidden="true">
+        <svg viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="60" r="52" stroke="rgba(45,106,79,0.15)" stroke-width="1.5" />
+          <circle cx="60" cy="60" r="44" stroke="rgba(45,106,79,0.08)" stroke-width="1" />
+          <line
+            x1="60"
+            y1="8"
+            x2="60"
+            y2="20"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="60"
+            y1="100"
+            x2="60"
+            y2="112"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="8"
+            y1="60"
+            x2="20"
+            y2="60"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="100"
+            y1="60"
+            x2="112"
+            y2="60"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <polygon points="60,14 55,60 65,60" fill="#2d6a4f" />
+          <polygon points="60,106 55,60 65,60" fill="#f4701b" />
+          <circle cx="60" cy="60" r="6" fill="#d8f3dc" />
+          <circle cx="60" cy="60" r="3" fill="#2d6a4f" />
+        </svg>
+      </div>
+
+      <h1 class="auth-page__title">Affilia la tua attività</h1>
+      <p class="auth-page__subtitle">Raggiungi gli esploratori del Trentino.</p>
+    </div>
+
+    <!-- Form -->
+    <form
+      class="auth-form"
+      [class.auth-form--shake]="shakeForm()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+      <!-- Email -->
+      <div
+        class="auth-field"
+        [class.auth-field--error]="(email.touched && email.invalid) || emailAlreadyExists()"
+      >
+        <label class="auth-field__label" for="biz-email">Email</label>
+        <input
+          class="auth-field__input"
+          id="biz-email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="info@tuaattivita.it"
+          [attr.aria-invalid]="(email.touched && email.invalid) || emailAlreadyExists() ? 'true' : null"
+          aria-describedby="biz-email-error"
+        />
+        <div class="auth-field__error" id="biz-email-error" role="alert" aria-live="polite">
+          @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. } @else if
+          (email.touched && email.errors?.['email']) { Inserisci un'email valida. } @else if
+          (emailAlreadyExists()) { Questa email è già registrata. }
+        </div>
+      </div>
+
+      <!-- Nome attività -->
+      <div
+        class="auth-field"
+        [class.auth-field--error]="businessName.touched && businessName.invalid"
+      >
+        <label class="auth-field__label" for="biz-name">Nome attività</label>
+        <input
+          class="auth-field__input"
+          id="biz-name"
+          type="text"
+          autocomplete="organization"
+          formControlName="businessName"
+          placeholder="Es. Alla Trota"
+          [attr.aria-invalid]="businessName.touched && businessName.invalid ? 'true' : null"
+          aria-describedby="biz-name-error"
+        />
+        <div class="auth-field__error" id="biz-name-error" role="alert" aria-live="polite">
+          @if (businessName.touched && businessName.errors?.['required']) { Il nome è obbligatorio.
+          } @else if (businessName.touched && businessName.errors?.['minlength']) { Almeno 2
+          caratteri. } @else if (businessName.touched && businessName.errors?.['maxlength']) {
+          Massimo 120 caratteri. }
+        </div>
+      </div>
+
+      <!-- Tipo attività -->
+      <div
+        class="auth-field"
+        [class.auth-field--error]="businessType.touched && businessType.invalid"
+      >
+        <label class="auth-field__label" for="biz-type">Tipo di attività</label>
+        <div class="auth-field__select-wrap">
+          <select
+            class="auth-field__input auth-field__input--select"
+            id="biz-type"
+            formControlName="businessType"
+          >
+            @for (type of businessTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="auth-field__error" role="alert" aria-live="polite">
+          @if (businessType.touched && businessType.errors?.['required']) { Seleziona un tipo. }
+        </div>
+      </div>
+
+      <!-- Indirizzo -->
+      <div class="auth-field" [class.auth-field--error]="address.touched && address.invalid">
+        <label class="auth-field__label" for="biz-address">Indirizzo</label>
+        <input
+          class="auth-field__input"
+          id="biz-address"
+          type="text"
+          autocomplete="street-address"
+          formControlName="address"
+          placeholder="Es. Via Roma 1, Trento"
+          [attr.aria-invalid]="address.touched && address.invalid ? 'true' : null"
+          aria-describedby="biz-address-error"
+        />
+        <div class="auth-field__error" id="biz-address-error" role="alert" aria-live="polite">
+          @if (address.touched && address.errors?.['required']) { L'indirizzo è obbligatorio. }
+        </div>
+      </div>
+
+      <!-- Posizione GPS -->
+      <div class="auth-field">
+        <label class="auth-field__label">Posizione</label>
+        <button
+          type="button"
+          class="auth-location-btn"
+          [class.auth-location-btn--done]="locationDetected()"
+          [disabled]="detectingLocation() || locationDetected()"
+          (click)="detectLocation()"
+        >
+          @if (detectingLocation()) {
+          <ion-spinner name="crescent" class="auth-location-btn__spinner"></ion-spinner>
+          Rilevamento in corso… } @else if (locationDetected()) {
+          <ion-icon name="checkmark-circle"></ion-icon>
+          Posizione rilevata } @else {
+          <ion-icon name="locate-outline"></ion-icon>
+          Rileva posizione attuale }
+        </button>
+      </div>
+
+      <!-- Password -->
+      <div class="auth-field" [class.auth-field--error]="password.touched && password.invalid">
+        <label class="auth-field__label" for="biz-password">Password</label>
+        <div class="auth-field__input-row">
+          <input
+            class="auth-field__input auth-field__input--padded"
+            id="biz-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            autocomplete="new-password"
+            formControlName="password"
+            placeholder="Almeno 8 caratteri"
+            [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
+            aria-describedby="biz-password-error"
+          />
+          <button
+            type="button"
+            class="auth-field__eye-btn"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'"
+          >
+            <ion-icon [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+        <div class="auth-field__error" id="biz-password-error" role="alert" aria-live="polite">
+          @if (password.touched && password.errors?.['required']) { La password è obbligatoria. }
+          @else if (password.touched && password.errors?.['minlength']) { Almeno 8 caratteri. }
+        </div>
+      </div>
+
+      <!-- Conferma password -->
+      <div
+        class="auth-field"
+        [class.auth-field--error]="(confirmPassword.touched && confirmPassword.invalid) || passwordsMismatch"
+      >
+        <label class="auth-field__label" for="biz-confirm">Conferma password</label>
+        <div class="auth-field__input-row">
+          <input
+            class="auth-field__input auth-field__input--padded"
+            id="biz-confirm"
+            [type]="confirmPasswordVisible() ? 'text' : 'password'"
+            autocomplete="new-password"
+            formControlName="confirmPassword"
+            placeholder="Ripeti la password"
+            [attr.aria-invalid]="(confirmPassword.touched && confirmPassword.invalid) || passwordsMismatch ? 'true' : null"
+            aria-describedby="biz-confirm-error"
+          />
+          <button
+            type="button"
+            class="auth-field__eye-btn"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="confirmPasswordVisible() ? 'Nascondi password' : 'Mostra password'"
+          >
+            <ion-icon
+              [name]="confirmPasswordVisible() ? 'eye-off-outline' : 'eye-outline'"
+            ></ion-icon>
+          </button>
+        </div>
+        <div class="auth-field__error" id="biz-confirm-error" role="alert" aria-live="polite">
+          @if (confirmPassword.touched && confirmPassword.errors?.['required']) { Conferma la
+          password. } @else if (passwordsMismatch) { Le password non coincidono. }
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="auth-primary-btn" [disabled]="submitting()">
+        @if (submitting()) {
+        <ion-spinner name="crescent" class="auth-primary-btn__spinner"></ion-spinner>
+        Registrazione in corso… } @else { Registra la tua attività }
+      </button>
+    </form>
+
+    <p class="auth-page__switch">
+      Hai già un account?
+      <a routerLink="/auth/login" class="auth-page__switch-link">Accedi</a>
+    </p>
+  </div>
+</ion-content>

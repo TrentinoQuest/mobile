@@ -1,0 +1,134 @@
+<ion-content [fullscreen]="true" class="auth-page">
+  <div class="auth-page__body">
+    <!-- Back -->
+    <div class="auth-page__topbar">
+      <button class="auth-page__back-btn" type="button" (click)="goBack()" aria-label="Indietro">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="auth-page__hero">
+      <div class="auth-page__compass" aria-hidden="true">
+        <svg viewBox="0 0 120 120" fill="none">
+          <circle cx="60" cy="60" r="52" stroke="rgba(45,106,79,0.15)" stroke-width="1.5" />
+          <circle cx="60" cy="60" r="44" stroke="rgba(45,106,79,0.08)" stroke-width="1" />
+          <line
+            x1="60"
+            y1="8"
+            x2="60"
+            y2="20"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="60"
+            y1="100"
+            x2="60"
+            y2="112"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="8"
+            y1="60"
+            x2="20"
+            y2="60"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <line
+            x1="100"
+            y1="60"
+            x2="112"
+            y2="60"
+            stroke="rgba(45,106,79,0.3)"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <polygon points="60,14 55,60 65,60" fill="#2d6a4f" />
+          <polygon points="60,106 55,60 65,60" fill="#f4701b" />
+          <circle cx="60" cy="60" r="6" fill="#d8f3dc" />
+          <circle cx="60" cy="60" r="3" fill="#2d6a4f" />
+        </svg>
+      </div>
+
+      <h1 class="auth-page__title">Bentornato</h1>
+      <p class="auth-page__subtitle">Accedi per continuare la tua esplorazione.</p>
+    </div>
+
+    <!-- Form -->
+    <form
+      class="auth-form"
+      [class.auth-form--shake]="shakeForm()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+      <!-- Email -->
+      <div class="auth-field" [class.auth-field--error]="email.touched && email.invalid">
+        <label class="auth-field__label" for="login-email">Email</label>
+        <input
+          class="auth-field__input"
+          id="login-email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="nome@esempio.it"
+          [attr.aria-invalid]="email.touched && email.invalid ? 'true' : null"
+          aria-describedby="login-email-error"
+        />
+        <div class="auth-field__error" id="login-email-error" role="alert" aria-live="polite">
+          @if (email.touched && email.errors?.['required']) { L'email è obbligatoria. } @else if
+          (email.touched && email.errors?.['email']) { Inserisci un'email valida. }
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="auth-field" [class.auth-field--error]="password.touched && password.invalid">
+        <label class="auth-field__label" for="login-password">Password</label>
+        <div class="auth-field__input-row">
+          <input
+            class="auth-field__input auth-field__input--padded"
+            id="login-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            autocomplete="current-password"
+            formControlName="password"
+            placeholder="La tua password"
+            [attr.aria-invalid]="password.touched && password.invalid ? 'true' : null"
+            aria-describedby="login-password-error"
+          />
+          <button
+            type="button"
+            class="auth-field__eye-btn"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="passwordVisible() ? 'Nascondi password' : 'Mostra password'"
+          >
+            <ion-icon [name]="passwordVisible() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+        <div class="auth-field__error" id="login-password-error" role="alert" aria-live="polite">
+          @if (password.touched && password.errors?.['required']) { La password è obbligatoria. }
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="auth-primary-btn" [disabled]="submitting()">
+        @if (submitting()) {
+        <ion-spinner name="crescent" class="auth-primary-btn__spinner"></ion-spinner>
+        Accesso in corso… } @else { Accedi }
+      </button>
+
+      <a routerLink="/auth/recover" class="auth-ghost-link">Password dimenticata?</a>
+    </form>
+
+    <p class="auth-page__switch">
+      Non hai un account?
+      <a routerLink="/" class="auth-page__switch-link">Registrati</a>
+    </p>
+  </div>
+</ion-content>

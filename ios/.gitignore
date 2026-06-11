@@ -1,0 +1,18 @@
+App/build
+App/Pods
+App/output
+App/App/public
+DerivedData
+xcuserdata
+
+# Cordova plugins for Capacitor
+capacitor-cordova-ios-plugins
+
+# Generated Config files
+App/App/capacitor.config.json
+App/App/config.xml
+
+# Google Services (Firebase)
+# Contiene l'API key Firebase: NON va su GitHub. Il file reale viene
+# consegnato separatamente e va copiato in ios/App/App/ (vedi BUILD.md).
+App/App/GoogleService-Info.plist

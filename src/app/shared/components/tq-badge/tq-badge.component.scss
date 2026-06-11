@@ -1,0 +1,47 @@
+// Mappa colore → variabile CSS corrispondente
+$badge-colors: (
+  'primary': var(--color-primary),
+  'accent': var(--color-accent),
+  'success': var(--color-success),
+  'error': var(--color-error),
+  'warning': var(--color-warning),
+  'xp': var(--color-xp),
+  'common': var(--color-common),
+  'rare': var(--color-rare),
+  'epic': var(--color-epic),
+  'legendary': var(--color-legendary),
+);
+
+:host {
+  display: inline-flex;
+}
+
+.tq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  white-space: nowrap;
+
+  // Dimensioni
+  &--md {
+    padding: 3px 10px;
+    font-size: var(--font-micro);
+  }
+
+  &--sm {
+    padding: 2px 8px;
+    font-size: 0.625rem;
+  }
+
+  // Colori: solido Flat 2.0
+  @each $name, $value in $badge-colors {
+    &--#{$name} {
+      --badge-color: #{$value};
+      background: var(--badge-color);
+      color: #ffffff;
+      border: none;
+    }
+  }
+}

@@ -1,0 +1,453 @@
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, Subject, tap } from 'rxjs';
+import { Preferences } from '@capacitor/preferences';
+import {
+  AuthenticatedUser,
+  AuthResponse,
+  GamificationResult,
+  LoginRequest,
+  LogoutRequest,
+  PasswordRecoveryRequest,
+  Player,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+  RegisterPlayerRequest,
+  UserRole,
+} from '@trentino-quest/shared-types';
+import { environment } from '../../../../environments/environment';
+import { RegisterBusinessRequest } from '../business/business.types';
+
+/**
+ * AuthService — Gestione autenticazione e sessione utente.
+ *
+ * Responsabilita:
+ * - Esporre lo stato dell'utente corrente come Signal reattivi
+ * - Effettuare le chiamate HTTP agli endpoint /auth/*
+ * - Persistere i token (access + refresh) e l'utente in Capacitor Preferences
+ * - Caricare lo stato di sessione all'avvio dell'app (via provideAppInitializer)
+ * - Verificare la raggiungibilita del backend tramite /health
+ *
+ * Strategia di sicurezza: pattern access token + refresh token.
+ * - accessToken: JWT breve (15 min) allegato a tutte le chiamate API
+ * - refreshToken: stringa opaque lunga (30 giorni) usata solo per /auth/refresh
+ *
+ * NOTA: il servizio non gestisce navigazione (no Router) ne errori HTTP
+ * semantici. Lascia entrambe le responsabilita ai consumatori (componenti,
+ * guard, interceptor).
+ */
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  // ===========================================================================
+  // 1. COSTANTI
+  // ===========================================================================
+
+  /** Chiave Preferences per l'access token JWT. */
+  private static readonly KEY_ACCESS_TOKEN = 'tq_access_token';
+
+  /** Chiave Preferences per il refresh token. */
+  private static readonly KEY_REFRESH_TOKEN = 'tq_refresh_token';
+
+  /** Chiave Preferences per l'utente autenticato (JSON serializzato). */
+  private static readonly KEY_USER = 'tq_user';
+
+  // ===========================================================================
+  // 2. DEPENDENCY INJECTION
+  // ===========================================================================
+
+  private readonly http = inject(HttpClient);
+
+  // ===========================================================================
+  // 3. STATO INTERNO
+  // ===========================================================================
+
+  /**
+   * Signal modificabile interno con l'utente autenticato.
+   * Esposto pubblicamente in versione readonly come `currentUser`.
+   */
+  private readonly _currentUser = signal<AuthenticatedUser | null>(null);
+
+  /**
+   * Cache in-memory del access token, sincronizzata con Preferences.
+   * Permette agli interceptor di leggerlo sincronicamente senza Promise.
+   */
+  private accessTokenCache: string | null = null;
+
+  /**
+   * Cache in-memory del refresh token, sincronizzata con Preferences.
+   */
+  private refreshTokenCache: string | null = null;
+
+  /**
+   * Subject che emette un valore ogni volta che avviene un logout (volontario
+   * o forzato dal refreshInterceptor). I service che mantengono stato utente
+   * (QuestService, PlayerProfileService, BusinessService) lo ascoltano e
+   * chiamano reset() automaticamente.
+   */
+  private readonly _logout$ = new Subject<void>();
+
+  // ===========================================================================
+  // 4. API PUBBLICA REATTIVA (Signal)
+  // ===========================================================================
+
+  /** Utente correntemente autenticato, oppure null se non autenticato. */
+  readonly currentUser = this._currentUser.asReadonly();
+
+  /**
+   * Observable che emette ogni volta che avviene un logout.
+   * I service singleton lo ascoltano per resettare il proprio stato.
+   */
+  readonly logout$: Observable<void> = this._logout$.asObservable();
+
+  /** True se c'e un utente autenticato, false altrimenti. */
+  readonly isAuthenticated = computed(() => this._currentUser() !== null);
+
+  /** Ruolo dell'utente corrente, o null se non autenticato. */
+  readonly userRole = computed<UserRole | null>(() => this._currentUser()?.role ?? null);
+
+  // ===========================================================================
+  // 5. API PUBBLICA HTTP
+  // ===========================================================================
+
+  /**
+   * Registra un nuovo Giocatore.
+   * Salva automaticamente i token e l'utente in Preferences in caso di successo.
+   */
+  registerPlayer(req: RegisterPlayerRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, req)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
+  }
+
+  /**
+   * Registra una nuova Attività Locale.
+   * Endpoint: POST /business/register (tag business-self-mgt).
+   * Restituisce AuthResponse: salva token e user in Preferences automaticamente.
+   * Il nuovo business parte con approvalStatus 'pending'.
+   */
+  registerBusiness(req: RegisterBusinessRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/business/register`, req)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
+  }
+
+  /**
+   * Autentica un utente esistente.
+   * Salva automaticamente i token e l'utente in Preferences in caso di successo.
+   */
+  login(req: LoginRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, req)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
+  }
+
+  /**
+   * Termina la sessione corrente.
+   *
+   * Strategia "fire and forget": inviamo la chiamata di logout al backend
+   * PRIMA di cancellare lo stato locale, cosi' l'authInterceptor allega
+   * ancora l'access token corrente (la revoca server-side del refresh token
+   * richiede la richiesta autenticata). Subito dopo cancelliamo lo stato
+   * locale senza aspettare la risposta: se il backend non riceve la
+   * chiamata, il refresh token resta nel DB ma l'access token scade
+   * comunque entro 15 minuti.
+   */
+  logout(): void {
+    const refreshToken = this.refreshTokenCache;
+
+    // 1. Notifica il backend (la subscribe costruisce la richiesta ORA,
+    //    col token ancora in cache), senza aspettare ne gestire errori.
+    if (refreshToken) {
+      const body: LogoutRequest = { refreshToken };
+      this.http.post<void>(`${environment.apiUrl}/auth/logout`, body).subscribe({
+        error: () => {
+          // Logout backend fallito: ignoriamo, il refresh token scadra
+          // naturalmente lato server.
+        },
+      });
+    }
+
+    // 2. Cancella stato locale immediatamente
+    this.handleLogoutSuccess();
+  }
+
+  /**
+   * Aggiorna tutti i campi gamification del player dopo un check-in o scan QR.
+   * Usa i dati restituiti dalla response del backend per mantenere il signal
+   * sincronizzato senza un roundtrip a GET /player/me.
+   */
+  updateAfterCompletion(totalPoints: number, gamification: GamificationResult): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = {
+      ...player,
+      totalPoints,
+      xp: gamification.totalXp,
+      level: gamification.newLevel ?? player.level,
+      levelTitle: gamification.levelTitle,
+      currentStreak: gamification.currentStreak,
+      longestStreak: gamification.longestStreak,
+      streakShieldActive: gamification.shieldEarned
+        ? true
+        : gamification.shieldConsumed
+          ? false
+          : player.streakShieldActive,
+    };
+    this._currentUser.set(updated);
+    void Preferences.set({
+      key: AuthService.KEY_USER,
+      value: JSON.stringify(updated),
+    });
+  }
+
+  /** Accredita monete (es. reward quiz lore), mantiene il signal sincronizzato. */
+  addPoints(amount: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = { ...player, totalPoints: player.totalPoints + amount };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
+  /** Scala totalPoints dopo un acquisto al market, mantiene il signal sincronizzato. */
+  deductPoints(amount: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = { ...player, totalPoints: Math.max(0, player.totalPoints - amount) };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
+  /**
+   * Sincronizza valuta e XP del player con i totali restituiti dal backend
+   * (es. CompleteDailyQuestResponse, LoreAnswerResponse). A differenza di
+   * updateAfterCompletion non richiede un GamificationResult completo.
+   */
+  updateWallet(totalPoints: number, totalXp?: number): void {
+    const user = this._currentUser();
+    if (!user || user.role !== UserRole.PLAYER) return;
+    const player = user as Player;
+    const updated: Player = {
+      ...player,
+      totalPoints,
+      xp: totalXp ?? player.xp,
+    };
+    this._currentUser.set(updated);
+    void Preferences.set({ key: AuthService.KEY_USER, value: JSON.stringify(updated) });
+  }
+
+  /**
+   * Invia il token dispositivo al backend per le notifiche push.
+   * Fire-and-forget: eventuali errori di rete vengono ignorati silenziosamente.
+   */
+  saveDeviceToken(token: string): void {
+    this.http
+      .post<void>(`${environment.apiUrl}/auth/device-token`, { fcmToken: token })
+      .subscribe({ error: () => {} });
+  }
+
+  /**
+   * Avvia il flusso di recupero password.
+   * Il backend risponde sempre con 202 per non rivelare quali email sono
+   * registrate.
+   */
+  recoverPassword(req: PasswordRecoveryRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/password-recovery`, req);
+  }
+
+  /**
+   * Rinnova l'access token usando il refresh token corrente.
+   * Chiamato dall'interceptor di refresh quando una richiesta riceve 401.
+   *
+   * Salva automaticamente i nuovi token in Preferences (rotation: anche il
+   * refresh token cambia a ogni rinnovo).
+   *
+   * Se non c'e un refresh token disponibile, ritorna un errore senza chiamare
+   * il backend.
+   */
+  refreshAccessToken(): Observable<RefreshTokenResponse> {
+    const refreshToken = this.refreshTokenCache;
+
+    if (!refreshToken) {
+      // Nessun refresh token disponibile: ritorna un Observable di errore
+      // sintetico. L'interceptor lo trattera come fallimento e fara logout.
+      return new Observable((subscriber) => {
+        subscriber.error(new Error('No refresh token available'));
+      });
+    }
+
+    const body: RefreshTokenRequest = { refreshToken };
+
+    return this.http
+      .post<RefreshTokenResponse>(`${environment.apiUrl}/auth/refresh`, body)
+      .pipe(tap((response) => this.handleRefreshSuccess(response)));
+  }
+
+  // ===========================================================================
+  // 6. API PUBBLICA BOOTSTRAP
+  // ===========================================================================
+
+  /**
+   * Carica i token e l'utente da Preferences all'avvio dell'app.
+   * Chiamato da provideAppInitializer.
+   *
+   * Strategia "tollerante": se il access token e' scaduto, lo cancelliamo
+   * insieme al refresh token e all'utente, riportando lo stato a non
+   * autenticato. L'utente vedra la landing pubblica.
+   *
+   * NOTA: non chiamiamo il backend per validare il token. Ci fidiamo della
+   * decodifica locale del campo `exp`. Eventuali edge case (token revocato
+   * lato server) saranno gestiti dal refreshInterceptor al primo 401.
+   */
+  async loadFromStorage(): Promise<void> {
+    const [accessToken, refreshToken, userJson] = await Promise.all([
+      Preferences.get({ key: AuthService.KEY_ACCESS_TOKEN }),
+      Preferences.get({ key: AuthService.KEY_REFRESH_TOKEN }),
+      Preferences.get({ key: AuthService.KEY_USER }),
+    ]);
+
+    // Se manca uno qualsiasi dei tre, lo stato e' incoerente: pulisci tutto.
+    if (!accessToken.value || !refreshToken.value || !userJson.value) {
+      await this.clearStorage();
+      return;
+    }
+
+    // NOTA: non verifichiamo la scadenza locale dell'access token. Anche se
+    // scaduto lo manteniamo in memoria: il refreshInterceptor lo rinnovera'
+    // automaticamente al primo 401.
+
+    // Carica tutto in memoria e aggiorna i Signal
+    try {
+      const user: AuthenticatedUser = JSON.parse(userJson.value);
+      this.accessTokenCache = accessToken.value;
+      this.refreshTokenCache = refreshToken.value;
+      this._currentUser.set(user);
+    } catch {
+      // JSON corrotto: pulisci tutto
+      await this.clearStorage();
+    }
+  }
+
+  /**
+   * Verifica la raggiungibilita del backend chiamando /health.
+   * Chiamato da provideAppInitializer.
+   *
+   * @returns true se il backend risponde, false altrimenti.
+   */
+  async checkBackendHealth(): Promise<boolean> {
+    try {
+      // Il timeout di default di HttpClient e' troppo lungo (~2 minuti).
+      // Usiamo fetch nativo con AbortController per un timeout corto.
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(environment.healthCheckUrl, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // ===========================================================================
+  // 7. API PUBBLICA UTILITY (per gli interceptor)
+  // ===========================================================================
+
+  /**
+   * Ritorna l'access token corrente in modo sincrono.
+   * Usato dall'authInterceptor per allegare l'header Authorization.
+   *
+   * @returns access token JWT, o null se non autenticato.
+   */
+  getAccessToken(): string | null {
+    return this.accessTokenCache;
+  }
+
+  /**
+   * Ritorna il refresh token corrente in modo sincrono.
+   * Usato dal refreshInterceptor.
+   *
+   * @returns refresh token, o null se non autenticato.
+   */
+  getRefreshToken(): string | null {
+    return this.refreshTokenCache;
+  }
+
+  // ===========================================================================
+  // 8. METODI PRIVATI — GESTIONE STORAGE
+  // ===========================================================================
+
+  /**
+   * Gestisce il successo di register/login: persiste tokens e user, aggiorna
+   * il Signal currentUser.
+   */
+  private async handleAuthSuccess(response: AuthResponse): Promise<void> {
+    this.accessTokenCache = response.accessToken;
+    this.refreshTokenCache = response.refreshToken;
+    this._currentUser.set(response.user);
+
+    await Promise.all([
+      Preferences.set({
+        key: AuthService.KEY_ACCESS_TOKEN,
+        value: response.accessToken,
+      }),
+      Preferences.set({
+        key: AuthService.KEY_REFRESH_TOKEN,
+        value: response.refreshToken,
+      }),
+      Preferences.set({
+        key: AuthService.KEY_USER,
+        value: JSON.stringify(response.user),
+      }),
+    ]);
+  }
+
+  /**
+   * Gestisce il successo di refresh: aggiorna entrambi i token (rotation),
+   * lascia l'utente invariato.
+   */
+  private async handleRefreshSuccess(response: RefreshTokenResponse): Promise<void> {
+    this.accessTokenCache = response.accessToken;
+    this.refreshTokenCache = response.refreshToken;
+
+    await Promise.all([
+      Preferences.set({
+        key: AuthService.KEY_ACCESS_TOKEN,
+        value: response.accessToken,
+      }),
+      Preferences.set({
+        key: AuthService.KEY_REFRESH_TOKEN,
+        value: response.refreshToken,
+      }),
+    ]);
+  }
+
+  /**
+   * Gestisce il logout (sia volontario che forzato da 401): cancella tutto
+   * lo stato locale e notifica i service che dipendono dalla sessione.
+   */
+  private handleLogoutSuccess(): void {
+    this.accessTokenCache = null;
+    this.refreshTokenCache = null;
+    this._currentUser.set(null);
+    this._logout$.next();
+    void this.clearStorage();
+  }
+
+  /**
+   * Cancella tutti i dati di autenticazione da Preferences.
+   */
+  private async clearStorage(): Promise<void> {
+    await Promise.all([
+      Preferences.remove({ key: AuthService.KEY_ACCESS_TOKEN }),
+      Preferences.remove({ key: AuthService.KEY_REFRESH_TOKEN }),
+      Preferences.remove({ key: AuthService.KEY_USER }),
+    ]);
+  }
+}

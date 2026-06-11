@@ -1,0 +1,13 @@
+:host {
+  display: block;
+
+  ion-segment {
+    --background: var(--color-surface-2);
+  }
+
+  ion-segment-button {
+    --color: var(--color-text-disabled);
+    --color-checked: var(--color-text-primary);
+    --indicator-color: var(--color-primary);
+  }
+}

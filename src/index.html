@@ -1,26 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Trentino Quest</title>
 
-<head>
-  <meta charset="utf-8" />
-  <title>Ionic App</title>
+    <base href="/" />
 
-  <base href="/" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <!-- theme-color: tinta la barra di sistema col bg dark del gioco. -->
+    <meta name="theme-color" content="#121212" />
 
-  <meta name="color-scheme" content="light dark" />
-  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="msapplication-tap-highlight" content="no" />
+    <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
 
-  <link rel="icon" type="image/png" href="assets/icon/favicon.png" />
+    <!-- add to homescreen for ios -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!--
+      black-translucent: la WebView va edge-to-edge sotto la status bar
+      (contenuto a tutto schermo). Lo spazio della status bar e' protetto
+      via var(--tq-safe-top) nei layout. Necessario per il look immersivo
+      mappa-fullscreen.
+    -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- add to homescreen for ios -->
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-</head>
+    <!--
+      Font loading per Trentino Quest.
+      - preconnect: handshake anticipato con i CDN Google per ridurre il primo paint
+      - display=swap: mostra subito il fallback, scambia al font finale al load
+      - Pesi caricati solo quelli effettivamente in uso (vedi variables.scss)
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Nunito:wght@700;800&display=swap"
+    />
+  </head>
 
-<body>
-  <app-root></app-root>
-</body>
-
+  <body>
+    <app-root></app-root>
+  </body>
 </html>

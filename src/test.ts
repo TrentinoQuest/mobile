@@ -4,11 +4,13 @@ import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
 import {
   BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting
+  platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
+import { installCapacitorTestMocks } from './testing/capacitor-test-mocks';
+
+// Registra il mock in-memory di Preferences PRIMA che i moduli applicativi
+// importino @capacitor/preferences (registerPlugin e' first-wins).
+installCapacitorTestMocks();
 
 // First, initialize the Angular testing environment.
-getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(),
-);
+getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());

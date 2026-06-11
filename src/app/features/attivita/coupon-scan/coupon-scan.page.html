@@ -1,0 +1,146 @@
+<ion-content class="coupon-scan" fullscreen>
+  <div class="coupon-scan__container">
+    <header class="coupon-scan__header">
+      <p class="coupon-scan__eyebrow">Cassa</p>
+      <h1 class="coupon-scan__title">Valida coupon</h1>
+    </header>
+
+    @switch (state()) {
+
+    <!-- IDLE — invito alla scansione -->
+    @case ('idle') {
+    <div class="coupon-scan__hero">
+      <div class="coupon-scan__hero-icon">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </div>
+      <p class="coupon-scan__hero-text">
+        Inquadra il QR del coupon mostrato dal cliente per verificarne la validità.
+      </p>
+    </div>
+    <tq-button iconStart="scan-outline" (tapped)="scan()">Scansiona coupon</tq-button>
+    }
+
+    <!-- VERIFYING -->
+    @case ('verifying') {
+    <div class="coupon-scan__pending">
+      <ion-icon class="coupon-scan__spinner" name="qr-code-outline"></ion-icon>
+      <p class="coupon-scan__pending-text">Verifica del coupon in corso…</p>
+    </div>
+    }
+
+    <!-- VERIFIED — biglietto col verdetto + eventuale riscatto -->
+    @case ('verified') {
+    @if (coupon(); as c) {
+    <div class="coupon-scan__ticket" [class.coupon-scan__ticket--valid]="c.status === 'active'">
+      <!-- Zona verdetto: la risposta che serve al cassiere, leggibile al volo -->
+      <div class="coupon-scan__verdict">
+        <div class="coupon-scan__verdict-seal">
+          @switch (c.status) {
+          @case ('active') {
+          <ion-icon name="checkmark-outline"></ion-icon>
+          }
+          @case ('redeemed') {
+          <ion-icon name="close-outline"></ion-icon>
+          }
+          @case ('expired') {
+          <ion-icon name="time-outline"></ion-icon>
+          }
+          }
+        </div>
+        <h2 class="coupon-scan__verdict-text">
+          @switch (c.status) {
+          @case ('active') { Coupon valido }
+          @case ('redeemed') { Già riscattato }
+          @case ('expired') { Coupon scaduto }
+          }
+        </h2>
+        <p class="coupon-scan__verdict-hint">
+          @switch (c.status) {
+          @case ('active') { Conferma il riscatto per accettarlo. }
+          @case ('redeemed') { Non può essere accettato di nuovo. }
+          @case ('expired') { Non è più utilizzabile. }
+          }
+        </p>
+      </div>
+
+      <!-- Linea di strappo perforata -->
+      <div class="coupon-scan__tear" aria-hidden="true"></div>
+
+      <!-- Dettagli offerta -->
+      <div class="coupon-scan__ticket-body">
+        <h3 class="coupon-scan__offer">{{ c.offerTitle }}</h3>
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Attività</span>
+          <span class="coupon-scan__fact-value">{{ c.businessName }}</span>
+        </div>
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Scadenza</span>
+          <span class="coupon-scan__fact-value">{{ c.expiresAt | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        @if (c.redeemedAt) {
+        <div class="coupon-scan__fact">
+          <span class="coupon-scan__fact-label">Usato il</span>
+          <span class="coupon-scan__fact-value">{{ c.redeemedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="coupon-scan__actions">
+      @if (c.status === 'active') {
+      <tq-button iconStart="checkmark-circle" [loading]="redeeming()" (tapped)="redeem()">
+        Riscatta coupon
+      </tq-button>
+      }
+      <tq-button
+        [variant]="c.status === 'active' ? 'ghost' : 'secondary'"
+        iconStart="scan-outline"
+        [disabled]="redeeming()"
+        (tapped)="reset()"
+      >
+        Scansiona un altro
+      </tq-button>
+    </div>
+    }
+    }
+
+    <!-- SUCCESS -->
+    @case ('success') {
+    <div class="coupon-scan__outcome">
+      <div class="coupon-scan__check" aria-hidden="true">
+        <span class="coupon-scan__check-ring"></span>
+        <span class="coupon-scan__check-ring coupon-scan__check-ring--delay"></span>
+        <svg class="coupon-scan__check-svg" viewBox="0 0 52 52">
+          <circle class="coupon-scan__check-circle" cx="26" cy="26" r="24" />
+          <path class="coupon-scan__check-mark" fill="none" d="M14.5 27 l7.5 7.5 l16 -16" />
+        </svg>
+      </div>
+      <h2 class="coupon-scan__outcome-title">Coupon riscattato</h2>
+      @if (coupon(); as c) {
+      <div class="coupon-scan__receipt">
+        <span class="coupon-scan__receipt-offer">{{ c.offerTitle }}</span>
+        <span class="coupon-scan__receipt-business">
+          <ion-icon name="storefront-outline"></ion-icon>{{ c.businessName }}
+        </span>
+      </div>
+      }
+      <p class="coupon-scan__outcome-text">Consegna l’offerta al cliente.</p>
+    </div>
+    <tq-button iconStart="scan-outline" (tapped)="reset()">Scansiona un altro</tq-button>
+    }
+
+    <!-- ERROR -->
+    @case ('error') {
+    <div class="coupon-scan__outcome">
+      <div class="coupon-scan__seal coupon-scan__seal--error">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
+      <h2 class="coupon-scan__outcome-title">Coupon non valido</h2>
+      <p class="coupon-scan__outcome-text">{{ errorMessage() }}</p>
+    </div>
+    <tq-button iconStart="refresh-outline" (tapped)="reset()">Riprova</tq-button>
+    }
+
+    }
+  </div>
+</ion-content>

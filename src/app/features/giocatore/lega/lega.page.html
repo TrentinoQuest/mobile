@@ -1,0 +1,233 @@
+<ion-content [fullscreen]="true" class="lega">
+  <!-- ═══════════════════════════════════════════════════════════ HEADER -->
+  <div class="lega__header">
+    <h1 class="lega__title">Comunità</h1>
+
+    <div class="lega__segment" role="tablist">
+      <button
+        class="lega__seg-btn"
+        [class.lega__seg-btn--active]="activeTab() === 'classifica'"
+        role="tab"
+        type="button"
+        (click)="setTab('classifica')"
+      >
+        Classifica
+      </button>
+      <button
+        class="lega__seg-btn"
+        [class.lega__seg-btn--active]="activeTab() === 'amici'"
+        role="tab"
+        type="button"
+        (click)="setTab('amici')"
+      >
+        Amici @if (requestsBadge() > 0) {
+        <span class="lega__seg-badge">{{ requestsBadge() }}</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ CLASSIFICA -->
+  @if (activeTab() === 'classifica') {
+  <div class="lega__body">
+    @if (leagueLoading()) {
+    <div class="lega__spinner"></div>
+    } @else if (current(); as league) {
+
+    <!-- Info lega attiva -->
+    <div class="lega__info-card">
+      <div class="lega__info-tier">
+        <ion-icon [name]="TIER_ICONS[league.tier]" class="lega__info-icon"></ion-icon>
+        <div>
+          <p class="lega__info-name">{{ TIER_LABEL[league.tier] }}</p>
+          <p class="lega__info-week">
+            {{ formatDate(league.season.weekStart) }} — {{ formatDate(league.season.weekEnd) }}
+          </p>
+        </div>
+      </div>
+      <div class="lega__info-stats">
+        <span class="lega__info-rank">#{{ league.rank }}</span>
+        <span class="lega__info-xp">{{ league.weeklyXp }} XP</span>
+      </div>
+    </div>
+
+    <!-- Lista girone -->
+    <div class="lega__list" role="list">
+      @for (member of league.leaderboard; track member.playerId) { @if (member.rank === 6) {
+      <div class="lega__separator lega__separator--promotion">
+        <div class="lega__separator-line"></div>
+        <span>Zona promozione</span>
+        <div class="lega__separator-line"></div>
+      </div>
+      } @if (member.rank === 26) {
+      <div class="lega__separator lega__separator--relegation">
+        <div class="lega__separator-line"></div>
+        <span>Zona retrocessione</span>
+        <div class="lega__separator-line"></div>
+      </div>
+      }
+
+      <div [ngClass]="rowClasses(member)" role="listitem">
+        <span class="league-row__rank" [class.league-row__rank--top]="member.rank <= 3"
+          >{{ member.rank }}</span
+        >
+        <div
+          class="league-row__avatar"
+          [style.background]="avatarGradient(member.playerId)"
+          aria-hidden="true"
+        >
+          {{ avatarInitial(member.username) }}
+        </div>
+        <div class="league-row__info">
+          <span class="league-row__username">{{ member.username }}</span>
+          @if (member.isFriend) {
+          <span class="league-row__friend-tag">amico</span>
+          }
+        </div>
+        <span class="league-row__xp">{{ member.weeklyXp }} XP</span>
+      </div>
+      }
+    </div>
+
+    } @else {
+    <p class="lega__empty">Nessuna lega disponibile al momento.</p>
+    }
+  </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════ AMICI -->
+  @if (activeTab() === 'amici') {
+  <div class="lega__body">
+    <!-- Bottone aggiungi amico -->
+    <button class="add-friend-btn" type="button" (click)="openAddFriend()">
+      <ion-icon name="person-add-outline"></ion-icon>
+      <span>Aggiungi amico</span>
+    </button>
+
+    @if (friendsLoading() || requestsLoading()) {
+    <div class="lega__spinner"></div>
+    } @else {
+
+    <!-- Richieste ricevute (in cima alla lista) -->
+    @for (req of requests(); track req.friendshipId) {
+    <div class="request-inline-card">
+      <div class="request-inline-card__top">
+        <div
+          class="request-inline-card__avatar"
+          [style.background]="avatarGradient(req.requesterId)"
+          aria-hidden="true"
+        >
+          {{ avatarInitial(req.username) }}
+        </div>
+        <div class="request-inline-card__meta">
+          <span class="request-inline-card__username">{{ req.username }}</span>
+          <span class="request-inline-card__sub">vuole essere tuo amico</span>
+        </div>
+      </div>
+      <div class="request-inline-card__actions">
+        <button
+          class="request-inline-btn request-inline-btn--accept"
+          type="button"
+          (click)="acceptRequest(req)"
+        >
+          Accetta
+        </button>
+        <button
+          class="request-inline-btn request-inline-btn--reject"
+          type="button"
+          (click)="rejectRequest(req)"
+        >
+          Rifiuta
+        </button>
+      </div>
+    </div>
+    }
+
+    <!-- Lista amici -->
+    @if (friends().length === 0) {
+    <div class="lega__empty-state">
+      <ion-icon name="people-outline" class="lega__empty-icon"></ion-icon>
+      <p class="lega__empty-title">Nessun amico</p>
+      <p class="lega__empty-sub">Cerca un utente con il tasto qui sopra.</p>
+    </div>
+    } @else {
+    <div class="friends-list">
+      @for (friend of friends(); track friend.friendshipId) {
+      <button class="friend-row" type="button" (click)="friendTap(friend)">
+        <div
+          class="friend-row__avatar"
+          [style.background]="avatarGradient(friend.playerId)"
+          aria-hidden="true"
+        >
+          {{ avatarInitial(friend.username) }}
+        </div>
+        <span class="friend-row__username">{{ friend.username }}</span>
+        <ion-icon name="chevron-forward" class="friend-row__chevron"></ion-icon>
+      </button>
+      }
+    </div>
+    } }
+  </div>
+  }
+</ion-content>
+
+<!-- ══════════════════════════════════════════════════ MODAL RICERCA AMICI -->
+@if (addFriendOpen()) {
+<div class="add-friend-modal">
+  <button
+    class="add-friend-modal__backdrop"
+    type="button"
+    (click)="closeAddFriend()"
+    aria-label="Chiudi"
+  ></button>
+  <div class="add-friend-modal__panel">
+    <div class="add-friend-modal__header">
+      <h3 class="add-friend-modal__title">Cerca utente</h3>
+      <button
+        class="add-friend-modal__close"
+        type="button"
+        (click)="closeAddFriend()"
+        aria-label="Chiudi"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Campo username + bottone -->
+    <div class="add-friend-modal__row">
+      <input
+        class="add-friend-modal__input"
+        type="text"
+        placeholder="Nome utente..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); requestSent.set(false); requestError.set('')"
+        (keyup.enter)="sendFriendRequest()"
+        autocomplete="off"
+        autocapitalize="none"
+        aria-label="Username"
+      />
+      <button
+        class="add-friend-modal__send-btn"
+        type="button"
+        [disabled]="!searchQuery().trim() || sendingRequest()"
+        (click)="sendFriendRequest()"
+      >
+        @if (sendingRequest()) {
+        <span class="add-friend-modal__send-spinner"></span>
+        } @else {
+        <ion-icon name="send-outline"></ion-icon>
+        }
+      </button>
+    </div>
+
+    <!-- Feedback -->
+    @if (requestSent()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--ok">
+      <ion-icon name="checkmark-circle"></ion-icon> Richiesta inviata!
+    </p>
+    } @else if (requestError()) {
+    <p class="add-friend-modal__feedback add-friend-modal__feedback--err">{{ requestError() }}</p>
+    }
+  </div>
+</div>
+}

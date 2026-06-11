@@ -1,0 +1,22 @@
+<div class="qr-card">
+  <!-- Angoli decorativi stile viewfinder -->
+  <div class="qr-card__corner qr-card__corner--tl"></div>
+  <div class="qr-card__corner qr-card__corner--tr"></div>
+  <div class="qr-card__corner qr-card__corner--bl"></div>
+  <div class="qr-card__corner qr-card__corner--br"></div>
+
+  <!-- Eyebrow label -->
+  <div class="qr-card__label-top">LA TUA IDENTITÀ</div>
+
+  <!-- Canvas QR -->
+  <div class="qr-card__canvas-wrap">
+    <canvas #qrCanvas class="qr-card__canvas"></canvas>
+    <div class="qr-card__glow"></div>
+  </div>
+
+  <!-- ID troncato in mono -->
+  <div class="qr-card__id">{{ playerId() }}</div>
+
+  <!-- Label bottom -->
+  <div class="qr-card__label-bottom">SCAN TO CONNECT · TRENTINO QUEST</div>
+</div>

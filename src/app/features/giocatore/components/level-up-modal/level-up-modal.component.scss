@@ -1,0 +1,289 @@
+/* ============================================================================
+ * LevelUpModalComponent
+ * ============================================================================
+ * Celebrazione level-up — appare quando gamification.newLevel non è null.
+ * Tema dorato/stelle, distinto dal fuoco arancione della streak modal.
+ * ========================================================================== */
+
+ion-content.levelup-modal {
+  --background: var(--color-accent-ultra);
+}
+
+/* ── Glow dorato di sfondo ──────────────────────────────────────────────── */
+
+.levelup-modal__glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(160, 110, 0, 0.3) 0%, transparent 58%);
+  pointer-events: none;
+}
+
+/* ── Particelle burst ───────────────────────────────────────────────────── */
+
+.levelup-modal__particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.levelup-modal__particle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: #ffd060;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  animation: levelup-particle-burst 1s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms) both;
+
+  &:nth-child(even) {
+    background: #ffb020;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+  &:nth-child(3n) {
+    background: #fff0a0;
+    width: 4px;
+    height: 4px;
+    border-radius: 1px;
+  }
+  &:nth-child(5n) {
+    background: #e08000;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+}
+
+@keyframes levelup-particle-burst {
+  from {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--travel)));
+    opacity: 0;
+  }
+}
+
+/* ── Pulsante chiudi ────────────────────────────────────────────────────── */
+
+.levelup-modal__close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: 20px;
+  z-index: 30;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(var(--color-bg-rgb), 0.18);
+  border: 1px solid rgba(var(--color-bg-rgb), 0.25);
+  color: var(--color-text-secondary);
+  font-size: 22px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ── Corpo centrale ─────────────────────────────────────────────────────── */
+
+.levelup-modal__body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 28px;
+  z-index: 1;
+}
+
+/* ── Stella ─────────────────────────────────────────────────────────────── */
+
+.levelup-modal__star-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  animation: levelup-star-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.levelup-modal__star-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 150, 0, 0.22) 0%, transparent 70%);
+  animation: levelup-ring-pulse 2.2s ease-in-out infinite;
+}
+
+.levelup-modal__star-svg {
+  width: 62px;
+  height: 62px;
+  filter: drop-shadow(0 0 22px rgba(255, 176, 32, 0.75));
+}
+
+@keyframes levelup-star-in {
+  from {
+    transform: scale(0.4) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes levelup-ring-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.2;
+  }
+}
+
+/* ── "LEVEL UP!" ────────────────────────────────────────────────────────── */
+
+.levelup-modal__headline {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+  animation: levelup-slide-in 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Numero livello ─────────────────────────────────────────────────────── */
+
+.levelup-modal__level-num {
+  font-size: 100px;
+  font-weight: 700;
+  color: #ffb020;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  filter: drop-shadow(0 0 32px rgba(255, 176, 32, 0.55));
+  animation: levelup-num-in 0.6s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes levelup-num-in {
+  from {
+    transform: scale(0.45) translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Titolo livello ─────────────────────────────────────────────────────── */
+
+.levelup-modal__level-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  margin-top: 6px;
+  margin-bottom: 32px;
+  animation: levelup-slide-in 0.5s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Badge XP ──────────────────────────────────────────────────────────── */
+
+.levelup-modal__xp-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  background: rgba(255, 176, 32, 0.1);
+  border: 1px solid rgba(255, 176, 32, 0.28);
+  border-radius: 28px;
+  padding: 9px 22px;
+  animation: levelup-slide-in 0.5s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.levelup-modal__xp-plus {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(var(--color-accent-rgb), 0.7);
+}
+
+.levelup-modal__xp-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.levelup-modal__xp-unit {
+  font-size: 15px;
+  color: rgba(var(--color-accent-rgb), 0.6);
+}
+
+@keyframes levelup-slide-in {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── CTA ────────────────────────────────────────────────────────────────── */
+
+.levelup-modal__cta {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 48px;
+  z-index: 1;
+  animation: levelup-slide-in 0.5s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.levelup-modal__cta-btn {
+  width: 100%;
+  background: var(--color-accent);
+  color: #ffffff;
+  border: none;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-h3);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--color-accent-shadow);
+  letter-spacing: 0.01em;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--color-accent-shadow);
+  }
+}
